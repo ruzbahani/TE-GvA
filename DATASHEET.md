@@ -312,8 +312,8 @@ and TEP Studio with the Tennessee Eastman kernel, which are not included (Sectio
 
 The process model is the revised Tennessee Eastman model of Bathelt, Ricker and Jelali (2015). It runs through TEP
 Studio, a Python wrapper of the model (https://github.com/khalidlabs/tep-studio), in mode 1 under Ricker's
-decentralized multiloop controller, with a 1.8 s control interval, 41 measurements, 12 valves and the model's
-shutdown interlocks.
+decentralized multiloop controller, with a 1.8 s control interval, 41 measurements and 12 manipulated variables
+(11 valves and the reactor agitator speed). The shutdown limits of the original model remain active.
 
 | Component | Identifier |
 |---|---|
