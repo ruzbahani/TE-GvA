@@ -423,7 +423,8 @@ gradient-boosted and neural decision rules.
 ## 6. Distribution
 
 The dataset is published at https://github.com/ruzbahani/TE-GvA together with the code and the results of the
-paper. The arrays are NumPy `.npz` files and the metadata JSON, all loadable without pickle; `SHA256SUMS` lists a
+paper. The data and this datasheet are also archived on Zenodo (https://doi.org/10.5281/zenodo.23830595). The arrays
+are NumPy `.npz` files and the metadata JSON, all loadable without pickle; `SHA256SUMS` lists a
 checksum for every file.
 
 Licences: the code is released under the MIT licence, and the data and results under Creative Commons Attribution

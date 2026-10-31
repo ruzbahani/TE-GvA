@@ -1,7 +1,9 @@
 cff-version: 1.2.0
 message: "If you use this dataset or code, please cite it as below."
 type: dataset
-title: "TE-GvA: counterfactual gather-or-act decisions for fault-driven incident response on the Tennessee Eastman process"
+title: "TE-GvA: A Counterfactual Gather-or-Act Decision Dataset for Fault-Driven Incident Response on the Tennessee Eastman Process"
+doi: "10.5281/zenodo.23830595"
+date-released: "2026-10-31"
 authors:
   - family-names: "Mohammadi Ruzbahani"
     given-names: "Ali"

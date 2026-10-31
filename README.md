@@ -1,8 +1,11 @@
 # TE-GvA
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23830595.svg)](https://doi.org/10.5281/zenodo.23830595)
+
 Counterfactual gather-or-act decisions for fault-driven incident response on the Tennessee Eastman process.
 Data, code and results of "Gather or Act? Belief-Level Counterfactual Labels for Deadline-Aware Incident
-Response in Cyber-Physical Systems" (A. Mohammadi Ruzbahani).
+Response in Cyber-Physical Systems" (A. Mohammadi Ruzbahani). The data and the datasheet are archived on Zenodo:
+https://doi.org/10.5281/zenodo.23830595.
 
 ## Contents
 

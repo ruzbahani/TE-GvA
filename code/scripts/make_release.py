@@ -64,9 +64,12 @@ def copy_tree(src, dst):
 
 README = """# TE-GvA
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23830595.svg)](https://doi.org/10.5281/zenodo.23830595)
+
 Counterfactual gather-or-act decisions for fault-driven incident response on the Tennessee Eastman process.
 Data, code and results of "Gather or Act? Belief-Level Counterfactual Labels for Deadline-Aware Incident
-Response in Cyber-Physical Systems" (A. Mohammadi Ruzbahani).
+Response in Cyber-Physical Systems" (A. Mohammadi Ruzbahani). The data and the datasheet are archived on Zenodo:
+https://doi.org/10.5281/zenodo.23830595.
 
 ## Contents
 
@@ -155,7 +158,6 @@ def main():
                 shutil.copy2(f, dst / f.name)
     (out / "README.md").write_text(README, encoding="utf-8")
     shutil.copy2(ROOT / "docs" / "datasets" / "TE-GvA-datasheet.md", out / "DATASHEET.md")
-    shutil.copy2(ROOT / "docs" / "release" / "zenodo.json", out / ".zenodo.json")
     shutil.copy2(ROOT / "docs" / "release" / "CITATION.cff", out / "CITATION.cff")
     shutil.copy2(ROOT / "LICENSE", out / "LICENSE")
     bad = [p for p in out.rglob("*") if p.is_file() and (p.suffix in FORBIDDEN or "temexd" in p.name.lower()
