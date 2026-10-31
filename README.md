@@ -11,6 +11,8 @@ Response in Cyber-Physical Systems" (A. Mohammadi Ruzbahani).
 | `data/natural/`, `data/stress/` | `{train,val,test}.npz` (load with `numpy.load(..., allow_pickle=False)`), `meta.json` (vocabulary, scaler, split seeds, label keys, provenance), `*_item_ids.json` |
 | `code/` | generation, labelling, models and evaluation (`cpsdefense/`, `scripts/`, `configs/`, `tests/`) |
 | `results/` | `numbers.json` and the JSON results of the test evaluation and of the development analyses |
+| `DATASHEET.md` | what the dataset contains, how it was made, what each field means, and its limitations |
+| `CITATION.cff` | how to cite the dataset |
 | `SHA256SUMS` | checksums of every file |
 
 ## Loading
@@ -23,10 +25,11 @@ J_hindsight, J_belief = a["y_J"], a["y_J_belief"]
 decision_of_candidate = a["cand_decision"]
 ```
 
-The fields `dec_kind`, `dec_onset`, `dec_oracle_tts`, `dec_family`, `dec_posterior`, `dec_twin_ok` and
+`DATASHEET.md` describes every field. The fields `dec_kind`, `dec_onset`, `dec_oracle_tts`, `dec_family`, `dec_posterior`, `dec_twin_ok` and
 `dec_belief_fallback` are hidden judging fields: use them for scoring only, never as model inputs. Report the
-natural and stress sets separately. The code refers to the two sets as `v2-natural` and `v2-stress` and expects
-them under `data/processed/tep_decisions/`.
+natural and stress sets separately. The analysis scripts read the arrays from the directories named in their
+settings (the `SETS` constants in `code/scripts` and the `data` entry in `code/configs/model`); copy the two sets
+there or change the settings.
 
 ## Not included
 
