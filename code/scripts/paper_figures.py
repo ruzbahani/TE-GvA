@@ -106,7 +106,7 @@ def fig_dataset():
         oh, ah = per_decision(d, "y_J")
         ob, ab = per_decision(d, "y_J_belief")
         both = np.isfinite(oh) & np.isfinite(ah)
-        subsets = [("all", both), ("family", both & fam)]
+        subsets = [("all", both), ("fam.", both & fam)]
         if name == "stress":
             bk = d["dec_backup_available"].astype(bool)
             subsets = [("all", both), ("fam.\n+bkp", both & fam & bk), ("fam.\n" + "\u2212" + "bkp", both & fam & ~bk)]
@@ -118,12 +118,12 @@ def fig_dataset():
     ax.bar(x - 0.19, h_share, 0.38, color=C["hindsight"], label="hindsight labels", edgecolor="none")
     ax.bar(x + 0.19, b_share, 0.38, color=C["belief"], label="belief labels", edgecolor="none")
     for xi, v in zip(x, b_share):
-        ax.text(xi + 0.19, v + 0.8, f"{v:.0f}", ha="center", va="bottom", fontsize=6.5, color=C["belief"])
+        ax.text(xi + 0.19, v + 0.8, f"{v:.1f}", ha="center", va="bottom", fontsize=6, color=C["belief"])
     ax.set_xticks(x, groups, fontsize=6.5)
     for xc, name in ((0.5, "natural"), (3.0, "stress")):
         ax.annotate(name, xy=(xc, 0), xycoords=("data", "axes fraction"), xytext=(0, -20),
                     textcoords="offset points", ha="center", va="top", fontsize=7.5, style="italic")
-    ax.axvline(1.5, color="#888888", lw=0.4, ls=":")
+    ax.axvline(1.5, ymax=0.7, color="#888888", lw=0.4, ls=":")
     ax.set_ylabel("gathering optimal (% of decisions)")
     ax.set_ylim(0, max(b_share) * 1.22)
     ax.legend(loc="upper left", handlelength=1.0, borderaxespad=0.1)
@@ -136,7 +136,7 @@ def fig_dataset():
         ax.hist(p, bins=bins, histtype="step", density=False, weights=np.full(p.size, 100.0 / p.size),
                 color=C[name], lw=1.1, label=name)
     ax.set_xlabel(r"$P(c^\star \mid \mathcal{E}_\tau)$, true cause")
-    ax.set_ylabel("family decisions (%)")
+    ax.set_ylabel("ambiguous decisions (%)")
     ax.legend(loc="upper center", handlelength=1.2)
     panel(ax, "b", "posterior")
     ax = axes[2]
@@ -176,7 +176,7 @@ def fig_dataset():
     ax.set_xscale("log")
     ax.set_xticks([0.01, 0.1, 1, 10, 100], ["0.01", "0.1", "1", "10", "100"])
     ax.set_xlabel("threshold (cost points)")
-    ax.set_ylabel("family decisions above (%)")
+    ax.set_ylabel("ambiguous decisions above (%)")
     ax.set_ylim(0, 40)
     ax.legend(loc="upper right", handlelength=1.2)
     panel(ax, "d", "hindsight-best action")
@@ -184,8 +184,8 @@ def fig_dataset():
 
 NAMES = {"playbook_act_first": "playbook: act first", "playbook_investigate_first": "playbook: investigate first",
          "monitor": "always wait (monitor 300 s)", "random": "random candidate",
-         "action_prior_belief": "action prior (evidence-blind)", "base": "direct: learned item path",
-         "base_ensemble": "direct: learned item path, ens.", "summary_items": "direct: summary + items",
+         "action_prior_belief": "action prior (evidence-blind)", "base": "direct: item path",
+         "base_ensemble": "direct: item path, ens.", "summary_items": "direct: summary + items",
          "summary_aux": "direct: summary as aux. target", "summary": "direct: summary only",
          "summary_ensemble": "direct: summary only, ens.", "flat_gbm_hindsight": "GBM, hindsight labels",
          "flat_gbm_belief": "GBM, belief labels", "hindsight_oracle": "hindsight oracle (reference)"}
@@ -233,15 +233,15 @@ def fig_results():
 
 def fig_labels():
     n = numbers()
-    rows = [("natural", "all", "all decisions"), ("natural", "family", "link-vs-module family"),
-            ("stress", "all", "all decisions"), ("stress", "family", "link-vs-module family"),
+    rows = [("natural", "all", "all decisions"), ("natural", "family", "ambiguous family"),
+            ("stress", "all", "all decisions"), ("stress", "family", "ambiguous family"),
             ("stress", "backup_available", "backup channel available"),
             ("stress", "backup_unavailable", "no backup channel"),
-            ("stress", "family_backup_unavailable", "family, no backup channel")]
+            ("stress", "family_backup_unavailable", "ambiguous family, no backup")]
     fig, axes = plt.subplots(1, 2, figsize=(FULL, 2.6), sharey=True, gridspec_kw={"wspace": 0.06})
     y = np.arange(len(rows))[::-1]
-    for ax, (labels, letter, title) in zip(axes, (("belief", "a", "judged by belief labels"),
-                                                  ("hindsight", "b", "judged by hindsight labels (no posterior)"))):
+    for ax, (labels, letter, title) in zip(axes, (("belief", "a", "scored with belief labels"),
+                                                  ("hindsight", "b", "scored with hindsight labels (no posterior)"))):
         ax.axvline(0, color="black", lw=0.6)
         for yi, (set_name, sub, _) in zip(y, rows):
             for split, dy, filled in (("val", 0.17, False), ("test", -0.17, True)):
