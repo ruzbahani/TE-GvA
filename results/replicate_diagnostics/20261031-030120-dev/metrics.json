@@ -1,0 +1,18 @@
+{
+  "natural": {
+    "belief_p_disjoint_ambiguous_family": 0.1265,
+    "belief_p_gather_flip_ambiguous_family": 0.0565,
+    "flag_equals_trace_rule_share": 1.0,
+    "memory_flag_share_family": 0.2002,
+    "runner_up_unresolved_t95_share": 0.3094,
+    "tie_share_hindsight": 0.4155
+  },
+  "stress": {
+    "belief_p_disjoint_ambiguous_family": 0.1323,
+    "belief_p_gather_flip_ambiguous_family": 0.0596,
+    "flag_equals_trace_rule_share": 1.0,
+    "memory_flag_share_family": 0.324,
+    "runner_up_unresolved_t95_share": 0.3447,
+    "tie_share_hindsight": 0.4127
+  }
+}

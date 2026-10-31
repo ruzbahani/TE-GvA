@@ -1,0 +1,3817 @@
+{
+  "configs": [
+    {
+      "T": 0.0,
+      "delta": -1.0,
+      "splits": {
+        "test": {
+          "mean_abs_label_shift_family": 3.876418102179565,
+          "mean_abs_posterior_shift_family": 0.25272726471356655,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.09201582468702914,
+                "lo": -0.11605338347589403,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.999,
+                "point": -0.0014987087667088783
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.08525509482190644,
+                "lo": -0.15547302407058197,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.768,
+                "point": -0.022302700525458574
+              },
+              "regret": {
+                "hi": 1.622522067401552,
+                "lo": 0.6113836601643767,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.057377668449089
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.1868418822440463,
+                "lo": -0.2570990458598512,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.988,
+                "point": -0.010753939595530726
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.1974140884708274,
+                "lo": -0.3400293386369738,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.724,
+                "point": -0.05048603313473432
+              },
+              "regret": {
+                "hi": 3.025796652379108,
+                "lo": 0.9217194242471564,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.7806367662724059
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.17085639093027918,
+                "lo": -0.05873710080972683,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.303,
+                "point": 0.057791116772736406
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.1321784728059456,
+                "lo": -0.15083260418807967,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.944,
+                "point": -0.006596028524995301
+              },
+              "regret": {
+                "hi": 1.6357308213460016,
+                "lo": 0.5729072378755302,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.0322707907183377
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.3718031237503645,
+                "lo": -0.12351825108543539,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.294,
+                "point": 0.12758898666317453
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.2855719767953742,
+                "lo": -0.3488907975995041,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.964,
+                "point": -0.013837131800319868
+              },
+              "regret": {
+                "hi": 3.03102262835124,
+                "lo": 0.8334408352368128,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.7220540515673197
+              }
+            }
+          }
+        },
+        "val": {
+          "mean_abs_label_shift_family": 3.1652532517469907,
+          "mean_abs_posterior_shift_family": 0.26054263358836305,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.5552856029575411,
+                "lo": -0.026354653688374616,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.085,
+                "point": 0.23664883030833872
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.4909003559230706,
+                "lo": -0.1404915155846087,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.357,
+                "point": 0.14589042444241462
+              },
+              "regret": {
+                "hi": 2.0402520354043627,
+                "lo": 0.8546127766039234,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.364947335120853
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 1.3325539751761426,
+                "lo": 0.16051861185029642,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.001,
+                "point": 0.6464525521646165
+              },
+              "minus_gbm_hindsight": {
+                "hi": 1.1046409615048856,
+                "lo": -0.33968453818929273,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.372,
+                "point": 0.32511549196717837
+              },
+              "regret": {
+                "hi": 3.5562478855625623,
+                "lo": 1.3366612101544084,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.246715299908532
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.5792082235825469,
+                "lo": -0.1481150797536649,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.239,
+                "point": 0.19984107147875818
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.5636444098484382,
+                "lo": -0.16718923110686496,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.394,
+                "point": 0.1666207445614416
+              },
+              "regret": {
+                "hi": 2.327293109922509,
+                "lo": 0.9923011015439633,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.5748693977672428
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 1.3803027797608258,
+                "lo": -0.18458985950251489,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.131,
+                "point": 0.5636350947980602
+              },
+              "minus_gbm_hindsight": {
+                "hi": 1.3265101344426187,
+                "lo": -0.45754128633840097,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.36,
+                "point": 0.3717587122349899
+              },
+              "regret": {
+                "hi": 4.237868640346323,
+                "lo": 1.6400589478609597,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.7190399408629093
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "T": 0.0,
+      "delta": 0.0,
+      "splits": {
+        "test": {
+          "mean_abs_label_shift_family": 2.507303847239513,
+          "mean_abs_posterior_shift_family": 0.19864689212937806,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.06743963785971178,
+                "lo": -0.12142104764946193,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.837,
+                "point": -0.013460495502838565
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.06576273131668195,
+                "lo": -0.14537401192834287,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.528,
+                "point": -0.03426448726158826
+              },
+              "regret": {
+                "hi": 1.6207704470626845,
+                "lo": 0.5993299033328005,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.0454158817129593
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.12828935074566422,
+                "lo": -0.27791064600080784,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.686,
+                "point": -0.05119258874429988
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.1274427949224415,
+                "lo": -0.3398945035236586,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.458,
+                "point": -0.09092468228350348
+              },
+              "regret": {
+                "hi": 2.9865152303651494,
+                "lo": 0.8840979157686695,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.7401981171236367
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.14458488319090604,
+                "lo": -0.07740921416067514,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.496,
+                "point": 0.03595543720132566
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.10711136532528169,
+                "lo": -0.1689232092025007,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.692,
+                "point": -0.02843170809640605
+              },
+              "regret": {
+                "hi": 1.6052121992461144,
+                "lo": 0.5528409800865065,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.010435111146927
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.3007316385127384,
+                "lo": -0.18121090162839906,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.561,
+                "point": 0.06411125423208208
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.2193630683947313,
+                "lo": -0.3990919039130332,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.66,
+                "point": -0.07731486423141232
+              },
+              "regret": {
+                "hi": 2.975126404673387,
+                "lo": 0.7727445700880395,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.6585763191362273
+              }
+            }
+          }
+        },
+        "val": {
+          "mean_abs_label_shift_family": 2.1089927045278243,
+          "mean_abs_posterior_shift_family": 0.19414450051866403,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.8003775580088622,
+                "lo": -0.08664793278336752,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.341,
+                "point": 0.2411084913153787
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.7483839112238702,
+                "lo": -0.24681202443738864,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.682,
+                "point": 0.1503500854494546
+              },
+              "regret": {
+                "hi": 2.292128525803343,
+                "lo": 0.735232361952438,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.369406996127893
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 1.822178805850088,
+                "lo": -0.1876622796604078,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.348,
+                "point": 0.5387205622965021
+              },
+              "minus_gbm_hindsight": {
+                "hi": 1.5500099897127553,
+                "lo": -0.6353279767715022,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.807,
+                "point": 0.21738350209906399
+              },
+              "regret": {
+                "hi": 4.025575661071193,
+                "lo": 1.0517469240085984,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.1389833100404174
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.7885779706112731,
+                "lo": -0.2991575068685872,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.669,
+                "point": 0.1490461944861441
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.7451281117165964,
+                "lo": -0.31395468727864173,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.796,
+                "point": 0.11582586756882751
+              },
+              "regret": {
+                "hi": 2.4887216174789986,
+                "lo": 0.8214535193116632,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.5240745207746287
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 1.7558327602151915,
+                "lo": -0.692382397939864,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.658,
+                "point": 0.3315803944307243
+              },
+              "minus_gbm_hindsight": {
+                "hi": 1.5771967277962708,
+                "lo": -0.8178021330181999,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.895,
+                "point": 0.13970401186765402
+              },
+              "regret": {
+                "hi": 4.630063258635003,
+                "lo": 1.2305445187521804,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.4869852404955735
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "T": 0.0,
+      "delta": 1.0,
+      "splits": {
+        "test": {
+          "mean_abs_label_shift_family": 3.5529534153028184,
+          "mean_abs_posterior_shift_family": 0.30127350784651435,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.18343562010897704,
+                "lo": -0.028105650495624083,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.153,
+                "point": 0.07140608653930203
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.1830014287878263,
+                "lo": -0.05958367409377699,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.415,
+                "point": 0.05060209478055233
+              },
+              "regret": {
+                "hi": 1.7384520839609314,
+                "lo": 0.6559893840872196,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.1302824637550999
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.42058481052233243,
+                "lo": -0.03927217277843386,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.126,
+                "point": 0.17399471793920962
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.4132185898535012,
+                "lo": -0.11395061528280945,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.344,
+                "point": 0.13426262440000603
+              },
+              "regret": {
+                "hi": 3.2713751667561035,
+                "lo": 1.0299810498545803,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.9653854238071462
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.14688357924022033,
+                "lo": -0.06935837385092042,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.475,
+                "point": 0.03687234028974318
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.08529040307214526,
+                "lo": -0.14913073423564197,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.667,
+                "point": -0.02751480500798853
+              },
+              "regret": {
+                "hi": 1.6188573827143253,
+                "lo": 0.5476949144192502,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.0113520142353445
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.36039441559916036,
+                "lo": -0.14576839335904407,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.457,
+                "point": 0.09341597669023827
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.21269331923814144,
+                "lo": -0.3137924711878973,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.743,
+                "point": -0.04801014177325613
+              },
+              "regret": {
+                "hi": 3.002896239899569,
+                "lo": 0.7435261489050268,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.6878810415943835
+              }
+            }
+          }
+        },
+        "val": {
+          "mean_abs_label_shift_family": 3.3680561296661127,
+          "mean_abs_posterior_shift_family": 0.293232267417968,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.9045780574544877,
+                "lo": 0.030982010535991967,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.024,
+                "point": 0.3817560482789253
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.8269963736085852,
+                "lo": -0.08315724563966528,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.176,
+                "point": 0.2909976424130012
+              },
+              "regret": {
+                "hi": 2.3845100873604737,
+                "lo": 0.8859862743295759,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.5100545530914395
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 2.061470146209845,
+                "lo": 0.10511765923410439,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.019,
+                "point": 0.8651009658258972
+              },
+              "minus_gbm_hindsight": {
+                "hi": 1.7698396609753402,
+                "lo": -0.2550099699171589,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.267,
+                "point": 0.5437639056284591
+              },
+              "regret": {
+                "hi": 4.274207963546095,
+                "lo": 1.337771830668536,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.4653637135698125
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 1.044747636728984,
+                "lo": 0.021101203442964518,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.036,
+                "point": 0.45545457911253373
+              },
+              "minus_gbm_hindsight": {
+                "hi": 1.032057537509988,
+                "lo": -0.020270050651378012,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.073,
+                "point": 0.42223425219521715
+              },
+              "regret": {
+                "hi": 2.824149359765417,
+                "lo": 1.0743963210344853,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.8304829054010183
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 2.3483168211531344,
+                "lo": 0.10290514576168935,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.025,
+                "point": 1.0309226602015156
+              },
+              "minus_gbm_hindsight": {
+                "hi": 2.1794777312399662,
+                "lo": -0.12473125975899496,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.109,
+                "point": 0.8390462776384453
+              },
+              "regret": {
+                "hi": 5.2234580594592215,
+                "lo": 1.7059986202220165,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 3.1863275062663647
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "T": 0.5,
+      "delta": -1.0,
+      "splits": {
+        "test": {
+          "mean_abs_label_shift_family": 2.30263991771766,
+          "mean_abs_posterior_shift_family": 0.12263532877632409,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.07848239562180616,
+                "lo": -0.05440028672726109,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.776,
+                "point": 0.010245235929860375
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.1064018786445779,
+                "lo": -0.13892604817645804,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.893,
+                "point": -0.010558755828889321
+              },
+              "regret": {
+                "hi": 1.6674178552257244,
+                "lo": 0.6016283935211655,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.0691216131456582
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.21971695490395182,
+                "lo": -0.07879556028182264,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.424,
+                "point": 0.059485331018317655
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.3020224246528581,
+                "lo": -0.2548670098562018,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.913,
+                "point": 0.01975323747911406
+              },
+              "regret": {
+                "hi": 3.1569952551379847,
+                "lo": 0.9518548369560182,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.8508760368862542
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.10226856666132426,
+                "lo": -0.03757867053027563,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.637,
+                "point": 0.02099262360899623
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.06797910255328542,
+                "lo": -0.15530896475621223,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.453,
+                "point": -0.04339452168873548
+              },
+              "regret": {
+                "hi": 1.6095444733353417,
+                "lo": 0.5203196589825845,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 0.9954722975545975
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.25983517841522236,
+                "lo": -0.03520577945753042,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.243,
+                "point": 0.08456256893630054
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.1925593317627901,
+                "lo": -0.3239114746389357,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.683,
+                "point": -0.05686354952719386
+              },
+              "regret": {
+                "hi": 3.0070164559704025,
+                "lo": 0.7659421954664797,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.6790276338404457
+              }
+            }
+          }
+        },
+        "val": {
+          "mean_abs_label_shift_family": 2.1085084508170735,
+          "mean_abs_posterior_shift_family": 0.13492055860938293,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.03803833944796426,
+                "lo": -0.24082068924543124,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.328,
+                "point": -0.07299914111032835
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.016852458580674308,
+                "lo": -0.3470099229444952,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.072,
+                "point": -0.16375754697625244
+              },
+              "regret": {
+                "hi": 1.5074335882178063,
+                "lo": 0.6936848816665557,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.055299363702186
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.10013606442603847,
+                "lo": -0.18966686410448885,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.657,
+                "point": -0.035512366281039265
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.037808666091516556,
+                "lo": -0.79284209250974,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.084,
+                "point": -0.3568494264784774
+              },
+              "regret": {
+                "hi": 2.2753286204280823,
+                "lo": 1.0344318628136342,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 1.564750381462876
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.06595980528777717,
+                "lo": -0.25388804496094003,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.385,
+                "point": -0.07282616390767371
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.15332550852907817,
+                "lo": -0.36733713559099385,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.427,
+                "point": -0.10604649082499029
+              },
+              "regret": {
+                "hi": 1.8539063370534818,
+                "lo": 0.8385653024005321,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.3022021623808109
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.20616780062350507,
+                "lo": -0.275340286597124,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.762,
+                "point": -0.03512316757506673
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.34678202665497265,
+                "lo": -0.842095902997793,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.499,
+                "point": -0.226999550138137
+              },
+              "regret": {
+                "hi": 3.1473195179349482,
+                "lo": 1.312847361233903,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.1202816784897824
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "T": 0.5,
+      "delta": 0.0,
+      "splits": {
+        "test": {
+          "mean_abs_label_shift_family": 0.6898752725445763,
+          "mean_abs_posterior_shift_family": 0.0446110151564869,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.03804023546981433,
+                "lo": -0.08196918240663675,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.493,
+                "point": -0.021970582151283224
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.05025055191100522,
+                "lo": -0.14512728606539405,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.393,
+                "point": -0.04277457391003292
+              },
+              "regret": {
+                "hi": 1.6274578893911384,
+                "lo": 0.5760507188617545,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.0369057950645146
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.11857918434593424,
+                "lo": -0.17599630886280027,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.725,
+                "point": -0.02690166148742623
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.13446709336820456,
+                "lo": -0.3022497448294532,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.554,
+                "point": -0.06663375502662983
+              },
+              "regret": {
+                "hi": 3.050081849574228,
+                "lo": 0.8542708606390554,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.7644890443805104
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.10748206187207847,
+                "lo": -0.026445659733718294,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.497,
+                "point": 0.026475901310029637
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.07738447289483125,
+                "lo": -0.14797584720255022,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.521,
+                "point": -0.03791124398770207
+              },
+              "regret": {
+                "hi": 1.6411226468889448,
+                "lo": 0.5096843926067608,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.000955575255631
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.2824857936406792,
+                "lo": -0.029727572314720122,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.242,
+                "point": 0.08614013325563596
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.2054285231969842,
+                "lo": -0.30301209737752155,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.652,
+                "point": -0.055285985207858435
+              },
+              "regret": {
+                "hi": 3.0790295053205456,
+                "lo": 0.7133642949062539,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.6806051981597812
+              }
+            }
+          }
+        },
+        "val": {
+          "mean_abs_label_shift_family": 0.6376037708329364,
+          "mean_abs_posterior_shift_family": 0.04478139751003177,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.2510825805541436,
+                "lo": -0.02729306395134503,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.187,
+                "point": 0.09201844024823447
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.24870911342242766,
+                "lo": -0.21275902984282702,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.965,
+                "point": 0.001260034382310371
+              },
+              "regret": {
+                "hi": 1.7202275588665874,
+                "lo": 0.7910330172372197,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.2203169450607487
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.5673146261390605,
+                "lo": -0.04204306922696464,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.128,
+                "point": 0.2238489771570178
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.35358654875491713,
+                "lo": -0.5464666957436157,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.674,
+                "point": -0.09748808304042034
+              },
+              "regret": {
+                "hi": 2.5839881320246896,
+                "lo": 1.1975303971984483,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 1.824111724900933
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.38626628395288526,
+                "lo": 0.017865873781644826,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.009,
+                "point": 0.16995399731862815
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.45515435110213087,
+                "lo": -0.14908030604773811,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.384,
+                "point": 0.13673367040131157
+              },
+              "regret": {
+                "hi": 2.1617177106318355,
+                "lo": 1.011602025334227,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.5449823236071127
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.8122291542200492,
+                "lo": 0.06390824950135165,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.001,
+                "point": 0.39920398056540307
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.8566500928043669,
+                "lo": -0.4110404332572195,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.499,
+                "point": 0.2073275980023328
+              },
+              "regret": {
+                "hi": 3.698845251822524,
+                "lo": 1.5783261860240734,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.5546088266302522
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "T": 0.5,
+      "delta": 1.0,
+      "splits": {
+        "test": {
+          "mean_abs_label_shift_family": 2.3545089849604515,
+          "mean_abs_posterior_shift_family": 0.17874644295537595,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.26932670151188387,
+                "lo": -0.015099857934840448,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.088,
+                "point": 0.1149912610680488
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.2679627746091644,
+                "lo": -0.04637962900106886,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.244,
+                "point": 0.0941872693092991
+              },
+              "regret": {
+                "hi": 1.7811163174257625,
+                "lo": 0.6866430322772125,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.1738676382838467
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.6716990861830058,
+                "lo": -0.003170025204990012,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.054,
+                "point": 0.2880403676050076
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.6598560918539943,
+                "lo": -0.06936472591713233,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.152,
+                "point": 0.24830827406580402
+              },
+              "regret": {
+                "hi": 3.323571957259098,
+                "lo": 1.1129657301073994,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 2.079431073472944
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.39908788400800566,
+                "lo": -0.04504812372725878,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.185,
+                "point": 0.13740778646292384
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.3384952213096462,
+                "lo": -0.11683717686145786,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.601,
+                "point": 0.07302064116519213
+              },
+              "regret": {
+                "hi": 1.741750169277089,
+                "lo": 0.5976323891715303,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.1118874604085252
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.9751771191385442,
+                "lo": -0.0887652523038425,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.155,
+                "point": 0.3403455935263837
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.8432636575745125,
+                "lo": -0.24172103593543764,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.494,
+                "point": 0.19891947506288932
+              },
+              "regret": {
+                "hi": 3.3248815134473406,
+                "lo": 0.8819608373373513,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.934810658430529
+              }
+            }
+          }
+        },
+        "val": {
+          "mean_abs_label_shift_family": 2.275110913674721,
+          "mean_abs_posterior_shift_family": 0.17559727633983677,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 1.0252954088650292,
+                "lo": 0.04630343493935699,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.012,
+                "point": 0.4415931209435875
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.9343901511654384,
+                "lo": -0.03207646462746311,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.096,
+                "point": 0.3508347150776634
+              },
+              "regret": {
+                "hi": 2.518681154356377,
+                "lo": 0.8943661086308781,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.5698916257561017
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 2.3824444648416536,
+                "lo": 0.18285131041134844,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.008,
+                "point": 1.0223252077000178
+              },
+              "minus_gbm_hindsight": {
+                "hi": 2.0557440062398142,
+                "lo": -0.09258275753024,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.137,
+                "point": 0.7009881475025797
+              },
+              "regret": {
+                "hi": 4.632284191731322,
+                "lo": 1.4067380376512575,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.622587955443933
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 1.1797439708969673,
+                "lo": 0.014621034839439565,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.038,
+                "point": 0.5166329940379972
+              },
+              "minus_gbm_hindsight": {
+                "hi": 1.1613131411203212,
+                "lo": -0.010713749278311546,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.063,
+                "point": 0.48341266712068065
+              },
+              "regret": {
+                "hi": 2.9378287346744725,
+                "lo": 1.0608545671369327,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.8916613203264818
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 2.730513447804828,
+                "lo": 0.1672226031379531,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.019,
+                "point": 1.191164922162439
+              },
+              "minus_gbm_hindsight": {
+                "hi": 2.5330611766053654,
+                "lo": -0.08594689194725653,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.087,
+                "point": 0.9992885395993687
+              },
+              "regret": {
+                "hi": 5.567870997788487,
+                "lo": 1.7268809431889822,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 3.346569768227288
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "T": 1.0,
+      "delta": -1.0,
+      "splits": {
+        "test": {
+          "mean_abs_label_shift_family": 1.8689426415048078,
+          "mean_abs_posterior_shift_family": 0.11462963816776262,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.05738927487662589,
+                "lo": -0.1749011627337502,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.422,
+                "point": -0.047753928690736025
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.06787732753649864,
+                "lo": -0.21793152043127387,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.364,
+                "point": -0.06855792044948572
+              },
+              "regret": {
+                "hi": 1.5966183915544354,
+                "lo": 0.5617178712040442,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.0111224485250618
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.13087576936068943,
+                "lo": -0.40431200433843356,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.383,
+                "point": -0.11677658714286632
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.16501740503065818,
+                "lo": -0.48393667199897955,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.329,
+                "point": -0.1565086806820699
+              },
+              "regret": {
+                "hi": 2.9725591071010724,
+                "lo": 0.8246404285673467,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.6746141187250703
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.10351197040786718,
+                "lo": -0.14249744435927805,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.768,
+                "point": -0.017325734004125626
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.056722353674047654,
+                "lo": -0.2325117168329854,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.268,
+                "point": -0.08171287930185733
+              },
+              "regret": {
+                "hi": 1.5658811507566535,
+                "lo": 0.4986751499992726,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 0.9571539399414757
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.21378889899410644,
+                "lo": -0.3315069023397437,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.781,
+                "point": -0.045777466207442385
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.12696097249920874,
+                "lo": -0.5147288446281966,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.258,
+                "point": -0.18720358467093678
+              },
+              "regret": {
+                "hi": 2.8742015917898844,
+                "lo": 0.6915926326112681,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.5486875986967028
+              }
+            }
+          }
+        },
+        "val": {
+          "mean_abs_label_shift_family": 1.7436266791417396,
+          "mean_abs_posterior_shift_family": 0.12077137494331003,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.19222842193653064,
+                "lo": -0.17829749620735716,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.892,
+                "point": 0.009771979321441915
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.13170960713911853,
+                "lo": -0.29267427566734683,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.464,
+                "point": -0.08098642654448218
+              },
+              "regret": {
+                "hi": 1.588173579386205,
+                "lo": 0.7614633538339952,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.1380704841339562
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.44221931216136906,
+                "lo": -0.12112745275945712,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.377,
+                "point": 0.13002730016304587
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.2973000766223784,
+                "lo": -0.6765927466099071,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.433,
+                "point": -0.19130976003439226
+              },
+              "regret": {
+                "hi": 2.4571198746649605,
+                "lo": 1.149932090711569,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 1.7302900479069612
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.3032384790435168,
+                "lo": -0.09964684078980465,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.327,
+                "point": 0.10198321508958164
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.38060535871954,
+                "lo": -0.23152614077781017,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.684,
+                "point": 0.06876288817226506
+              },
+              "regret": {
+                "hi": 2.034442249632579,
+                "lo": 0.9828593489754738,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.4770115413780662
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.7206501357971787,
+                "lo": 0.027450356277998657,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.038,
+                "point": 0.3375025806413601
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.8670008217493776,
+                "lo": -0.5510245484093339,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.669,
+                "point": 0.1456261980782898
+              },
+              "regret": {
+                "hi": 3.5281139590907866,
+                "lo": 1.5697934837948935,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.4929074267062092
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "T": 1.0,
+      "delta": 0.0,
+      "splits": {
+        "test": {
+          "mean_abs_label_shift_family": 2.3869889871660635e-16,
+          "mean_abs_posterior_shift_family": 1.3877787807814457e-17,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.0,
+                "lo": 0.0,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 1.0,
+                "point": 0.0
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.052722800276466676,
+                "lo": -0.1033396776322856,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.627,
+                "point": -0.020803991758749696
+              },
+              "regret": {
+                "hi": 1.6560103518955553,
+                "lo": 0.5982338697512658,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.0588763772157979
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.0,
+                "lo": 0.0,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 1.0,
+                "point": 0.0
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.12759200584048913,
+                "lo": -0.22013579200567482,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.646,
+                "point": -0.039732093539203595
+              },
+              "regret": {
+                "hi": 3.0552035080774447,
+                "lo": 0.8894225558122307,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.7913907058679366
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.0,
+                "lo": 0.0,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 1.0,
+                "point": 0.0
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.01281750160732653,
+                "lo": -0.15997032847629722,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.118,
+                "point": -0.06438714529773171
+              },
+              "regret": {
+                "hi": 1.582999489788088,
+                "lo": 0.5091629774356016,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 0.9744796739456013
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.0,
+                "lo": 0.0,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 1.0,
+                "point": 0.0
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.027245313471187218,
+                "lo": -0.36281306781767086,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.123,
+                "point": -0.1414261184634944
+              },
+              "regret": {
+                "hi": 2.909183202977784,
+                "lo": 0.6986454515233257,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.5944650649041452
+              }
+            }
+          }
+        },
+        "val": {
+          "mean_abs_label_shift_family": 2.096035708641707e-16,
+          "mean_abs_posterior_shift_family": 1.194367082885181e-17,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.0,
+                "lo": 0.0,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 1.0,
+                "point": 0.0
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.13275715951989983,
+                "lo": -0.2975546803848917,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.397,
+                "point": -0.0907584058659241
+              },
+              "regret": {
+                "hi": 1.6259150568607048,
+                "lo": 0.7153307545472131,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.1282985048125143
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.0,
+                "lo": 0.0,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 1.0,
+                "point": 0.0
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.045467266427135576,
+                "lo": -0.7459235879821009,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.095,
+                "point": -0.32133706019743813
+              },
+              "regret": {
+                "hi": 2.349243339980245,
+                "lo": 1.0415306339436239,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 1.6002627477439153
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.0,
+                "lo": 0.0,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 1.0,
+                "point": 0.0
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.2599565285615624,
+                "lo": -0.3126469595624704,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.823,
+                "point": -0.03322032691731658
+              },
+              "regret": {
+                "hi": 1.9742651261124762,
+                "lo": 0.8639626162612027,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.3750283262884846
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.0,
+                "lo": 0.0,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 1.0,
+                "point": 0.0
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.4082010327380816,
+                "lo": -0.8011965564651083,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.576,
+                "point": -0.19187638256307027
+              },
+              "regret": {
+                "hi": 3.2642349383507776,
+                "lo": 1.2901216020030337,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.155404846064849
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "T": 1.0,
+      "delta": 1.0,
+      "splits": {
+        "test": {
+          "mean_abs_label_shift_family": 1.9807400812949933,
+          "mean_abs_posterior_shift_family": 0.12839405273581225,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.20557684679562688,
+                "lo": -0.029075862321899616,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.223,
+                "point": 0.07008453879705923
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.19976369495135898,
+                "lo": -0.06079075593512532,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.472,
+                "point": 0.04928054703830953
+              },
+              "regret": {
+                "hi": 1.7415388175787967,
+                "lo": 0.6447021386796532,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.128960916012857
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.5393875731817231,
+                "lo": -0.005820270278417222,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.06,
+                "point": 0.21488659037255187
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.49905901069311526,
+                "lo": -0.07307758022344192,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.216,
+                "point": 0.17515449683334827
+              },
+              "regret": {
+                "hi": 3.2631898258308927,
+                "lo": 1.0416243605094475,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 2.0062772962404885
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.34367460337638533,
+                "lo": -0.020543669115218616,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.18,
+                "point": 0.11829051298403448
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.2865936542078573,
+                "lo": -0.0991758891078354,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.711,
+                "point": 0.05390336768630277
+              },
+              "regret": {
+                "hi": 1.7365101669630452,
+                "lo": 0.5843636494387842,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.0927701869296358
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.854639452886333,
+                "lo": 0.011793505696835533,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.027,
+                "point": 0.327367196808827
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.7085934293727739,
+                "lo": -0.16047581486912818,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.484,
+                "point": 0.18594107834533258
+              },
+              "regret": {
+                "hi": 3.3359556549491867,
+                "lo": 0.876221238363816,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.9218322617129722
+              }
+            }
+          }
+        },
+        "val": {
+          "mean_abs_label_shift_family": 1.8522654880027232,
+          "mean_abs_posterior_shift_family": 0.1317084063361145,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.3777428978798618,
+                "lo": -0.13819049850239062,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.39,
+                "point": 0.1092321192916963
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.23409792225189152,
+                "lo": -0.15860699735100686,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.855,
+                "point": 0.018473713425772198
+              },
+              "regret": {
+                "hi": 1.7407612535045023,
+                "lo": 0.7992522944222971,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.2375306241042106
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.9112820259851647,
+                "lo": -0.03372538956349975,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.073,
+                "point": 0.4154516234493817
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.5473546360285881,
+                "lo": -0.3457678705418915,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.7,
+                "point": 0.09411456325194356
+              },
+              "regret": {
+                "hi": 2.8385064588434843,
+                "lo": 1.3412146441118018,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.015714371193297
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.5213823303443085,
+                "lo": -0.14822109195201247,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.315,
+                "point": 0.1702076431266637
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.44338837081286764,
+                "lo": -0.11866865467402207,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.338,
+                "point": 0.13698731620934712
+              },
+              "regret": {
+                "hi": 2.17659958866869,
+                "lo": 0.97954293458579,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.5452359694151483
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 1.2787371326725616,
+                "lo": -0.07667096183346132,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.087,
+                "point": 0.5526465520780572
+              },
+              "minus_gbm_hindsight": {
+                "hi": 1.042301473400588,
+                "lo": -0.23452578745619515,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.272,
+                "point": 0.36077016951498697
+              },
+              "regret": {
+                "hi": 3.9250120205321157,
+                "lo": 1.6693454840159303,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.7080513981429064
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "T": 2.0,
+      "delta": -1.0,
+      "splits": {
+        "test": {
+          "mean_abs_label_shift_family": 2.177983504232336,
+          "mean_abs_posterior_shift_family": 0.13729937393772904,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.06955211468025303,
+                "lo": -0.06674054468250468,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.975,
+                "point": -0.00026942085347436695
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.0913174173051713,
+                "lo": -0.13322388293976786,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.731,
+                "point": -0.021073412612224063
+              },
+              "regret": {
+                "hi": 1.6499273001636914,
+                "lo": 0.5979261359228174,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.0586069563623235
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.17556461189229275,
+                "lo": -0.1383819449050567,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.937,
+                "point": 0.009846561719770941
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.2323618661039783,
+                "lo": -0.27682772494448077,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.784,
+                "point": -0.029885531819432654
+              },
+              "regret": {
+                "hi": 3.0615234998141436,
+                "lo": 0.9149102050147203,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.8012372675877075
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.11252610693344346,
+                "lo": -0.02460866044673244,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.376,
+                "point": 0.031166460645913552
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.07761483967057344,
+                "lo": -0.14693111627888225,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.585,
+                "point": -0.033220684651818155
+              },
+              "regret": {
+                "hi": 1.6211244386195627,
+                "lo": 0.5288358234337994,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.0056461345915149
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.2586866007673101,
+                "lo": -0.026005960152633862,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.233,
+                "point": 0.08319695188500864
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.1877450049488075,
+                "lo": -0.3250701006179097,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.679,
+                "point": -0.05822916657848576
+              },
+              "regret": {
+                "hi": 3.013310996347316,
+                "lo": 0.7641031061378069,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.6776620167891538
+              }
+            }
+          }
+        },
+        "val": {
+          "mean_abs_label_shift_family": 2.028103448495253,
+          "mean_abs_posterior_shift_family": 0.140873420356767,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.10786725508864599,
+                "lo": -0.157951327286018,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.902,
+                "point": 0.0006903902202384238
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.08113727929557582,
+                "lo": -0.2657593326551394,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.328,
+                "point": -0.09006801564568567
+              },
+              "regret": {
+                "hi": 1.5821090336855046,
+                "lo": 0.7418937647553102,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.1289888950327527
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.24996366689441976,
+                "lo": 0.005727315048076931,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.037,
+                "point": 0.11988348574784569
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.17289389941828057,
+                "lo": -0.6067871593831369,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.314,
+                "point": -0.20145357444959244
+              },
+              "regret": {
+                "hi": 2.4677086967515836,
+                "lo": 1.1535875369614952,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 1.720146233491761
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.20008035653916886,
+                "lo": -0.13190872840041865,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.527,
+                "point": 0.04845692459696993
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.3030004165974204,
+                "lo": -0.25465908977322144,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.909,
+                "point": 0.015236597679653352
+              },
+              "regret": {
+                "hi": 1.9799924734709229,
+                "lo": 0.9303729717789007,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.4234852508854545
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.5031229509791998,
+                "lo": 0.022948150705524712,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.019,
+                "point": 0.2273581880954909
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.7141731406932449,
+                "lo": -0.6111939710359615,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.874,
+                "point": 0.03548180553242064
+              },
+              "regret": {
+                "hi": 3.514481870826354,
+                "lo": 1.4828756949848536,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.38276303416034
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "T": 2.0,
+      "delta": 0.0,
+      "splits": {
+        "test": {
+          "mean_abs_label_shift_family": 0.7020285875735445,
+          "mean_abs_posterior_shift_family": 0.041579790628465195,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.030319867274671394,
+                "lo": -0.06744529049934252,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.493,
+                "point": -0.01586362990983048
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.05770412060716416,
+                "lo": -0.1419049433244645,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.488,
+                "point": -0.036667621668580175
+              },
+              "regret": {
+                "hi": 1.628271702374497,
+                "lo": 0.5827277961894396,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.0430127473059674
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.0788328902880516,
+                "lo": -0.11258987329728826,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.942,
+                "point": -0.0049928197083799475
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.15269620462335454,
+                "lo": -0.28371114896457744,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.693,
+                "point": -0.04472491324758354
+              },
+              "regret": {
+                "hi": 3.05395421649143,
+                "lo": 0.9056006292258713,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.7863978861595566
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.09615372953496493,
+                "lo": -0.03835475657735449,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.706,
+                "point": 0.017395439341092556
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.06398129264882473,
+                "lo": -0.15597376880565023,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.403,
+                "point": -0.04699170595663915
+              },
+              "regret": {
+                "hi": 1.6012483730098765,
+                "lo": 0.5226090907382336,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 0.9918751132866939
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.23065053806725727,
+                "lo": -0.02846478540427468,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.336,
+                "point": 0.07261167521043976
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.16350105847939345,
+                "lo": -0.32807905340013555,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.608,
+                "point": -0.06881444325305464
+              },
+              "regret": {
+                "hi": 2.9860778059121524,
+                "lo": 0.7588516716501558,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.667076740114585
+              }
+            }
+          }
+        },
+        "val": {
+          "mean_abs_label_shift_family": 0.6258999266954336,
+          "mean_abs_posterior_shift_family": 0.04212968420588421,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.12911719480957937,
+                "lo": -0.0765260421033112,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.56,
+                "point": 0.02718188649087283
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.15452580513780567,
+                "lo": -0.2617933564463291,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.561,
+                "point": -0.06357651937505127
+              },
+              "regret": {
+                "hi": 1.6221097883148237,
+                "lo": 0.7619569679110803,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.155480391303387
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.2947511992220167,
+                "lo": -0.17279097269648958,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.562,
+                "point": 0.061554052355330846
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.09724575014722753,
+                "lo": -0.6737480525005316,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.178,
+                "point": -0.2597830078421073
+              },
+              "regret": {
+                "hi": 2.3277406415296467,
+                "lo": 1.1221862417978656,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 1.6618168000992461
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.21303306658153245,
+                "lo": -0.028138271390758647,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.13,
+                "point": 0.09144377594519115
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.3631737104083494,
+                "lo": -0.24027653244818617,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.717,
+                "point": 0.058223449027874574
+              },
+              "regret": {
+                "hi": 2.033610262374847,
+                "lo": 0.9590320330369712,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.4664721022336757
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.4671517318023239,
+                "lo": -0.05054168677002686,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.112,
+                "point": 0.20614330362754574
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.6292569559288612,
+                "lo": -0.6159929083079713,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.925,
+                "point": 0.014266921064475468
+              },
+              "regret": {
+                "hi": 3.4108982368383276,
+                "lo": 1.4985141218538898,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.361548149692395
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "T": 2.0,
+      "delta": 1.0,
+      "splits": {
+        "test": {
+          "mean_abs_label_shift_family": 1.432007550911518,
+          "mean_abs_posterior_shift_family": 0.09137989720023863,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.05771651112791051,
+                "lo": -0.041378352463321846,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.778,
+                "point": 0.0066939943577020156
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.04700059403495824,
+                "lo": -0.07788207934260727,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.706,
+                "point": -0.01410999740104768
+              },
+              "regret": {
+                "hi": 1.6522360209200033,
+                "lo": 0.6074296635398131,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.0655703715734999
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.12969739717215112,
+                "lo": -0.08199387412250606,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.66,
+                "point": 0.02292758098207659
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.1195791834225641,
+                "lo": -0.15865603645615278,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.799,
+                "point": -0.016804512557127005
+              },
+              "regret": {
+                "hi": 3.0977175640066874,
+                "lo": 0.906615654738431,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.8143182868500132
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.11290336475369803,
+                "lo": -0.01564374006507665,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.222,
+                "point": 0.03978670548197638
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.0367768776512335,
+                "lo": -0.10261724780652347,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.555,
+                "point": -0.024600439815755326
+              },
+              "regret": {
+                "hi": 1.6380246982397422,
+                "lo": 0.5466734019731136,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.0142663794275777
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.2720435169745708,
+                "lo": -0.012195644686553242,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.112,
+                "point": 0.10014390693871689
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.08229678121771801,
+                "lo": -0.2146939542409589,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.658,
+                "point": -0.04128221152477751
+              },
+              "regret": {
+                "hi": 2.984167643793104,
+                "lo": 0.7680093880854165,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 1.694608971842862
+              }
+            }
+          }
+        },
+        "val": {
+          "mean_abs_label_shift_family": 1.3654639396790196,
+          "mean_abs_posterior_shift_family": 0.09742676553274296,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.28727661257328946,
+                "lo": -0.0890271802619453,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.322,
+                "point": 0.09123642667723364
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.24090265692629473,
+                "lo": -0.1871568607400231,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.936,
+                "point": 0.000478020811309543
+              },
+              "regret": {
+                "hi": 1.7151628110897916,
+                "lo": 0.7930365843093202,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.219534931489748
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 0.6387327174034056,
+                "lo": -0.18422368330471067,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.313,
+                "point": 0.20691372119220341
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.27661602030693394,
+                "lo": -0.5027967840253466,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.532,
+                "point": -0.11442333900523471
+              },
+              "regret": {
+                "hi": 2.532524542552053,
+                "lo": 1.197785794183634,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 1.8071764689361187
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.3097410116799992,
+                "lo": -0.22864192069699635,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.762,
+                "point": 0.04175592639040504
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.2778416744112199,
+                "lo": -0.2247181945903212,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.988,
+                "point": 0.008535599473088462
+              },
+              "regret": {
+                "hi": 2.016488169523903,
+                "lo": 0.9053453883135283,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.4167842526788896
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 0.6557410270228454,
+                "lo": -0.502874566087302,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.793,
+                "point": 0.09558259554683879
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.3745043419295389,
+                "lo": -0.6001416741217526,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.672,
+                "point": -0.09629378701623148
+              },
+              "regret": {
+                "hi": 3.2806713690222953,
+                "lo": 1.4029346250972186,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.250987441611688
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "T": "inf",
+      "delta": -1.0,
+      "splits": {
+        "test": {
+          "mean_abs_label_shift_family": 3.5840934828427673,
+          "mean_abs_posterior_shift_family": 0.22937339005757074,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.6985897433467401,
+                "lo": 0.10180427704893417,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.006,
+                "point": 0.37325958600154974
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.6670737321707884,
+                "lo": 0.07155171087385219,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.007,
+                "point": 0.35245559424280004
+              },
+              "regret": {
+                "hi": 2.067162628958986,
+                "lo": 0.9062859373650325,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.4321359632173476
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 1.5750965903956107,
+                "lo": 0.2590641748658833,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.007,
+                "point": 0.8494682309378765
+              },
+              "minus_gbm_hindsight": {
+                "hi": 1.5668627249773281,
+                "lo": 0.203659339489208,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.007,
+                "point": 0.8097361373986729
+              },
+              "regret": {
+                "hi": 4.028126820113183,
+                "lo": 1.5505379584746082,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 2.640858936805813
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.9327618363708767,
+                "lo": -0.019830089134207803,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.069,
+                "point": 0.38871150865915494
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.8690681292305473,
+                "lo": -0.09280771129753276,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.157,
+                "point": 0.32432436336142323
+              },
+              "regret": {
+                "hi": 2.1211579010421215,
+                "lo": 0.7552655172136842,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.3631911826047562
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 2.125081203146499,
+                "lo": -0.05102693151743814,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.06,
+                "point": 0.8855227171389539
+              },
+              "minus_gbm_hindsight": {
+                "hi": 1.9850417764533426,
+                "lo": -0.19933609244255074,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.139,
+                "point": 0.7440965986754595
+              },
+              "regret": {
+                "hi": 4.150806780757425,
+                "lo": 1.1936894495159682,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 2.479987782043099
+              }
+            }
+          }
+        },
+        "val": {
+          "mean_abs_label_shift_family": 3.3790810566109624,
+          "mean_abs_posterior_shift_family": 0.23923140412160843,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.782216139005589,
+                "lo": 0.27598147194515144,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.5232863810766664
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.6843927248851811,
+                "lo": 0.19324840944541016,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.001,
+                "point": 0.43252797521074227
+              },
+              "regret": {
+                "hi": 2.219526579388618,
+                "lo": 1.1666119274790567,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.6515848858891806
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 1.747530764116176,
+                "lo": 0.896784344778202,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 1.3050524531907215
+              },
+              "minus_gbm_hindsight": {
+                "hi": 1.552926276340512,
+                "lo": 0.4511922601180466,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.9837153929932834
+              },
+              "regret": {
+                "hi": 3.890438953606096,
+                "lo": 2.1006387674217897,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.905315200934637
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 1.019506492052693,
+                "lo": 0.17538865207422394,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.002,
+                "point": 0.5609149231198896
+              },
+              "minus_gbm_hindsight": {
+                "hi": 1.0477744525456085,
+                "lo": 0.060782525488482335,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.022,
+                "point": 0.527694596202573
+              },
+              "regret": {
+                "hi": 2.624311975289262,
+                "lo": 1.3136378887578062,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.9359432494083741
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 2.3983660231494675,
+                "lo": 0.5882508290973205,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 1.3897166727879728
+              },
+              "minus_gbm_hindsight": {
+                "hi": 2.392363912656915,
+                "lo": 0.15678497134704517,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.023,
+                "point": 1.1978402902249026
+              },
+              "regret": {
+                "hi": 4.928959410406006,
+                "lo": 2.3821919357389394,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 3.545121518852822
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "T": "inf",
+      "delta": 0.0,
+      "splits": {
+        "test": {
+          "mean_abs_label_shift_family": 3.577754116958989,
+          "mean_abs_posterior_shift_family": 0.22816086801171537,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.7075761712743087,
+                "lo": 0.15897302861118429,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.4026141777988652
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.683629500452914,
+                "lo": 0.12533769915132897,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.3818101860401155
+              },
+              "regret": {
+                "hi": 2.1167945852872934,
+                "lo": 0.9204798218764393,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.461490555014663
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 1.6490036711574256,
+                "lo": 0.43834889527832127,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.001,
+                "point": 0.9817933671849717
+              },
+              "minus_gbm_hindsight": {
+                "hi": 1.645138434860891,
+                "lo": 0.36709912004962025,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.9420612736457681
+              },
+              "regret": {
+                "hi": 4.134490201798082,
+                "lo": 1.6543649922397148,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 2.7731840730529083
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.967642021139968,
+                "lo": 0.030693151107332683,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.028,
+                "point": 0.4217346893566055
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.8927111187962002,
+                "lo": -0.049001388519914764,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.095,
+                "point": 0.3573475440588738
+              },
+              "regret": {
+                "hi": 2.169203734121328,
+                "lo": 0.7850263193663848,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.3962143633022068
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 2.199666708986023,
+                "lo": 0.1729574220431292,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.02,
+                "point": 1.0264078941530328
+              },
+              "minus_gbm_hindsight": {
+                "hi": 2.0669884229992035,
+                "lo": -0.012176297836509952,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.053,
+                "point": 0.8849817756895384
+              },
+              "regret": {
+                "hi": 4.284488411302103,
+                "lo": 1.2800057706849628,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 2.620872959057178
+              }
+            }
+          }
+        },
+        "val": {
+          "mean_abs_label_shift_family": 3.3627688119135275,
+          "mean_abs_posterior_shift_family": 0.23774140837873908,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.6910315745363782,
+                "lo": 0.16830474920068994,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.002,
+                "point": 0.4266895841467959
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.5730593134192576,
+                "lo": 0.10762116669416442,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.004,
+                "point": 0.3359311782808718
+              },
+              "regret": {
+                "hi": 2.1088162242886916,
+                "lo": 1.0598762969014077,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.5549880889593102
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 1.5465491997166372,
+                "lo": 0.6584625760344852,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 1.0982010298671743
+              },
+              "minus_gbm_hindsight": {
+                "hi": 1.2758482780663087,
+                "lo": 0.27622653998477675,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.002,
+                "point": 0.7768639696697361
+              },
+              "regret": {
+                "hi": 3.6689693451703196,
+                "lo": 1.8619179032266435,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.6984637776110896
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.9055532529116687,
+                "lo": 0.02104884573431978,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.04,
+                "point": 0.43111483123200545
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.8851662207950629,
+                "lo": -0.04945046599046989,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.082,
+                "point": 0.39789450431468887
+              },
+              "regret": {
+                "hi": 2.468570777557919,
+                "lo": 1.202814076541542,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.80614315752049
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 2.1501012592277826,
+                "lo": 0.2303096252240826,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.014,
+                "point": 1.1081578358088953
+              },
+              "minus_gbm_hindsight": {
+                "hi": 2.0689777527985616,
+                "lo": -0.05824667897797103,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.07,
+                "point": 0.916281453245825
+              },
+              "regret": {
+                "hi": 4.510289492994865,
+                "lo": 2.14866880934799,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 3.2635626818737444
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "T": "inf",
+      "delta": 1.0,
+      "splits": {
+        "test": {
+          "mean_abs_label_shift_family": 3.577754116958989,
+          "mean_abs_posterior_shift_family": 0.22816086801171537,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.7075761712743087,
+                "lo": 0.15897302861118429,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.4026141777988652
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.683629500452914,
+                "lo": 0.12533769915132897,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.3818101860401155
+              },
+              "regret": {
+                "hi": 2.1167945852872934,
+                "lo": 0.9204798218764393,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.461490555014663
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 1.6490036711574256,
+                "lo": 0.43834889527832127,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.001,
+                "point": 0.9817933671849717
+              },
+              "minus_gbm_hindsight": {
+                "hi": 1.645138434860891,
+                "lo": 0.36709912004962025,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.9420612736457681
+              },
+              "regret": {
+                "hi": 4.134490201798082,
+                "lo": 1.6543649922397148,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 2.7731840730529083
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.967642021139968,
+                "lo": 0.030693151107332683,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.028,
+                "point": 0.4217346893566055
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.8927111187962002,
+                "lo": -0.049001388519914764,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.095,
+                "point": 0.3573475440588738
+              },
+              "regret": {
+                "hi": 2.169203734121328,
+                "lo": 0.7850263193663848,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.3962143633022068
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 2.199666708986023,
+                "lo": 0.1729574220431292,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.02,
+                "point": 1.0264078941530328
+              },
+              "minus_gbm_hindsight": {
+                "hi": 2.0669884229992035,
+                "lo": -0.012176297836509952,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "p_two_sided": 0.053,
+                "point": 0.8849817756895384
+              },
+              "regret": {
+                "hi": 4.284488411302103,
+                "lo": 1.2800057706849628,
+                "n_boot": 2000,
+                "n_clusters": 84,
+                "n_valid": 2000,
+                "point": 2.620872959057178
+              }
+            }
+          }
+        },
+        "val": {
+          "mean_abs_label_shift_family": 3.3627688119135275,
+          "mean_abs_posterior_shift_family": 0.23774140837873908,
+          "views": {
+            "belief/all": {
+              "minus_gbm_belief": {
+                "hi": 0.6910315745363782,
+                "lo": 0.16830474920068994,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.002,
+                "point": 0.4266895841467959
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.5730593134192576,
+                "lo": 0.10762116669416442,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.004,
+                "point": 0.3359311782808718
+              },
+              "regret": {
+                "hi": 2.1088162242886916,
+                "lo": 1.0598762969014077,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.5549880889593102
+              }
+            },
+            "belief/family": {
+              "minus_gbm_belief": {
+                "hi": 1.5465491997166372,
+                "lo": 0.6584625760344852,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 1.0982010298671743
+              },
+              "minus_gbm_hindsight": {
+                "hi": 1.2758482780663087,
+                "lo": 0.27622653998477675,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.002,
+                "point": 0.7768639696697361
+              },
+              "regret": {
+                "hi": 3.6689693451703196,
+                "lo": 1.8619179032266435,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 2.6984637776110896
+              }
+            },
+            "hindsight/all": {
+              "minus_gbm_belief": {
+                "hi": 0.9055532529116687,
+                "lo": 0.02104884573431978,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.04,
+                "point": 0.43111483123200545
+              },
+              "minus_gbm_hindsight": {
+                "hi": 0.8851662207950629,
+                "lo": -0.04945046599046989,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "p_two_sided": 0.082,
+                "point": 0.39789450431468887
+              },
+              "regret": {
+                "hi": 2.468570777557919,
+                "lo": 1.202814076541542,
+                "n_boot": 2000,
+                "n_clusters": 199,
+                "n_valid": 2000,
+                "point": 1.80614315752049
+              }
+            },
+            "hindsight/family": {
+              "minus_gbm_belief": {
+                "hi": 2.1501012592277826,
+                "lo": 0.2303096252240826,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.014,
+                "point": 1.1081578358088953
+              },
+              "minus_gbm_hindsight": {
+                "hi": 2.0689777527985616,
+                "lo": -0.05824667897797103,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "p_two_sided": 0.07,
+                "point": 0.916281453245825
+              },
+              "regret": {
+                "hi": 4.510289492994865,
+                "lo": 2.14866880934799,
+                "n_boot": 2000,
+                "n_clusters": 87,
+                "n_valid": 2000,
+                "point": 3.2635626818737444
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "eval_test": true,
+  "log": [
+    "prior P(link) = 0.5185; reproduction of the stored belief J at T=1, delta=0: max abs diff 1.42e-14",
+    "val T=0.0 delta=-1: belief/all regret 1.365, minus GBM (hindsight) +0.146 [-0.140, +0.491]; hindsight/all minus GBM (hindsight) +0.167 [-0.167, +0.564]",
+    "test T=0.0 delta=-1: belief/all regret 1.057, minus GBM (hindsight) -0.022 [-0.155, +0.085]; hindsight/all minus GBM (hindsight) -0.007 [-0.151, +0.132]",
+    "val T=0.0 delta=+0: belief/all regret 1.369, minus GBM (hindsight) +0.150 [-0.247, +0.748]; hindsight/all minus GBM (hindsight) +0.116 [-0.314, +0.745]",
+    "test T=0.0 delta=+0: belief/all regret 1.045, minus GBM (hindsight) -0.034 [-0.145, +0.066]; hindsight/all minus GBM (hindsight) -0.028 [-0.169, +0.107]",
+    "val T=0.0 delta=+1: belief/all regret 1.510, minus GBM (hindsight) +0.291 [-0.083, +0.827]; hindsight/all minus GBM (hindsight) +0.422 [-0.020, +1.032]",
+    "test T=0.0 delta=+1: belief/all regret 1.130, minus GBM (hindsight) +0.051 [-0.060, +0.183]; hindsight/all minus GBM (hindsight) -0.028 [-0.149, +0.085]",
+    "val T=0.5 delta=-1: belief/all regret 1.055, minus GBM (hindsight) -0.164 [-0.347, +0.017]; hindsight/all minus GBM (hindsight) -0.106 [-0.367, +0.153]",
+    "test T=0.5 delta=-1: belief/all regret 1.069, minus GBM (hindsight) -0.011 [-0.139, +0.106]; hindsight/all minus GBM (hindsight) -0.043 [-0.155, +0.068]",
+    "val T=0.5 delta=+0: belief/all regret 1.220, minus GBM (hindsight) +0.001 [-0.213, +0.249]; hindsight/all minus GBM (hindsight) +0.137 [-0.149, +0.455]",
+    "test T=0.5 delta=+0: belief/all regret 1.037, minus GBM (hindsight) -0.043 [-0.145, +0.050]; hindsight/all minus GBM (hindsight) -0.038 [-0.148, +0.077]",
+    "val T=0.5 delta=+1: belief/all regret 1.570, minus GBM (hindsight) +0.351 [-0.032, +0.934]; hindsight/all minus GBM (hindsight) +0.483 [-0.011, +1.161]",
+    "test T=0.5 delta=+1: belief/all regret 1.174, minus GBM (hindsight) +0.094 [-0.046, +0.268]; hindsight/all minus GBM (hindsight) +0.073 [-0.117, +0.338]",
+    "val T=1.0 delta=-1: belief/all regret 1.138, minus GBM (hindsight) -0.081 [-0.293, +0.132]; hindsight/all minus GBM (hindsight) +0.069 [-0.232, +0.381]",
+    "test T=1.0 delta=-1: belief/all regret 1.011, minus GBM (hindsight) -0.069 [-0.218, +0.068]; hindsight/all minus GBM (hindsight) -0.082 [-0.233, +0.057]",
+    "val T=1.0 delta=+0: belief/all regret 1.128, minus GBM (hindsight) -0.091 [-0.298, +0.133]; hindsight/all minus GBM (hindsight) -0.033 [-0.313, +0.260]",
+    "test T=1.0 delta=+0: belief/all regret 1.059, minus GBM (hindsight) -0.021 [-0.103, +0.053]; hindsight/all minus GBM (hindsight) -0.064 [-0.160, +0.013]",
+    "val T=1.0 delta=+1: belief/all regret 1.238, minus GBM (hindsight) +0.018 [-0.159, +0.234]; hindsight/all minus GBM (hindsight) +0.137 [-0.119, +0.443]",
+    "test T=1.0 delta=+1: belief/all regret 1.129, minus GBM (hindsight) +0.049 [-0.061, +0.200]; hindsight/all minus GBM (hindsight) +0.054 [-0.099, +0.287]",
+    "val T=2.0 delta=-1: belief/all regret 1.129, minus GBM (hindsight) -0.090 [-0.266, +0.081]; hindsight/all minus GBM (hindsight) +0.015 [-0.255, +0.303]",
+    "test T=2.0 delta=-1: belief/all regret 1.059, minus GBM (hindsight) -0.021 [-0.133, +0.091]; hindsight/all minus GBM (hindsight) -0.033 [-0.147, +0.078]",
+    "val T=2.0 delta=+0: belief/all regret 1.155, minus GBM (hindsight) -0.064 [-0.262, +0.155]; hindsight/all minus GBM (hindsight) +0.058 [-0.240, +0.363]",
+    "test T=2.0 delta=+0: belief/all regret 1.043, minus GBM (hindsight) -0.037 [-0.142, +0.058]; hindsight/all minus GBM (hindsight) -0.047 [-0.156, +0.064]",
+    "val T=2.0 delta=+1: belief/all regret 1.220, minus GBM (hindsight) +0.000 [-0.187, +0.241]; hindsight/all minus GBM (hindsight) +0.009 [-0.225, +0.278]",
+    "test T=2.0 delta=+1: belief/all regret 1.066, minus GBM (hindsight) -0.014 [-0.078, +0.047]; hindsight/all minus GBM (hindsight) -0.025 [-0.103, +0.037]",
+    "val T=inf delta=-1: belief/all regret 1.652, minus GBM (hindsight) +0.433 [+0.193, +0.684]; hindsight/all minus GBM (hindsight) +0.528 [+0.061, +1.048]",
+    "test T=inf delta=-1: belief/all regret 1.432, minus GBM (hindsight) +0.352 [+0.072, +0.667]; hindsight/all minus GBM (hindsight) +0.324 [-0.093, +0.869]",
+    "val T=inf delta=+0: belief/all regret 1.555, minus GBM (hindsight) +0.336 [+0.108, +0.573]; hindsight/all minus GBM (hindsight) +0.398 [-0.049, +0.885]",
+    "test T=inf delta=+0: belief/all regret 1.461, minus GBM (hindsight) +0.382 [+0.125, +0.684]; hindsight/all minus GBM (hindsight) +0.357 [-0.049, +0.893]",
+    "val T=inf delta=+1: belief/all regret 1.555, minus GBM (hindsight) +0.336 [+0.108, +0.573]; hindsight/all minus GBM (hindsight) +0.398 [-0.049, +0.885]",
+    "test T=inf delta=+1: belief/all regret 1.461, minus GBM (hindsight) +0.382 [+0.125, +0.684]; hindsight/all minus GBM (hindsight) +0.357 [-0.049, +0.893]"
+  ],
+  "prior_link": 0.5185185185185185,
+  "references": {
+    "belief": {
+      "test": {
+        "belief/all": {
+          "hi": 1.6560103518955553,
+          "lo": 0.5982338697512658,
+          "n_boot": 2000,
+          "n_clusters": 199,
+          "n_valid": 2000,
+          "point": 1.0588763772157979
+        },
+        "belief/family": {
+          "hi": 3.0552035080774447,
+          "lo": 0.8894225558122307,
+          "n_boot": 2000,
+          "n_clusters": 84,
+          "n_valid": 2000,
+          "point": 1.7913907058679366
+        },
+        "hindsight/all": {
+          "hi": 1.582999489788088,
+          "lo": 0.5091629774356016,
+          "n_boot": 2000,
+          "n_clusters": 199,
+          "n_valid": 2000,
+          "point": 0.9744796739456013
+        },
+        "hindsight/family": {
+          "hi": 2.909183202977784,
+          "lo": 0.6986454515233257,
+          "n_boot": 2000,
+          "n_clusters": 84,
+          "n_valid": 2000,
+          "point": 1.5944650649041452
+        }
+      },
+      "val": {
+        "belief/all": {
+          "hi": 1.6259150568607048,
+          "lo": 0.7153307545472131,
+          "n_boot": 2000,
+          "n_clusters": 199,
+          "n_valid": 2000,
+          "point": 1.1282985048125143
+        },
+        "belief/family": {
+          "hi": 2.349243339980245,
+          "lo": 1.0415306339436239,
+          "n_boot": 2000,
+          "n_clusters": 87,
+          "n_valid": 2000,
+          "point": 1.6002627477439153
+        },
+        "hindsight/all": {
+          "hi": 1.9742651261124762,
+          "lo": 0.8639626162612027,
+          "n_boot": 2000,
+          "n_clusters": 199,
+          "n_valid": 2000,
+          "point": 1.3750283262884846
+        },
+        "hindsight/family": {
+          "hi": 3.2642349383507776,
+          "lo": 1.2901216020030337,
+          "n_boot": 2000,
+          "n_clusters": 87,
+          "n_valid": 2000,
+          "point": 2.155404846064849
+        }
+      }
+    },
+    "hindsight": {
+      "test": {
+        "belief/all": {
+          "hi": 1.6781512595045123,
+          "lo": 0.6293055547607065,
+          "n_boot": 2000,
+          "n_clusters": 199,
+          "n_valid": 2000,
+          "point": 1.0796803689745476
+        },
+        "belief/family": {
+          "hi": 3.0767985755415377,
+          "lo": 0.9446331478313162,
+          "n_boot": 2000,
+          "n_clusters": 84,
+          "n_valid": 2000,
+          "point": 1.8311227994071402
+        },
+        "hindsight/all": {
+          "hi": 1.6352117232607781,
+          "lo": 0.5829225322868639,
+          "n_boot": 2000,
+          "n_clusters": 199,
+          "n_valid": 2000,
+          "point": 1.038866819243333
+        },
+        "hindsight/family": {
+          "hi": 2.9957003863283624,
+          "lo": 0.8160974556826581,
+          "n_boot": 2000,
+          "n_clusters": 84,
+          "n_valid": 2000,
+          "point": 1.7358911833676396
+        }
+      },
+      "val": {
+        "belief/all": {
+          "hi": 1.6965158427804532,
+          "lo": 0.8195690831887411,
+          "n_boot": 2000,
+          "n_clusters": 199,
+          "n_valid": 2000,
+          "point": 1.2190569106784384
+        },
+        "belief/family": {
+          "hi": 2.6964768467418296,
+          "lo": 1.3132974788286516,
+          "n_boot": 2000,
+          "n_clusters": 87,
+          "n_valid": 2000,
+          "point": 1.9215998079413534
+        },
+        "hindsight/all": {
+          "hi": 1.957649154197171,
+          "lo": 0.9342577830062632,
+          "n_boot": 2000,
+          "n_clusters": 199,
+          "n_valid": 2000,
+          "point": 1.4082486532058012
+        },
+        "hindsight/family": {
+          "hi": 3.3813823572505735,
+          "lo": 1.5319650046167301,
+          "n_boot": 2000,
+          "n_clusters": 87,
+          "n_valid": 2000,
+          "point": 2.3472812286279194
+        }
+      }
+    }
+  },
+  "settled_share": {
+    "test": 0.16071428571428573,
+    "train": 0.15471311475409835,
+    "val": 0.14942528735632185
+  },
+  "wall_s": 121.03549030004069
+}

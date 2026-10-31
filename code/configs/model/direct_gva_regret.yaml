@@ -1,0 +1,6 @@
+base: model/direct.yaml
+model:
+  gva_regret_weight: true
+  weights: {gva: 1.0}
+train:
+  stop_on: {J_centered: 1.0, gva: 1.0}

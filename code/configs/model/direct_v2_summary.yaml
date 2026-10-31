@@ -1,0 +1,3 @@
+base: model/direct_v2.yaml
+model:
+  summary_descriptor: true

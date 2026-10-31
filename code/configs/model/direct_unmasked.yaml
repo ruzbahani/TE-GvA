@@ -1,0 +1,4 @@
+base: model/direct.yaml
+model:
+  backbone:
+    mode: unmasked

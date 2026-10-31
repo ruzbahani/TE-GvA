@@ -1,0 +1,3191 @@
+{
+  "definitions": {
+    "action_classes": {
+      "escalate": "escalate (target incident)",
+      "monitor": "monitor (300 s and 900 s)",
+      "other": "every other candidate: switch_to_backup, repair_link, replace_io_module on other targets",
+      "other_observe": "every other observe-family candidate: query_historian, trace_link / verify_sensor on other targets",
+      "recalibrate_sensor": "recalibrate_sensor (any instrument)",
+      "repair_pair": "repair_link on sensor:<g> or replace_io_module on source:<g>",
+      "restore_primary": "restore_primary (any link)",
+      "set_production": "set_production",
+      "switch_to_backup_pair": "switch_to_backup on sensor:<g>",
+      "trace_link_pair": "trace_link on sensor:<g>",
+      "verify_sensor_pair": "verify_sensor on source:<g>"
+    },
+    "ambiguous_decisions": "decisions of episodes whose incident is a link fault on sensor:<g> or an I/O-module fault on <g> (dataset.in_family = dec_family); g = belief.family_group(incident)",
+    "argmin_set_changed": "the set of co-optimal candidates under J_belief with the shifted posterior differs",
+    "belief_minus_hindsight": "strictly-best share under belief minus hindsight labels on the with_both decisions; 95% paired cluster bootstrap over episodes (eval.metrics.paired_cluster_bootstrap_diff)",
+    "belief_regret": "J_belief(candidate) - min J_belief",
+    "calibration": "P(link | E) of ambiguous decisions with a defined posterior, 10 equal bins (dataset_stats.calibration_table): ECE (count-weighted |mean p - frequency|) and Brier",
+    "calibration_null": "ECE with outcomes drawn as independent Bernoulli(p) from the same posteriors, n_null draws, rng seed fixed (the same for every subgroup)",
+    "class_co_optimal_share": "share of decisions in which the class holds a co-optimal candidate",
+    "class_unique_argmin_share": "share of decisions whose argmin is a single candidate of the class",
+    "co_optimal": "J <= min J + TOL, TOL = 1e-9 (dataset_stats.TOL)",
+    "co_optimal_D": "D holds a co-optimal candidate; denominator: all ambiguous decisions of the subset",
+    "definitions_D": {
+      "D0_observe_family": [
+        "trace_link_pair",
+        "verify_sensor_pair",
+        "other_observe"
+      ],
+      "D1_diagnostic": [
+        "trace_link_pair",
+        "verify_sensor_pair",
+        "escalate"
+      ],
+      "D2_diagnostic_or_backup_probe": [
+        "trace_link_pair",
+        "verify_sensor_pair",
+        "escalate",
+        "switch_to_backup_pair"
+      ],
+      "D3_with_cause_revealing_repairs": [
+        "trace_link_pair",
+        "verify_sensor_pair",
+        "escalate",
+        "switch_to_backup_pair",
+        "repair_pair"
+      ]
+    },
+    "development_pool": "train + val raw episodes, split by seed (dataset.split_of, fractions 0.6/0.2/0.2) before a file is opened (dataset_stats.load_episodes); any other split is refused",
+    "effort_difference": "(resource_cost(tool) - resource_cost(query_historian)) * compute.per_resource_unit * weights.compute (configs/defense/tools.yaml, configs/sim/costs.yaml)",
+    "gather_flipped": "D0 strictly best (gather-or-act answer) differs between the stored and shifted posterior",
+    "groupwide_staleness": "stale alerts valid at tau (decision valid_evidence) on at least max(2, stale_fraction * group size) distinct channels of a sensor group (agents/playbook.Playbook.plan, stale_fraction 0.5)",
+    "info_classes": {
+      "backup_probe": "switch_to_backup_pair",
+      "cause_revealing_repair": "repair_pair",
+      "diagnostic": "no physical effect, own result discriminates the pair (trace_link_pair, verify_sensor_pair, escalate)",
+      "observe_no_pair_info": "other_observe",
+      "response_no_pair_info": "restore_primary, recalibrate_sensor, set_production, other",
+      "wait": "monitor"
+    },
+    "labels": "hindsight: J of the true cause (dataset.candidate_labels); belief: J_belief = P(c|E) J(a|c) + P(c'|E) J(a|c',h) (dataset.belief_labels); twin world: J(a|c',h), the twin's branch labels",
+    "minus_historian": "paired label difference J(tool) - J(query_historian on source:<g>) in the true world (hindsight labels) and the twin world (twin labels), common random numbers",
+    "onset_shift": "both worlds' assumed onsets moved by delta; link-world state records the true onset alone explains are set to the state the assumed onset implies; evidence rebuilt with belief.belief_evidence from the primary's stored items and the stored state timelines",
+    "onset_uniform": "likelihood of each cause averaged uniformly over the shifts, then the posterior",
+    "prior": "pair_prior = (pi_L w_L(g)/W_L) / (pi_L w_L(g)/W_L + pi_M w_M(g)/W_M): pi type shares, w the group's sensor-link and module weights, W_L all link weights (sensor and actuator), W_M all module weights",
+    "settled": "the twin's deterministic evidence differed by tau (deterministic_identical false): the posterior is exactly 0 or 1",
+    "since_onset_terciles": "post-onset decisions split at the 1/3 and 2/3 quantiles of tau - onset",
+    "strictly_best": "Eq. gap with class D in place of the observe family: min J over D < min J over the other candidates - TOL; denominator (with_both): decisions with candidates in D and outside D. D0 is the datasheet's gather-beats-act (dataset_stats: gather_belief, voi.gather_beats_act)",
+    "subgroup_ece_range": "over backup availability, decision index and since-onset tercile subgroups",
+    "tie_share": "share of decisions with more than one co-optimal candidate; cross_class_tie_share: whose co-optimal candidates fall in more than one class",
+    "trace_share_of_observe": "decisions in which trace_link_pair is co-optimal / decisions in which an observe-family candidate is co-optimal (belief labels)",
+    "within_effort": "|J(tool) - J(historian) - effort difference| <= EPS = 0.01 (dataset_stats.EPS)"
+  },
+  "log": [
+    "natural: 800 episodes, 3129 decisions, 1324 ambiguous (1324 with belief labels); 6s",
+    "natural: actions done; 7s",
+    "natural: onset done; 21s",
+    "stress: 800 episodes, 4795 decisions, 2790 ambiguous (2790 with belief labels); 8s",
+    "stress: actions done; 10s",
+    "stress: onset done; 47s"
+  ],
+  "sets": {
+    "natural": {
+      "actions": {
+        "all": {
+          "classes": {
+            "belief": {
+              "classes": {
+                "escalate": {
+                  "candidate": 0.9622,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "monitor": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.4449,
+                  "unique_argmin": 0.3724
+                },
+                "other": {
+                  "candidate": 0.8852,
+                  "co_optimal": 0.0166,
+                  "unique_argmin": 0.0159
+                },
+                "other_observe": {
+                  "candidate": 0.9713,
+                  "co_optimal": 0.0098,
+                  "unique_argmin": 0.0098
+                },
+                "recalibrate_sensor": {
+                  "candidate": 0.9592,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "repair_pair": {
+                  "candidate": 0.9041,
+                  "co_optimal": 0.1193,
+                  "unique_argmin": 0.1193
+                },
+                "restore_primary": {
+                  "candidate": 0.3036,
+                  "co_optimal": 0.0914,
+                  "unique_argmin": 0.0914
+                },
+                "set_production": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.0544,
+                  "unique_argmin": 0.0544
+                },
+                "switch_to_backup_pair": {
+                  "candidate": 0.5974,
+                  "co_optimal": 0.1186,
+                  "unique_argmin": 0.1186
+                },
+                "trace_link_pair": {
+                  "candidate": 0.9041,
+                  "co_optimal": 0.145,
+                  "unique_argmin": 0.145
+                },
+                "verify_sensor_pair": {
+                  "candidate": 0.8708,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                }
+              },
+              "cross_class_tie_share": 0.0,
+              "n": 1324,
+              "tie_share": 0.0733
+            },
+            "hindsight": {
+              "classes": {
+                "escalate": {
+                  "candidate": 0.9622,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "monitor": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.4834,
+                  "unique_argmin": 0.3505
+                },
+                "other": {
+                  "candidate": 0.8852,
+                  "co_optimal": 0.0106,
+                  "unique_argmin": 0.0098
+                },
+                "other_observe": {
+                  "candidate": 0.9713,
+                  "co_optimal": 0.0045,
+                  "unique_argmin": 0.0045
+                },
+                "recalibrate_sensor": {
+                  "candidate": 0.9592,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "repair_pair": {
+                  "candidate": 0.9041,
+                  "co_optimal": 0.2462,
+                  "unique_argmin": 0.244
+                },
+                "restore_primary": {
+                  "candidate": 0.3036,
+                  "co_optimal": 0.0952,
+                  "unique_argmin": 0.0952
+                },
+                "set_production": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.0408,
+                  "unique_argmin": 0.0408
+                },
+                "switch_to_backup_pair": {
+                  "candidate": 0.5974,
+                  "co_optimal": 0.111,
+                  "unique_argmin": 0.1103
+                },
+                "trace_link_pair": {
+                  "candidate": 0.9041,
+                  "co_optimal": 0.0128,
+                  "unique_argmin": 0.0113
+                },
+                "verify_sensor_pair": {
+                  "candidate": 0.8708,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                }
+              },
+              "cross_class_tie_share": 0.003,
+              "n": 1324,
+              "tie_share": 0.1337
+            }
+          },
+          "decisions": 1324,
+          "definitions": {
+            "D0_observe_family": {
+              "belief": {
+                "co_optimal": {
+                  "count": 205,
+                  "share": 0.1548
+                },
+                "strictly_best": {
+                  "count": 205,
+                  "share": 0.1552
+                }
+              },
+              "belief_minus_hindsight": {
+                "hi": 0.162,
+                "lo": 0.1188,
+                "n_boot": 2000,
+                "n_clusters": 331,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.1393
+              },
+              "decisions": 1324,
+              "hindsight": {
+                "co_optimal": {
+                  "count": 23,
+                  "share": 0.0174
+                },
+                "strictly_best": {
+                  "count": 21,
+                  "share": 0.0159
+                }
+              },
+              "members": [
+                "trace_link_pair",
+                "verify_sensor_pair",
+                "other_observe"
+              ],
+              "with_both": 1321
+            },
+            "D1_diagnostic": {
+              "belief": {
+                "co_optimal": {
+                  "count": 192,
+                  "share": 0.145
+                },
+                "strictly_best": {
+                  "count": 192,
+                  "share": 0.1468
+                }
+              },
+              "belief_minus_hindsight": {
+                "hi": 0.1573,
+                "lo": 0.1143,
+                "n_boot": 2000,
+                "n_clusters": 330,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.1353
+              },
+              "decisions": 1324,
+              "hindsight": {
+                "co_optimal": {
+                  "count": 17,
+                  "share": 0.0128
+                },
+                "strictly_best": {
+                  "count": 15,
+                  "share": 0.0115
+                }
+              },
+              "members": [
+                "trace_link_pair",
+                "verify_sensor_pair",
+                "escalate"
+              ],
+              "with_both": 1308
+            },
+            "D2_diagnostic_or_backup_probe": {
+              "belief": {
+                "co_optimal": {
+                  "count": 349,
+                  "share": 0.2636
+                },
+                "strictly_best": {
+                  "count": 349,
+                  "share": 0.2668
+                }
+              },
+              "belief_minus_hindsight": {
+                "hi": 0.1674,
+                "lo": 0.1219,
+                "n_boot": 2000,
+                "n_clusters": 330,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.1437
+              },
+              "decisions": 1324,
+              "hindsight": {
+                "co_optimal": {
+                  "count": 163,
+                  "share": 0.1231
+                },
+                "strictly_best": {
+                  "count": 161,
+                  "share": 0.1231
+                }
+              },
+              "members": [
+                "trace_link_pair",
+                "verify_sensor_pair",
+                "escalate",
+                "switch_to_backup_pair"
+              ],
+              "with_both": 1308
+            },
+            "D3_with_cause_revealing_repairs": {
+              "belief": {
+                "co_optimal": {
+                  "count": 507,
+                  "share": 0.3829
+                },
+                "strictly_best": {
+                  "count": 507,
+                  "share": 0.3876
+                }
+              },
+              "belief_minus_hindsight": {
+                "hi": 0.0438,
+                "lo": -0.0092,
+                "n_boot": 2000,
+                "n_clusters": 330,
+                "n_valid": 2000,
+                "p_two_sided": 0.227,
+                "point": 0.0176
+              },
+              "decisions": 1324,
+              "hindsight": {
+                "co_optimal": {
+                  "count": 488,
+                  "share": 0.3686
+                },
+                "strictly_best": {
+                  "count": 484,
+                  "share": 0.37
+                }
+              },
+              "members": [
+                "trace_link_pair",
+                "verify_sensor_pair",
+                "escalate",
+                "switch_to_backup_pair",
+                "repair_pair"
+              ],
+              "with_both": 1308
+            }
+          },
+          "episodes": 331,
+          "info_classes": {
+            "belief": {
+              "classes": {
+                "backup_probe": {
+                  "candidate": 0.5974,
+                  "co_optimal": 0.1186,
+                  "unique_argmin": 0.1186
+                },
+                "cause_revealing_repair": {
+                  "candidate": 0.9041,
+                  "co_optimal": 0.1193,
+                  "unique_argmin": 0.1193
+                },
+                "diagnostic": {
+                  "candidate": 0.9879,
+                  "co_optimal": 0.145,
+                  "unique_argmin": 0.145
+                },
+                "observe_no_pair_info": {
+                  "candidate": 0.9713,
+                  "co_optimal": 0.0098,
+                  "unique_argmin": 0.0098
+                },
+                "response_no_pair_info": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.1624,
+                  "unique_argmin": 0.1616
+                },
+                "wait": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.4449,
+                  "unique_argmin": 0.3724
+                }
+              },
+              "cross_class_tie_share": 0.0,
+              "n": 1324,
+              "tie_share": 0.0733
+            },
+            "hindsight": {
+              "classes": {
+                "backup_probe": {
+                  "candidate": 0.5974,
+                  "co_optimal": 0.111,
+                  "unique_argmin": 0.1103
+                },
+                "cause_revealing_repair": {
+                  "candidate": 0.9041,
+                  "co_optimal": 0.2462,
+                  "unique_argmin": 0.244
+                },
+                "diagnostic": {
+                  "candidate": 0.9879,
+                  "co_optimal": 0.0128,
+                  "unique_argmin": 0.0113
+                },
+                "observe_no_pair_info": {
+                  "candidate": 0.9713,
+                  "co_optimal": 0.0045,
+                  "unique_argmin": 0.0045
+                },
+                "response_no_pair_info": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.1465,
+                  "unique_argmin": 0.1458
+                },
+                "wait": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.4834,
+                  "unique_argmin": 0.3505
+                }
+              },
+              "cross_class_tie_share": 0.003,
+              "n": 1324,
+              "tie_share": 0.1337
+            }
+          },
+          "information_tools": {
+            "escalate": {
+              "belief_regret": {
+                "max": 101.1344,
+                "mean": 6.2733,
+                "median": 4.3815,
+                "min": 3.5,
+                "n": 1274,
+                "q05": 4.0,
+                "q25": 4.0548,
+                "q75": 5.2868,
+                "q95": 17.234,
+                "std": 7.5235
+              },
+              "candidate_decisions": 1274,
+              "co_optimal": {
+                "belief": 0,
+                "hindsight": 0
+              },
+              "minus_historian": {
+                "effort_difference": 3.96,
+                "true_world": {
+                  "max": 53.4214,
+                  "mean": 4.096,
+                  "median": 3.96,
+                  "min": 1.96,
+                  "n": 1153,
+                  "q05": 3.9238,
+                  "q25": 3.9479,
+                  "q75": 3.96,
+                  "q95": 4.1179,
+                  "std": 2.0127,
+                  "within_effort_share": 0.6522
+                },
+                "twin_world": {
+                  "max": 28.637,
+                  "mean": 4.0915,
+                  "median": 3.96,
+                  "min": 1.96,
+                  "n": 1153,
+                  "q05": 3.9229,
+                  "q25": 3.9472,
+                  "q75": 3.96,
+                  "q95": 4.0809,
+                  "std": 1.721,
+                  "within_effort_share": 0.6505
+                },
+                "within_effort_both_worlds_share": 0.6245
+              }
+            },
+            "no_trace_candidate": {
+              "count": 127,
+              "decisions": 1324,
+              "share": 0.0959
+            },
+            "trace_link_pair": {
+              "belief_regret": {
+                "max": 95.3949,
+                "mean": 1.9542,
+                "median": 0.3101,
+                "min": 0.0,
+                "n": 1197,
+                "q05": 0.0,
+                "q25": 0.18,
+                "q75": 1.4153,
+                "q95": 10.3538,
+                "std": 6.7611
+              },
+              "candidate_decisions": 1197,
+              "co_optimal": {
+                "belief": 192,
+                "hindsight": 17
+              },
+              "minus_historian": {
+                "true_world": {
+                  "max": 51.0909,
+                  "mean": -0.2184,
+                  "median": 0.16,
+                  "min": -91.3988,
+                  "n": 1153,
+                  "q05": -1.3411,
+                  "q25": 0.1397,
+                  "q75": 0.16,
+                  "q95": 0.66,
+                  "std": 5.6777
+                },
+                "twin_world": {
+                  "max": 25.7012,
+                  "mean": -2.4421,
+                  "median": 0.1564,
+                  "min": -98.9137,
+                  "n": 1153,
+                  "q05": -23.4969,
+                  "q25": -0.339,
+                  "q75": 0.16,
+                  "q95": 0.7369,
+                  "std": 11.4171
+                }
+              }
+            },
+            "trace_share_of_observe_co_optimal": {
+              "observe_co_optimal": 205,
+              "share": 0.9366,
+              "trace_co_optimal": 192
+            },
+            "verify_sensor_pair": {
+              "belief_regret": {
+                "max": 98.1344,
+                "mean": 3.2779,
+                "median": 1.4348,
+                "min": 0.96,
+                "n": 1153,
+                "q05": 1.0,
+                "q25": 1.0725,
+                "q75": 2.289,
+                "q95": 14.2609,
+                "std": 7.6661
+              },
+              "candidate_decisions": 1153,
+              "co_optimal": {
+                "belief": 0,
+                "hindsight": 0
+              },
+              "minus_historian": {
+                "effort_difference": 0.96,
+                "true_world": {
+                  "max": 50.4214,
+                  "mean": 1.096,
+                  "median": 0.96,
+                  "min": -1.04,
+                  "n": 1153,
+                  "q05": 0.9243,
+                  "q25": 0.9482,
+                  "q75": 0.96,
+                  "q95": 1.0411,
+                  "std": 2.0119,
+                  "within_effort_share": 0.6644
+                },
+                "twin_world": {
+                  "max": 25.637,
+                  "mean": 1.091,
+                  "median": 0.96,
+                  "min": -1.04,
+                  "n": 1153,
+                  "q05": 0.9247,
+                  "q25": 0.9474,
+                  "q75": 0.96,
+                  "q95": 1.0198,
+                  "std": 1.7204,
+                  "within_effort_share": 0.6592
+                },
+                "within_effort_both_worlds_share": 0.6349
+              }
+            }
+          }
+        }
+      },
+      "ambiguous": {
+        "belief_decisions": 1324,
+        "belief_fallback": 0,
+        "decisions": 1324,
+        "episodes": 331,
+        "share_of_decisions": 0.4231
+      },
+      "calibration": {
+        "prior_only_brier": 0.2505,
+        "since_onset_tercile_edges_min": [
+          4.0404,
+          7.1387
+        ],
+        "subgroup_ece_range": {
+          "all_below_null_q95": true,
+          "max": 0.0266,
+          "max_subgroup": "since_onset_t1",
+          "min": 0.0131,
+          "min_subgroup": "index_3",
+          "subgroups": [
+            "index_0",
+            "index_1",
+            "index_2",
+            "index_3",
+            "since_onset_t1",
+            "since_onset_t2",
+            "since_onset_t3"
+          ]
+        },
+        "subgroups": {
+          "all": {
+            "below_null_q95": true,
+            "bins": [
+              {
+                "bin": [
+                  0.0,
+                  0.1
+                ],
+                "link_frequency": 0.0,
+                "mean_p_link": 0.0133,
+                "n": 256
+              },
+              {
+                "bin": [
+                  0.1,
+                  0.2
+                ],
+                "link_frequency": 0.0811,
+                "mean_p_link": 0.1336,
+                "n": 37
+              },
+              {
+                "bin": [
+                  0.2,
+                  0.3
+                ],
+                "link_frequency": 0.0,
+                "mean_p_link": 0.251,
+                "n": 10
+              },
+              {
+                "bin": [
+                  0.3,
+                  0.4
+                ],
+                "link_frequency": 0.3333,
+                "mean_p_link": 0.3639,
+                "n": 54
+              },
+              {
+                "bin": [
+                  0.4,
+                  0.5
+                ],
+                "link_frequency": 0.4335,
+                "mean_p_link": 0.4465,
+                "n": 526
+              },
+              {
+                "bin": [
+                  0.5,
+                  0.6
+                ],
+                "link_frequency": 0.5088,
+                "mean_p_link": 0.5158,
+                "n": 57
+              },
+              {
+                "bin": [
+                  0.6,
+                  0.7
+                ],
+                "link_frequency": null,
+                "mean_p_link": null,
+                "n": 0
+              },
+              {
+                "bin": [
+                  0.7,
+                  0.8
+                ],
+                "link_frequency": 1.0,
+                "mean_p_link": 0.7742,
+                "n": 8
+              },
+              {
+                "bin": [
+                  0.8,
+                  0.9
+                ],
+                "link_frequency": null,
+                "mean_p_link": null,
+                "n": 0
+              },
+              {
+                "bin": [
+                  0.9,
+                  1.0
+                ],
+                "link_frequency": 0.984,
+                "mean_p_link": 0.988,
+                "n": 376
+              }
+            ],
+            "brier": 0.1247,
+            "decisions": 1324,
+            "ece": 0.0152,
+            "episodes": 331,
+            "null_ece_mean": 0.0166,
+            "null_ece_q95": 0.028
+          },
+          "index_0": {
+            "below_null_q95": true,
+            "brier": 0.2046,
+            "decisions": 331,
+            "ece": 0.0173,
+            "episodes": 331,
+            "null_ece_mean": 0.0354,
+            "null_ece_q95": 0.0632
+          },
+          "index_1": {
+            "below_null_q95": true,
+            "brier": 0.1617,
+            "decisions": 331,
+            "ece": 0.0266,
+            "episodes": 331,
+            "null_ece_mean": 0.0366,
+            "null_ece_q95": 0.0633
+          },
+          "index_2": {
+            "below_null_q95": true,
+            "brier": 0.0943,
+            "decisions": 331,
+            "ece": 0.0183,
+            "episodes": 331,
+            "null_ece_mean": 0.0301,
+            "null_ece_q95": 0.0502
+          },
+          "index_3": {
+            "below_null_q95": true,
+            "brier": 0.0383,
+            "decisions": 331,
+            "ece": 0.0131,
+            "episodes": 331,
+            "null_ece_mean": 0.022,
+            "null_ece_q95": 0.0344
+          },
+          "not_settled": {
+            "below_null_q95": true,
+            "bins": [
+              {
+                "bin": [
+                  0.0,
+                  0.1
+                ],
+                "link_frequency": 0.0,
+                "mean_p_link": 0.0223,
+                "n": 153
+              },
+              {
+                "bin": [
+                  0.1,
+                  0.2
+                ],
+                "link_frequency": 0.0811,
+                "mean_p_link": 0.1336,
+                "n": 37
+              },
+              {
+                "bin": [
+                  0.2,
+                  0.3
+                ],
+                "link_frequency": 0.0,
+                "mean_p_link": 0.251,
+                "n": 10
+              },
+              {
+                "bin": [
+                  0.3,
+                  0.4
+                ],
+                "link_frequency": 0.3333,
+                "mean_p_link": 0.3639,
+                "n": 54
+              },
+              {
+                "bin": [
+                  0.4,
+                  0.5
+                ],
+                "link_frequency": 0.4335,
+                "mean_p_link": 0.4465,
+                "n": 526
+              },
+              {
+                "bin": [
+                  0.5,
+                  0.6
+                ],
+                "link_frequency": 0.5088,
+                "mean_p_link": 0.5158,
+                "n": 57
+              },
+              {
+                "bin": [
+                  0.6,
+                  0.7
+                ],
+                "link_frequency": null,
+                "mean_p_link": null,
+                "n": 0
+              },
+              {
+                "bin": [
+                  0.7,
+                  0.8
+                ],
+                "link_frequency": 1.0,
+                "mean_p_link": 0.7742,
+                "n": 8
+              },
+              {
+                "bin": [
+                  0.8,
+                  0.9
+                ],
+                "link_frequency": null,
+                "mean_p_link": null,
+                "n": 0
+              },
+              {
+                "bin": [
+                  0.9,
+                  1.0
+                ],
+                "link_frequency": 0.9783,
+                "mean_p_link": 0.9837,
+                "n": 276
+              }
+            ],
+            "brier": 0.1473,
+            "decisions": 1121,
+            "ece": 0.0179,
+            "episodes": 331,
+            "null_ece_mean": 0.0192,
+            "null_ece_q95": 0.0314
+          },
+          "pre_onset": {
+            "below_null_q95": true,
+            "brier": 0.2514,
+            "decisions": 36,
+            "ece": 0.0463,
+            "episodes": 36,
+            "null_ece_mean": 0.0698,
+            "null_ece_q95": 0.1759
+          },
+          "settled": {
+            "below_null_q95": false,
+            "brier": 0.0,
+            "decisions": 203,
+            "ece": 0.0,
+            "episodes": 138,
+            "null_ece_mean": 0.0,
+            "null_ece_q95": 0.0
+          },
+          "since_onset_t1": {
+            "below_null_q95": true,
+            "brier": 0.2116,
+            "decisions": 430,
+            "ece": 0.0266,
+            "episodes": 287,
+            "null_ece_mean": 0.024,
+            "null_ece_q95": 0.0502
+          },
+          "since_onset_t2": {
+            "below_null_q95": true,
+            "brier": 0.1272,
+            "decisions": 429,
+            "ece": 0.0234,
+            "episodes": 261,
+            "null_ece_mean": 0.0235,
+            "null_ece_q95": 0.0418
+          },
+          "since_onset_t3": {
+            "below_null_q95": true,
+            "brier": 0.0245,
+            "decisions": 429,
+            "ece": 0.0262,
+            "episodes": 226,
+            "null_ece_mean": 0.0177,
+            "null_ece_q95": 0.0295
+          }
+        }
+      },
+      "decisions": {
+        "train": 2346,
+        "val": 783
+      },
+      "episodes": {
+        "train": 600,
+        "val": 200
+      },
+      "incidents": "sim/incidents.yaml",
+      "onset": {
+        "control_step_s": 1.8,
+        "decisions": 1121,
+        "first_window_end_minus_onset_s": {
+          "max": 39.4223,
+          "min": 1.8282
+        },
+        "reproduction": {
+          "evidence_mismatches": 0,
+          "posterior_max_abs_diff": 0.0
+        },
+        "shift_+1_window": {
+          "argmin_set_changed": {
+            "count": 15,
+            "share": 0.0134
+          },
+          "decisions": 1121,
+          "gather_flipped": {
+            "count": 5,
+            "share": 0.0045
+          },
+          "max_abs_dpi": 0.7653,
+          "mean_abs_dpi": 0.0177,
+          "q95_abs_dpi": 0.0127
+        },
+        "shift_-1_window": {
+          "argmin_set_changed": {
+            "count": 15,
+            "share": 0.0134
+          },
+          "decisions": 1121,
+          "gather_flipped": {
+            "count": 12,
+            "share": 0.0107
+          },
+          "max_abs_dpi": 0.5842,
+          "mean_abs_dpi": 0.0088,
+          "q95_abs_dpi": 0.0127
+        },
+        "uniform_pm5_windows": {
+          "argmin_set_changed": {
+            "count": 45,
+            "share": 0.0401
+          },
+          "decisions": 1121,
+          "gather_flipped": {
+            "count": 23,
+            "share": 0.0205
+          },
+          "max_abs_dpi": 0.7677,
+          "mean_abs_dpi": 0.0385,
+          "q95_abs_dpi": 0.4538
+        },
+        "uniform_pm5_windows_control_steps": {
+          "argmin_set_changed": {
+            "count": 47,
+            "share": 0.0419
+          },
+          "decisions": 1121,
+          "gather_flipped": {
+            "count": 25,
+            "share": 0.0223
+          },
+          "max_abs_dpi": 0.7679,
+          "mean_abs_dpi": 0.0381,
+          "q95_abs_dpi": 0.4499
+        },
+        "window_s": 36.0,
+        "windows_in_likelihood": {
+          "max": 56.0,
+          "mean": 11.926,
+          "median": 8.0,
+          "min": 0.0,
+          "n": 1121,
+          "q05": 2.0,
+          "q25": 6.0,
+          "q75": 12.0,
+          "q95": 43.0,
+          "std": 11.6778
+        }
+      },
+      "pair_conditioning": {
+        "ambiguous": {
+          "decisions": 1324,
+          "share": 0.864,
+          "with_signal_on_g": 1144,
+          "without_signal": 180,
+          "without_signal_post_onset_minutes": {
+            "max": 26.6087,
+            "mean": 7.3112,
+            "median": 2.8763,
+            "min": 0.1229,
+            "n": 144,
+            "q05": 0.4305,
+            "q25": 1.684,
+            "q75": 12.6823,
+            "q95": 23.6714,
+            "std": 7.7528
+          },
+          "without_signal_pre_onset": 36
+        },
+        "decisions": 3129,
+        "signal_only_on_own_pair_group": 1144,
+        "signal_outside_pair": 0,
+        "signal_outside_pair_causes": {},
+        "with_groupwide_signal": 1144
+      },
+      "prior": {
+        "W_L": 13.0,
+        "W_L_actuator": 5.0,
+        "W_L_sensor": 8.0,
+        "W_M": 8.0,
+        "empirical_link_share": {
+          "ambiguous_episodes": 331,
+          "binomial_se_at_prior": 0.0275,
+          "decision_share": 0.4955,
+          "link_episodes": 164,
+          "share": 0.4955
+        },
+        "groups": {
+          "analyzers": {
+            "prior_link": 0.5185,
+            "w_L": 1.0,
+            "w_M": 1.0
+          },
+          "feeds": {
+            "prior_link": 0.5185,
+            "w_L": 1.0,
+            "w_M": 1.0
+          },
+          "reactor": {
+            "prior_link": 0.5185,
+            "w_L": 2.0,
+            "w_M": 2.0
+          },
+          "recycle": {
+            "prior_link": 0.5185,
+            "w_L": 1.0,
+            "w_M": 1.0
+          },
+          "separator": {
+            "prior_link": 0.5185,
+            "w_L": 1.0,
+            "w_M": 1.0
+          },
+          "stripper": {
+            "prior_link": 0.5185,
+            "w_L": 2.0,
+            "w_M": 2.0
+          }
+        },
+        "pi_L": 0.35,
+        "pi_M": 0.2,
+        "prior_link": 0.5185,
+        "same_for_every_group": true,
+        "stored_prior_matches": true
+      },
+      "root": "data/processed/tep_experience/20260927-003712-v2-natural",
+      "seconds": 22.8917
+    },
+    "stress": {
+      "actions": {
+        "all": {
+          "classes": {
+            "belief": {
+              "classes": {
+                "escalate": {
+                  "candidate": 0.9871,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "monitor": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.3315,
+                  "unique_argmin": 0.1882
+                },
+                "other": {
+                  "candidate": 0.9455,
+                  "co_optimal": 0.0165,
+                  "unique_argmin": 0.0147
+                },
+                "other_observe": {
+                  "candidate": 0.9713,
+                  "co_optimal": 0.0079,
+                  "unique_argmin": 0.0075
+                },
+                "recalibrate_sensor": {
+                  "candidate": 0.9638,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "repair_pair": {
+                  "candidate": 0.9591,
+                  "co_optimal": 0.2226,
+                  "unique_argmin": 0.2219
+                },
+                "restore_primary": {
+                  "candidate": 0.1853,
+                  "co_optimal": 0.048,
+                  "unique_argmin": 0.048
+                },
+                "set_production": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.0892,
+                  "unique_argmin": 0.0889
+                },
+                "switch_to_backup_pair": {
+                  "candidate": 0.2867,
+                  "co_optimal": 0.0638,
+                  "unique_argmin": 0.0638
+                },
+                "trace_link_pair": {
+                  "candidate": 0.9624,
+                  "co_optimal": 0.2219,
+                  "unique_argmin": 0.2215
+                },
+                "verify_sensor_pair": {
+                  "candidate": 0.9301,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                }
+              },
+              "cross_class_tie_share": 0.0014,
+              "n": 2790,
+              "tie_share": 0.1455
+            },
+            "hindsight": {
+              "classes": {
+                "escalate": {
+                  "candidate": 0.9871,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "monitor": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.3875,
+                  "unique_argmin": 0.1799
+                },
+                "other": {
+                  "candidate": 0.9455,
+                  "co_optimal": 0.0194,
+                  "unique_argmin": 0.0172
+                },
+                "other_observe": {
+                  "candidate": 0.9713,
+                  "co_optimal": 0.0039,
+                  "unique_argmin": 0.0036
+                },
+                "recalibrate_sensor": {
+                  "candidate": 0.9638,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "repair_pair": {
+                  "candidate": 0.9591,
+                  "co_optimal": 0.4108,
+                  "unique_argmin": 0.3792
+                },
+                "restore_primary": {
+                  "candidate": 0.1853,
+                  "co_optimal": 0.052,
+                  "unique_argmin": 0.052
+                },
+                "set_production": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.0842,
+                  "unique_argmin": 0.0839
+                },
+                "switch_to_backup_pair": {
+                  "candidate": 0.2867,
+                  "co_optimal": 0.0602,
+                  "unique_argmin": 0.0602
+                },
+                "trace_link_pair": {
+                  "candidate": 0.9624,
+                  "co_optimal": 0.0136,
+                  "unique_argmin": 0.0133
+                },
+                "verify_sensor_pair": {
+                  "candidate": 0.9301,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                }
+              },
+              "cross_class_tie_share": 0.0315,
+              "n": 2790,
+              "tie_share": 0.2108
+            }
+          },
+          "decisions": 2790,
+          "definitions": {
+            "D0_observe_family": {
+              "belief": {
+                "co_optimal": {
+                  "count": 640,
+                  "share": 0.2294
+                },
+                "strictly_best": {
+                  "count": 640,
+                  "share": 0.2296
+                }
+              },
+              "belief_minus_hindsight": {
+                "hi": 0.2346,
+                "lo": 0.1904,
+                "n_boot": 2000,
+                "n_clusters": 465,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.2124
+              },
+              "decisions": 2790,
+              "hindsight": {
+                "co_optimal": {
+                  "count": 48,
+                  "share": 0.0172
+                },
+                "strictly_best": {
+                  "count": 48,
+                  "share": 0.0172
+                }
+              },
+              "members": [
+                "trace_link_pair",
+                "verify_sensor_pair",
+                "other_observe"
+              ],
+              "with_both": 2787
+            },
+            "D1_diagnostic": {
+              "belief": {
+                "co_optimal": {
+                  "count": 619,
+                  "share": 0.2219
+                },
+                "strictly_best": {
+                  "count": 618,
+                  "share": 0.2224
+                }
+              },
+              "belief_minus_hindsight": {
+                "hi": 0.231,
+                "lo": 0.1872,
+                "n_boot": 2000,
+                "n_clusters": 465,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.2091
+              },
+              "decisions": 2790,
+              "hindsight": {
+                "co_optimal": {
+                  "count": 38,
+                  "share": 0.0136
+                },
+                "strictly_best": {
+                  "count": 37,
+                  "share": 0.0133
+                }
+              },
+              "members": [
+                "trace_link_pair",
+                "verify_sensor_pair",
+                "escalate"
+              ],
+              "with_both": 2779
+            },
+            "D2_diagnostic_or_backup_probe": {
+              "belief": {
+                "co_optimal": {
+                  "count": 797,
+                  "share": 0.2857
+                },
+                "strictly_best": {
+                  "count": 796,
+                  "share": 0.2864
+                }
+              },
+              "belief_minus_hindsight": {
+                "hi": 0.2345,
+                "lo": 0.1904,
+                "n_boot": 2000,
+                "n_clusters": 465,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.2127
+              },
+              "decisions": 2790,
+              "hindsight": {
+                "co_optimal": {
+                  "count": 206,
+                  "share": 0.0738
+                },
+                "strictly_best": {
+                  "count": 205,
+                  "share": 0.0738
+                }
+              },
+              "members": [
+                "trace_link_pair",
+                "verify_sensor_pair",
+                "escalate",
+                "switch_to_backup_pair"
+              ],
+              "with_both": 2779
+            },
+            "D3_with_cause_revealing_repairs": {
+              "belief": {
+                "co_optimal": {
+                  "count": 1418,
+                  "share": 0.5082
+                },
+                "strictly_best": {
+                  "count": 1415,
+                  "share": 0.5092
+                }
+              },
+              "belief_minus_hindsight": {
+                "hi": 0.0762,
+                "lo": 0.032,
+                "n_boot": 2000,
+                "n_clusters": 465,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.054
+              },
+              "decisions": 2790,
+              "hindsight": {
+                "co_optimal": {
+                  "count": 1352,
+                  "share": 0.4846
+                },
+                "strictly_best": {
+                  "count": 1265,
+                  "share": 0.4552
+                }
+              },
+              "members": [
+                "trace_link_pair",
+                "verify_sensor_pair",
+                "escalate",
+                "switch_to_backup_pair",
+                "repair_pair"
+              ],
+              "with_both": 2779
+            }
+          },
+          "episodes": 465,
+          "info_classes": {
+            "belief": {
+              "classes": {
+                "backup_probe": {
+                  "candidate": 0.2867,
+                  "co_optimal": 0.0638,
+                  "unique_argmin": 0.0638
+                },
+                "cause_revealing_repair": {
+                  "candidate": 0.9591,
+                  "co_optimal": 0.2226,
+                  "unique_argmin": 0.2219
+                },
+                "diagnostic": {
+                  "candidate": 0.9961,
+                  "co_optimal": 0.2219,
+                  "unique_argmin": 0.2215
+                },
+                "observe_no_pair_info": {
+                  "candidate": 0.9713,
+                  "co_optimal": 0.0079,
+                  "unique_argmin": 0.0075
+                },
+                "response_no_pair_info": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.1538,
+                  "unique_argmin": 0.1516
+                },
+                "wait": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.3315,
+                  "unique_argmin": 0.1882
+                }
+              },
+              "cross_class_tie_share": 0.0014,
+              "n": 2790,
+              "tie_share": 0.1455
+            },
+            "hindsight": {
+              "classes": {
+                "backup_probe": {
+                  "candidate": 0.2867,
+                  "co_optimal": 0.0602,
+                  "unique_argmin": 0.0602
+                },
+                "cause_revealing_repair": {
+                  "candidate": 0.9591,
+                  "co_optimal": 0.4108,
+                  "unique_argmin": 0.3792
+                },
+                "diagnostic": {
+                  "candidate": 0.9961,
+                  "co_optimal": 0.0136,
+                  "unique_argmin": 0.0133
+                },
+                "observe_no_pair_info": {
+                  "candidate": 0.9713,
+                  "co_optimal": 0.0039,
+                  "unique_argmin": 0.0036
+                },
+                "response_no_pair_info": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.1556,
+                  "unique_argmin": 0.153
+                },
+                "wait": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.3875,
+                  "unique_argmin": 0.1799
+                }
+              },
+              "cross_class_tie_share": 0.0315,
+              "n": 2790,
+              "tie_share": 0.2108
+            }
+          },
+          "information_tools": {
+            "escalate": {
+              "belief_regret": {
+                "max": 104.5328,
+                "mean": 12.8104,
+                "median": 4.5891,
+                "min": 3.5,
+                "n": 2754,
+                "q05": 4.0,
+                "q25": 4.0057,
+                "q75": 9.19,
+                "q95": 54.3969,
+                "std": 18.0914
+              },
+              "candidate_decisions": 2754,
+              "co_optimal": {
+                "belief": 0,
+                "hindsight": 0
+              },
+              "minus_historian": {
+                "effort_difference": 3.96,
+                "true_world": {
+                  "max": 53.3714,
+                  "mean": 4.2117,
+                  "median": 3.96,
+                  "min": 1.96,
+                  "n": 2595,
+                  "q05": 3.9322,
+                  "q25": 3.96,
+                  "q75": 3.96,
+                  "q95": 4.057,
+                  "std": 2.591,
+                  "within_effort_share": 0.8066
+                },
+                "twin_world": {
+                  "max": 28.9504,
+                  "mean": 4.2143,
+                  "median": 3.96,
+                  "min": 1.9586,
+                  "n": 2595,
+                  "q05": 3.9347,
+                  "q25": 3.96,
+                  "q75": 3.96,
+                  "q95": 4.0454,
+                  "std": 2.4598,
+                  "within_effort_share": 0.8189
+                },
+                "within_effort_both_worlds_share": 0.7703
+              }
+            },
+            "no_trace_candidate": {
+              "count": 105,
+              "decisions": 2790,
+              "share": 0.0376
+            },
+            "trace_link_pair": {
+              "belief_regret": {
+                "max": 99.931,
+                "mean": 3.8387,
+                "median": 0.2063,
+                "min": 0.0,
+                "n": 2685,
+                "q05": 0.0,
+                "q25": 0.0662,
+                "q75": 1.4558,
+                "q95": 23.0526,
+                "std": 12.5653
+              },
+              "candidate_decisions": 2685,
+              "co_optimal": {
+                "belief": 619,
+                "hindsight": 38
+              },
+              "minus_historian": {
+                "true_world": {
+                  "max": 26.5184,
+                  "mean": -4.9478,
+                  "median": 0.16,
+                  "min": -101.9351,
+                  "n": 2595,
+                  "q05": -49.3395,
+                  "q25": 0.0593,
+                  "q75": 0.16,
+                  "q95": 0.66,
+                  "std": 16.5251
+                },
+                "twin_world": {
+                  "max": 48.612,
+                  "mean": -9.4207,
+                  "median": 0.16,
+                  "min": -102.5566,
+                  "n": 2595,
+                  "q05": -72.6598,
+                  "q25": -1.0725,
+                  "q75": 0.16,
+                  "q95": 0.9414,
+                  "std": 22.8564
+                }
+              }
+            },
+            "trace_share_of_observe_co_optimal": {
+              "observe_co_optimal": 640,
+              "share": 0.9672,
+              "trace_co_optimal": 619
+            },
+            "verify_sensor_pair": {
+              "belief_regret": {
+                "max": 101.5328,
+                "mean": 10.1699,
+                "median": 1.6613,
+                "min": 0.96,
+                "n": 2595,
+                "q05": 1.0,
+                "q25": 1.0163,
+                "q75": 6.7987,
+                "q95": 52.9411,
+                "std": 18.4737
+              },
+              "candidate_decisions": 2595,
+              "co_optimal": {
+                "belief": 0,
+                "hindsight": 0
+              },
+              "minus_historian": {
+                "effort_difference": 0.96,
+                "true_world": {
+                  "max": 50.3714,
+                  "mean": 1.2111,
+                  "median": 0.96,
+                  "min": -1.04,
+                  "n": 2595,
+                  "q05": 0.9327,
+                  "q25": 0.96,
+                  "q75": 0.96,
+                  "q95": 1.048,
+                  "std": 2.5909,
+                  "within_effort_share": 0.8096
+                },
+                "twin_world": {
+                  "max": 25.9504,
+                  "mean": 1.2148,
+                  "median": 0.96,
+                  "min": -1.0414,
+                  "n": 2595,
+                  "q05": 0.935,
+                  "q25": 0.96,
+                  "q75": 0.96,
+                  "q95": 1.0286,
+                  "std": 2.4596,
+                  "within_effort_share": 0.8208
+                },
+                "within_effort_both_worlds_share": 0.7734
+              }
+            }
+          }
+        },
+        "backup_available": {
+          "classes": {
+            "belief": {
+              "classes": {
+                "escalate": {
+                  "candidate": 0.9854,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "monitor": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.3683,
+                  "unique_argmin": 0.2511
+                },
+                "other": {
+                  "candidate": 0.9156,
+                  "co_optimal": 0.0087,
+                  "unique_argmin": 0.0073
+                },
+                "other_observe": {
+                  "candidate": 0.9512,
+                  "co_optimal": 0.0095,
+                  "unique_argmin": 0.0087
+                },
+                "recalibrate_sensor": {
+                  "candidate": 0.941,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "repair_pair": {
+                  "candidate": 0.9665,
+                  "co_optimal": 0.1856,
+                  "unique_argmin": 0.1856
+                },
+                "restore_primary": {
+                  "candidate": 0.3763,
+                  "co_optimal": 0.0975,
+                  "unique_argmin": 0.0975
+                },
+                "set_production": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.0852,
+                  "unique_argmin": 0.0852
+                },
+                "switch_to_backup_pair": {
+                  "candidate": 0.5822,
+                  "co_optimal": 0.1295,
+                  "unique_argmin": 0.1295
+                },
+                "trace_link_pair": {
+                  "candidate": 0.9731,
+                  "co_optimal": 0.1164,
+                  "unique_argmin": 0.1157
+                },
+                "verify_sensor_pair": {
+                  "candidate": 0.917,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                }
+              },
+              "cross_class_tie_share": 0.0007,
+              "n": 1374,
+              "tie_share": 0.1194
+            },
+            "hindsight": {
+              "classes": {
+                "escalate": {
+                  "candidate": 0.9854,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "monitor": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.3937,
+                  "unique_argmin": 0.2344
+                },
+                "other": {
+                  "candidate": 0.9156,
+                  "co_optimal": 0.0087,
+                  "unique_argmin": 0.0066
+                },
+                "other_observe": {
+                  "candidate": 0.9512,
+                  "co_optimal": 0.0029,
+                  "unique_argmin": 0.0022
+                },
+                "recalibrate_sensor": {
+                  "candidate": 0.941,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "repair_pair": {
+                  "candidate": 0.9665,
+                  "co_optimal": 0.2868,
+                  "unique_argmin": 0.2853
+                },
+                "restore_primary": {
+                  "candidate": 0.3763,
+                  "co_optimal": 0.1055,
+                  "unique_argmin": 0.1055
+                },
+                "set_production": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.067,
+                  "unique_argmin": 0.067
+                },
+                "switch_to_backup_pair": {
+                  "candidate": 0.5822,
+                  "co_optimal": 0.1223,
+                  "unique_argmin": 0.1223
+                },
+                "trace_link_pair": {
+                  "candidate": 0.9731,
+                  "co_optimal": 0.0146,
+                  "unique_argmin": 0.0138
+                },
+                "verify_sensor_pair": {
+                  "candidate": 0.917,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                }
+              },
+              "cross_class_tie_share": 0.0015,
+              "n": 1374,
+              "tie_share": 0.163
+            }
+          },
+          "decisions": 1374,
+          "definitions": {
+            "D0_observe_family": {
+              "belief": {
+                "co_optimal": {
+                  "count": 172,
+                  "share": 0.1252
+                },
+                "strictly_best": {
+                  "count": 172,
+                  "share": 0.1254
+                }
+              },
+              "belief_minus_hindsight": {
+                "hi": 0.1256,
+                "lo": 0.0918,
+                "n_boot": 2000,
+                "n_clusters": 229,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.1086
+              },
+              "decisions": 1374,
+              "hindsight": {
+                "co_optimal": {
+                  "count": 23,
+                  "share": 0.0167
+                },
+                "strictly_best": {
+                  "count": 23,
+                  "share": 0.0168
+                }
+              },
+              "members": [
+                "trace_link_pair",
+                "verify_sensor_pair",
+                "other_observe"
+              ],
+              "with_both": 1372
+            },
+            "D1_diagnostic": {
+              "belief": {
+                "co_optimal": {
+                  "count": 160,
+                  "share": 0.1164
+                },
+                "strictly_best": {
+                  "count": 159,
+                  "share": 0.1161
+                }
+              },
+              "belief_minus_hindsight": {
+                "hi": 0.1187,
+                "lo": 0.086,
+                "n_boot": 2000,
+                "n_clusters": 229,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.1023
+              },
+              "decisions": 1374,
+              "hindsight": {
+                "co_optimal": {
+                  "count": 20,
+                  "share": 0.0146
+                },
+                "strictly_best": {
+                  "count": 19,
+                  "share": 0.0139
+                }
+              },
+              "members": [
+                "trace_link_pair",
+                "verify_sensor_pair",
+                "escalate"
+              ],
+              "with_both": 1369
+            },
+            "D2_diagnostic_or_backup_probe": {
+              "belief": {
+                "co_optimal": {
+                  "count": 338,
+                  "share": 0.246
+                },
+                "strictly_best": {
+                  "count": 337,
+                  "share": 0.2462
+                }
+              },
+              "belief_minus_hindsight": {
+                "hi": 0.1281,
+                "lo": 0.0905,
+                "n_boot": 2000,
+                "n_clusters": 229,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.1096
+              },
+              "decisions": 1374,
+              "hindsight": {
+                "co_optimal": {
+                  "count": 188,
+                  "share": 0.1368
+                },
+                "strictly_best": {
+                  "count": 187,
+                  "share": 0.1366
+                }
+              },
+              "members": [
+                "trace_link_pair",
+                "verify_sensor_pair",
+                "escalate",
+                "switch_to_backup_pair"
+              ],
+              "with_both": 1369
+            },
+            "D3_with_cause_revealing_repairs": {
+              "belief": {
+                "co_optimal": {
+                  "count": 593,
+                  "share": 0.4316
+                },
+                "strictly_best": {
+                  "count": 592,
+                  "share": 0.4324
+                }
+              },
+              "belief_minus_hindsight": {
+                "hi": 0.0307,
+                "lo": -0.0131,
+                "n_boot": 2000,
+                "n_clusters": 229,
+                "n_valid": 2000,
+                "p_two_sided": 0.446,
+                "point": 0.0088
+              },
+              "decisions": 1374,
+              "hindsight": {
+                "co_optimal": {
+                  "count": 582,
+                  "share": 0.4236
+                },
+                "strictly_best": {
+                  "count": 580,
+                  "share": 0.4237
+                }
+              },
+              "members": [
+                "trace_link_pair",
+                "verify_sensor_pair",
+                "escalate",
+                "switch_to_backup_pair",
+                "repair_pair"
+              ],
+              "with_both": 1369
+            }
+          },
+          "episodes": 229,
+          "info_classes": {
+            "belief": {
+              "classes": {
+                "backup_probe": {
+                  "candidate": 0.5822,
+                  "co_optimal": 0.1295,
+                  "unique_argmin": 0.1295
+                },
+                "cause_revealing_repair": {
+                  "candidate": 0.9665,
+                  "co_optimal": 0.1856,
+                  "unique_argmin": 0.1856
+                },
+                "diagnostic": {
+                  "candidate": 0.9964,
+                  "co_optimal": 0.1164,
+                  "unique_argmin": 0.1157
+                },
+                "observe_no_pair_info": {
+                  "candidate": 0.9512,
+                  "co_optimal": 0.0095,
+                  "unique_argmin": 0.0087
+                },
+                "response_no_pair_info": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.1914,
+                  "unique_argmin": 0.19
+                },
+                "wait": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.3683,
+                  "unique_argmin": 0.2511
+                }
+              },
+              "cross_class_tie_share": 0.0007,
+              "n": 1374,
+              "tie_share": 0.1194
+            },
+            "hindsight": {
+              "classes": {
+                "backup_probe": {
+                  "candidate": 0.5822,
+                  "co_optimal": 0.1223,
+                  "unique_argmin": 0.1223
+                },
+                "cause_revealing_repair": {
+                  "candidate": 0.9665,
+                  "co_optimal": 0.2868,
+                  "unique_argmin": 0.2853
+                },
+                "diagnostic": {
+                  "candidate": 0.9964,
+                  "co_optimal": 0.0146,
+                  "unique_argmin": 0.0138
+                },
+                "observe_no_pair_info": {
+                  "candidate": 0.9512,
+                  "co_optimal": 0.0029,
+                  "unique_argmin": 0.0022
+                },
+                "response_no_pair_info": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.1812,
+                  "unique_argmin": 0.179
+                },
+                "wait": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.3937,
+                  "unique_argmin": 0.2344
+                }
+              },
+              "cross_class_tie_share": 0.0015,
+              "n": 1374,
+              "tie_share": 0.163
+            }
+          },
+          "information_tools": {
+            "escalate": {
+              "belief_regret": {
+                "max": 104.401,
+                "mean": 7.776,
+                "median": 4.6045,
+                "min": 3.5787,
+                "n": 1354,
+                "q05": 4.0,
+                "q25": 4.078,
+                "q75": 5.6802,
+                "q95": 23.5246,
+                "std": 11.1754
+              },
+              "candidate_decisions": 1354,
+              "co_optimal": {
+                "belief": 0,
+                "hindsight": 0
+              },
+              "minus_historian": {
+                "effort_difference": 3.96,
+                "true_world": {
+                  "max": 47.9751,
+                  "mean": 4.1214,
+                  "median": 3.96,
+                  "min": 1.96,
+                  "n": 1260,
+                  "q05": 3.9241,
+                  "q25": 3.9547,
+                  "q75": 3.96,
+                  "q95": 4.0479,
+                  "std": 2.1393,
+                  "within_effort_share": 0.7079
+                },
+                "twin_world": {
+                  "max": 28.2319,
+                  "mean": 4.0294,
+                  "median": 3.96,
+                  "min": 1.9586,
+                  "n": 1260,
+                  "q05": 3.923,
+                  "q25": 3.9564,
+                  "q75": 3.96,
+                  "q95": 3.9964,
+                  "std": 1.3463,
+                  "within_effort_share": 0.7389
+                },
+                "within_effort_both_worlds_share": 0.6865
+              }
+            },
+            "no_trace_candidate": {
+              "count": 37,
+              "decisions": 1374,
+              "share": 0.0269
+            },
+            "trace_link_pair": {
+              "belief_regret": {
+                "max": 99.8278,
+                "mean": 3.4442,
+                "median": 0.666,
+                "min": 0.0,
+                "n": 1337,
+                "q05": 0.0,
+                "q25": 0.2,
+                "q75": 1.7732,
+                "q95": 17.9759,
+                "std": 10.9018
+              },
+              "candidate_decisions": 1337,
+              "co_optimal": {
+                "belief": 160,
+                "hindsight": 20
+              },
+              "minus_historian": {
+                "true_world": {
+                  "max": 25.3198,
+                  "mean": -0.3974,
+                  "median": 0.16,
+                  "min": -76.1925,
+                  "n": 1260,
+                  "q05": -1.2293,
+                  "q25": 0.1404,
+                  "q75": 0.16,
+                  "q95": 0.6162,
+                  "std": 4.7919
+                },
+                "twin_world": {
+                  "max": 25.4784,
+                  "mean": -3.2323,
+                  "median": 0.16,
+                  "min": -102.0109,
+                  "n": 1260,
+                  "q05": -24.8285,
+                  "q25": -0.1359,
+                  "q75": 0.163,
+                  "q95": 1.5124,
+                  "std": 14.3121
+                }
+              }
+            },
+            "trace_share_of_observe_co_optimal": {
+              "observe_co_optimal": 172,
+              "share": 0.9302,
+              "trace_co_optimal": 160
+            },
+            "verify_sensor_pair": {
+              "belief_regret": {
+                "max": 101.401,
+                "mean": 4.9381,
+                "median": 1.6861,
+                "min": 0.96,
+                "n": 1260,
+                "q05": 1.0,
+                "q25": 1.1009,
+                "q75": 2.6943,
+                "q95": 21.5473,
+                "std": 11.4623
+              },
+              "candidate_decisions": 1260,
+              "co_optimal": {
+                "belief": 0,
+                "hindsight": 0
+              },
+              "minus_historian": {
+                "effort_difference": 0.96,
+                "true_world": {
+                  "max": 44.9751,
+                  "mean": 1.1194,
+                  "median": 0.96,
+                  "min": -1.04,
+                  "n": 1260,
+                  "q05": 0.9244,
+                  "q25": 0.9547,
+                  "q75": 0.96,
+                  "q95": 1.0363,
+                  "std": 2.1391,
+                  "within_effort_share": 0.7127
+                },
+                "twin_world": {
+                  "max": 25.2319,
+                  "mean": 1.0302,
+                  "median": 0.96,
+                  "min": -1.0414,
+                  "n": 1260,
+                  "q05": 0.9231,
+                  "q25": 0.9558,
+                  "q75": 0.96,
+                  "q95": 0.988,
+                  "std": 1.3458,
+                  "within_effort_share": 0.7405
+                },
+                "within_effort_both_worlds_share": 0.6913
+              }
+            }
+          }
+        },
+        "backup_unavailable": {
+          "classes": {
+            "belief": {
+              "classes": {
+                "escalate": {
+                  "candidate": 0.9887,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "monitor": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.2959,
+                  "unique_argmin": 0.1271
+                },
+                "other": {
+                  "candidate": 0.9746,
+                  "co_optimal": 0.024,
+                  "unique_argmin": 0.0219
+                },
+                "other_observe": {
+                  "candidate": 0.9908,
+                  "co_optimal": 0.0064,
+                  "unique_argmin": 0.0064
+                },
+                "recalibrate_sensor": {
+                  "candidate": 0.9859,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "repair_pair": {
+                  "candidate": 0.952,
+                  "co_optimal": 0.2585,
+                  "unique_argmin": 0.2571
+                },
+                "restore_primary": {
+                  "candidate": 0.0,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "set_production": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.0932,
+                  "unique_argmin": 0.0925
+                },
+                "switch_to_backup_pair": {
+                  "candidate": 0.0,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "trace_link_pair": {
+                  "candidate": 0.952,
+                  "co_optimal": 0.3242,
+                  "unique_argmin": 0.3242
+                },
+                "verify_sensor_pair": {
+                  "candidate": 0.9428,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                }
+              },
+              "cross_class_tie_share": 0.0021,
+              "n": 1416,
+              "tie_share": 0.1709
+            },
+            "hindsight": {
+              "classes": {
+                "escalate": {
+                  "candidate": 0.9887,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "monitor": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.3814,
+                  "unique_argmin": 0.1271
+                },
+                "other": {
+                  "candidate": 0.9746,
+                  "co_optimal": 0.0297,
+                  "unique_argmin": 0.0275
+                },
+                "other_observe": {
+                  "candidate": 0.9908,
+                  "co_optimal": 0.0049,
+                  "unique_argmin": 0.0049
+                },
+                "recalibrate_sensor": {
+                  "candidate": 0.9859,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "repair_pair": {
+                  "candidate": 0.952,
+                  "co_optimal": 0.5311,
+                  "unique_argmin": 0.4703
+                },
+                "restore_primary": {
+                  "candidate": 0.0,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "set_production": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.101,
+                  "unique_argmin": 0.1003
+                },
+                "switch_to_backup_pair": {
+                  "candidate": 0.0,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "trace_link_pair": {
+                  "candidate": 0.952,
+                  "co_optimal": 0.0127,
+                  "unique_argmin": 0.0127
+                },
+                "verify_sensor_pair": {
+                  "candidate": 0.9428,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                }
+              },
+              "cross_class_tie_share": 0.0607,
+              "n": 1416,
+              "tie_share": 0.2571
+            }
+          },
+          "decisions": 1416,
+          "definitions": {
+            "D0_observe_family": {
+              "belief": {
+                "co_optimal": {
+                  "count": 468,
+                  "share": 0.3305
+                },
+                "strictly_best": {
+                  "count": 468,
+                  "share": 0.3307
+                }
+              },
+              "belief_minus_hindsight": {
+                "hi": 0.3505,
+                "lo": 0.2789,
+                "n_boot": 2000,
+                "n_clusters": 236,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.3131
+              },
+              "decisions": 1416,
+              "hindsight": {
+                "co_optimal": {
+                  "count": 25,
+                  "share": 0.0177
+                },
+                "strictly_best": {
+                  "count": 25,
+                  "share": 0.0177
+                }
+              },
+              "members": [
+                "trace_link_pair",
+                "verify_sensor_pair",
+                "other_observe"
+              ],
+              "with_both": 1415
+            },
+            "D1_diagnostic": {
+              "belief": {
+                "co_optimal": {
+                  "count": 459,
+                  "share": 0.3242
+                },
+                "strictly_best": {
+                  "count": 459,
+                  "share": 0.3255
+                }
+              },
+              "belief_minus_hindsight": {
+                "hi": 0.3506,
+                "lo": 0.2789,
+                "n_boot": 2000,
+                "n_clusters": 236,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.3128
+              },
+              "decisions": 1416,
+              "hindsight": {
+                "co_optimal": {
+                  "count": 18,
+                  "share": 0.0127
+                },
+                "strictly_best": {
+                  "count": 18,
+                  "share": 0.0128
+                }
+              },
+              "members": [
+                "trace_link_pair",
+                "verify_sensor_pair",
+                "escalate"
+              ],
+              "with_both": 1410
+            },
+            "D2_diagnostic_or_backup_probe": {
+              "belief": {
+                "co_optimal": {
+                  "count": 459,
+                  "share": 0.3242
+                },
+                "strictly_best": {
+                  "count": 459,
+                  "share": 0.3255
+                }
+              },
+              "belief_minus_hindsight": {
+                "hi": 0.3506,
+                "lo": 0.2789,
+                "n_boot": 2000,
+                "n_clusters": 236,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.3128
+              },
+              "decisions": 1416,
+              "hindsight": {
+                "co_optimal": {
+                  "count": 18,
+                  "share": 0.0127
+                },
+                "strictly_best": {
+                  "count": 18,
+                  "share": 0.0128
+                }
+              },
+              "members": [
+                "trace_link_pair",
+                "verify_sensor_pair",
+                "escalate",
+                "switch_to_backup_pair"
+              ],
+              "with_both": 1410
+            },
+            "D3_with_cause_revealing_repairs": {
+              "belief": {
+                "co_optimal": {
+                  "count": 825,
+                  "share": 0.5826
+                },
+                "strictly_best": {
+                  "count": 823,
+                  "share": 0.5837
+                }
+              },
+              "belief_minus_hindsight": {
+                "hi": 0.1378,
+                "lo": 0.0596,
+                "n_boot": 2000,
+                "n_clusters": 236,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": 0.0979
+              },
+              "decisions": 1416,
+              "hindsight": {
+                "co_optimal": {
+                  "count": 770,
+                  "share": 0.5438
+                },
+                "strictly_best": {
+                  "count": 685,
+                  "share": 0.4858
+                }
+              },
+              "members": [
+                "trace_link_pair",
+                "verify_sensor_pair",
+                "escalate",
+                "switch_to_backup_pair",
+                "repair_pair"
+              ],
+              "with_both": 1410
+            }
+          },
+          "episodes": 236,
+          "info_classes": {
+            "belief": {
+              "classes": {
+                "backup_probe": {
+                  "candidate": 0.0,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "cause_revealing_repair": {
+                  "candidate": 0.952,
+                  "co_optimal": 0.2585,
+                  "unique_argmin": 0.2571
+                },
+                "diagnostic": {
+                  "candidate": 0.9958,
+                  "co_optimal": 0.3242,
+                  "unique_argmin": 0.3242
+                },
+                "observe_no_pair_info": {
+                  "candidate": 0.9908,
+                  "co_optimal": 0.0064,
+                  "unique_argmin": 0.0064
+                },
+                "response_no_pair_info": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.1172,
+                  "unique_argmin": 0.1144
+                },
+                "wait": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.2959,
+                  "unique_argmin": 0.1271
+                }
+              },
+              "cross_class_tie_share": 0.0021,
+              "n": 1416,
+              "tie_share": 0.1709
+            },
+            "hindsight": {
+              "classes": {
+                "backup_probe": {
+                  "candidate": 0.0,
+                  "co_optimal": 0.0,
+                  "unique_argmin": 0.0
+                },
+                "cause_revealing_repair": {
+                  "candidate": 0.952,
+                  "co_optimal": 0.5311,
+                  "unique_argmin": 0.4703
+                },
+                "diagnostic": {
+                  "candidate": 0.9958,
+                  "co_optimal": 0.0127,
+                  "unique_argmin": 0.0127
+                },
+                "observe_no_pair_info": {
+                  "candidate": 0.9908,
+                  "co_optimal": 0.0049,
+                  "unique_argmin": 0.0049
+                },
+                "response_no_pair_info": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.1306,
+                  "unique_argmin": 0.1278
+                },
+                "wait": {
+                  "candidate": 1.0,
+                  "co_optimal": 0.3814,
+                  "unique_argmin": 0.1271
+                }
+              },
+              "cross_class_tie_share": 0.0607,
+              "n": 1416,
+              "tie_share": 0.2571
+            }
+          },
+          "information_tools": {
+            "escalate": {
+              "belief_regret": {
+                "max": 104.5328,
+                "mean": 17.6793,
+                "median": 4.5343,
+                "min": 3.5,
+                "n": 1400,
+                "q05": 4.0,
+                "q25": 4.0006,
+                "q75": 23.8852,
+                "q95": 65.8425,
+                "std": 21.7908
+              },
+              "candidate_decisions": 1400,
+              "co_optimal": {
+                "belief": 0,
+                "hindsight": 0
+              },
+              "minus_historian": {
+                "effort_difference": 3.96,
+                "true_world": {
+                  "max": 53.3714,
+                  "mean": 4.2969,
+                  "median": 3.96,
+                  "min": 1.96,
+                  "n": 1335,
+                  "q05": 3.9593,
+                  "q25": 3.96,
+                  "q75": 3.96,
+                  "q95": 4.1195,
+                  "std": 2.9521,
+                  "within_effort_share": 0.8996
+                },
+                "twin_world": {
+                  "max": 28.9504,
+                  "mean": 4.3889,
+                  "median": 3.96,
+                  "min": 1.96,
+                  "n": 1335,
+                  "q05": 3.9594,
+                  "q25": 3.96,
+                  "q75": 3.96,
+                  "q95": 4.1565,
+                  "std": 3.1604,
+                  "within_effort_share": 0.8944
+                },
+                "within_effort_both_worlds_share": 0.8494
+              }
+            },
+            "no_trace_candidate": {
+              "count": 68,
+              "decisions": 1416,
+              "share": 0.048
+            },
+            "trace_link_pair": {
+              "belief_regret": {
+                "max": 99.931,
+                "mean": 4.23,
+                "median": 0.2,
+                "min": 0.0,
+                "n": 1348,
+                "q05": 0.0,
+                "q25": 0.0,
+                "q75": 0.3673,
+                "q95": 24.3648,
+                "std": 14.0106
+              },
+              "candidate_decisions": 1348,
+              "co_optimal": {
+                "belief": 459,
+                "hindsight": 18
+              },
+              "minus_historian": {
+                "true_world": {
+                  "max": 26.5184,
+                  "mean": -9.2426,
+                  "median": 0.16,
+                  "min": -101.9351,
+                  "n": 1335,
+                  "q05": -53.5274,
+                  "q25": -0.3468,
+                  "q75": 0.16,
+                  "q95": 0.66,
+                  "std": 21.7061
+                },
+                "twin_world": {
+                  "max": 48.612,
+                  "mean": -15.2614,
+                  "median": 0.1586,
+                  "min": -102.5566,
+                  "n": 1335,
+                  "q05": -75.0001,
+                  "q25": -24.853,
+                  "q75": 0.16,
+                  "q95": 0.66,
+                  "std": 27.4207
+                }
+              }
+            },
+            "trace_share_of_observe_co_optimal": {
+              "observe_co_optimal": 468,
+              "share": 0.9808,
+              "trace_co_optimal": 459
+            },
+            "verify_sensor_pair": {
+              "belief_regret": {
+                "max": 101.5328,
+                "mean": 15.1078,
+                "median": 1.6382,
+                "min": 0.96,
+                "n": 1335,
+                "q05": 1.0,
+                "q25": 1.001,
+                "q75": 21.6897,
+                "q95": 64.01,
+                "std": 22.1171
+              },
+              "candidate_decisions": 1335,
+              "co_optimal": {
+                "belief": 0,
+                "hindsight": 0
+              },
+              "minus_historian": {
+                "effort_difference": 0.96,
+                "true_world": {
+                  "max": 50.3714,
+                  "mean": 1.2976,
+                  "median": 0.96,
+                  "min": -1.04,
+                  "n": 1335,
+                  "q05": 0.9593,
+                  "q25": 0.96,
+                  "q75": 0.96,
+                  "q95": 1.1195,
+                  "std": 2.9519,
+                  "within_effort_share": 0.9011
+                },
+                "twin_world": {
+                  "max": 25.9504,
+                  "mean": 1.3889,
+                  "median": 0.96,
+                  "min": -1.04,
+                  "n": 1335,
+                  "q05": 0.9594,
+                  "q25": 0.96,
+                  "q75": 0.96,
+                  "q95": 1.1259,
+                  "std": 3.1602,
+                  "within_effort_share": 0.8966
+                },
+                "within_effort_both_worlds_share": 0.8509
+              }
+            }
+          }
+        }
+      },
+      "ambiguous": {
+        "belief_decisions": 2790,
+        "belief_fallback": 0,
+        "decisions": 2790,
+        "episodes": 465,
+        "share_of_decisions": 0.5819
+      },
+      "calibration": {
+        "prior_only_brier": 0.2353,
+        "since_onset_tercile_edges_min": [
+          5.2782,
+          9.4864
+        ],
+        "subgroup_ece_range": {
+          "all_below_null_q95": true,
+          "max": 0.0219,
+          "max_subgroup": "index_2",
+          "min": 0.0085,
+          "min_subgroup": "index_5",
+          "subgroups": [
+            "backup_available",
+            "backup_unavailable",
+            "index_0",
+            "index_1",
+            "index_2",
+            "index_3",
+            "index_4",
+            "index_5",
+            "since_onset_t1",
+            "since_onset_t2",
+            "since_onset_t3"
+          ]
+        },
+        "subgroups": {
+          "all": {
+            "below_null_q95": true,
+            "bins": [
+              {
+                "bin": [
+                  0.0,
+                  0.1
+                ],
+                "link_frequency": 0.0036,
+                "mean_p_link": 0.01,
+                "n": 844
+              },
+              {
+                "bin": [
+                  0.1,
+                  0.2
+                ],
+                "link_frequency": 0.1688,
+                "mean_p_link": 0.158,
+                "n": 154
+              },
+              {
+                "bin": [
+                  0.2,
+                  0.3
+                ],
+                "link_frequency": 0.276,
+                "mean_p_link": 0.2501,
+                "n": 384
+              },
+              {
+                "bin": [
+                  0.3,
+                  0.4
+                ],
+                "link_frequency": 0.3129,
+                "mean_p_link": 0.3286,
+                "n": 700
+              },
+              {
+                "bin": [
+                  0.4,
+                  0.5
+                ],
+                "link_frequency": 0.0,
+                "mean_p_link": 0.4898,
+                "n": 1
+              },
+              {
+                "bin": [
+                  0.5,
+                  0.6
+                ],
+                "link_frequency": 1.0,
+                "mean_p_link": 0.5913,
+                "n": 1
+              },
+              {
+                "bin": [
+                  0.6,
+                  0.7
+                ],
+                "link_frequency": 1.0,
+                "mean_p_link": 0.6599,
+                "n": 3
+              },
+              {
+                "bin": [
+                  0.7,
+                  0.8
+                ],
+                "link_frequency": null,
+                "mean_p_link": null,
+                "n": 0
+              },
+              {
+                "bin": [
+                  0.8,
+                  0.9
+                ],
+                "link_frequency": 0.9474,
+                "mean_p_link": 0.8842,
+                "n": 19
+              },
+              {
+                "bin": [
+                  0.9,
+                  1.0
+                ],
+                "link_frequency": 0.9942,
+                "mean_p_link": 0.9826,
+                "n": 684
+              }
+            ],
+            "brier": 0.0925,
+            "decisions": 2790,
+            "ece": 0.014,
+            "episodes": 465,
+            "null_ece_mean": 0.0101,
+            "null_ece_q95": 0.0161
+          },
+          "backup_available": {
+            "below_null_q95": true,
+            "brier": 0.0707,
+            "decisions": 1374,
+            "ece": 0.0149,
+            "episodes": 229,
+            "null_ece_mean": 0.0123,
+            "null_ece_q95": 0.0209
+          },
+          "backup_unavailable": {
+            "below_null_q95": true,
+            "brier": 0.1136,
+            "decisions": 1416,
+            "ece": 0.0162,
+            "episodes": 236,
+            "null_ece_mean": 0.0145,
+            "null_ece_q95": 0.0245
+          },
+          "index_0": {
+            "below_null_q95": true,
+            "brier": 0.1915,
+            "decisions": 465,
+            "ece": 0.0168,
+            "episodes": 465,
+            "null_ece_mean": 0.0203,
+            "null_ece_q95": 0.0437
+          },
+          "index_1": {
+            "below_null_q95": true,
+            "brier": 0.146,
+            "decisions": 465,
+            "ece": 0.0176,
+            "episodes": 465,
+            "null_ece_mean": 0.0254,
+            "null_ece_q95": 0.044
+          },
+          "index_2": {
+            "below_null_q95": true,
+            "brier": 0.0892,
+            "decisions": 465,
+            "ece": 0.0219,
+            "episodes": 465,
+            "null_ece_mean": 0.0213,
+            "null_ece_q95": 0.0362
+          },
+          "index_3": {
+            "below_null_q95": true,
+            "brier": 0.0582,
+            "decisions": 465,
+            "ece": 0.0105,
+            "episodes": 465,
+            "null_ece_mean": 0.0191,
+            "null_ece_q95": 0.0319
+          },
+          "index_4": {
+            "below_null_q95": true,
+            "brier": 0.039,
+            "decisions": 465,
+            "ece": 0.0146,
+            "episodes": 465,
+            "null_ece_mean": 0.0178,
+            "null_ece_q95": 0.0272
+          },
+          "index_5": {
+            "below_null_q95": true,
+            "brier": 0.031,
+            "decisions": 465,
+            "ece": 0.0085,
+            "episodes": 465,
+            "null_ece_mean": 0.016,
+            "null_ece_q95": 0.0245
+          },
+          "not_settled": {
+            "below_null_q95": true,
+            "bins": [
+              {
+                "bin": [
+                  0.0,
+                  0.1
+                ],
+                "link_frequency": 0.0047,
+                "mean_p_link": 0.0133,
+                "n": 634
+              },
+              {
+                "bin": [
+                  0.1,
+                  0.2
+                ],
+                "link_frequency": 0.1688,
+                "mean_p_link": 0.158,
+                "n": 154
+              },
+              {
+                "bin": [
+                  0.2,
+                  0.3
+                ],
+                "link_frequency": 0.276,
+                "mean_p_link": 0.2501,
+                "n": 384
+              },
+              {
+                "bin": [
+                  0.3,
+                  0.4
+                ],
+                "link_frequency": 0.3129,
+                "mean_p_link": 0.3286,
+                "n": 700
+              },
+              {
+                "bin": [
+                  0.4,
+                  0.5
+                ],
+                "link_frequency": 0.0,
+                "mean_p_link": 0.4898,
+                "n": 1
+              },
+              {
+                "bin": [
+                  0.5,
+                  0.6
+                ],
+                "link_frequency": 1.0,
+                "mean_p_link": 0.5913,
+                "n": 1
+              },
+              {
+                "bin": [
+                  0.6,
+                  0.7
+                ],
+                "link_frequency": 1.0,
+                "mean_p_link": 0.6599,
+                "n": 3
+              },
+              {
+                "bin": [
+                  0.7,
+                  0.8
+                ],
+                "link_frequency": null,
+                "mean_p_link": null,
+                "n": 0
+              },
+              {
+                "bin": [
+                  0.8,
+                  0.9
+                ],
+                "link_frequency": 0.9474,
+                "mean_p_link": 0.8842,
+                "n": 19
+              },
+              {
+                "bin": [
+                  0.9,
+                  1.0
+                ],
+                "link_frequency": 0.9922,
+                "mean_p_link": 0.9769,
+                "n": 514
+              }
+            ],
+            "brier": 0.1071,
+            "decisions": 2410,
+            "ece": 0.0162,
+            "episodes": 465,
+            "null_ece_mean": 0.0115,
+            "null_ece_q95": 0.0188
+          },
+          "settled": {
+            "below_null_q95": false,
+            "brier": 0.0,
+            "decisions": 380,
+            "ece": 0.0,
+            "episodes": 129,
+            "null_ece_mean": 0.0,
+            "null_ece_q95": 0.0
+          },
+          "since_onset_t1": {
+            "below_null_q95": true,
+            "brier": 0.1745,
+            "decisions": 930,
+            "ece": 0.0177,
+            "episodes": 448,
+            "null_ece_mean": 0.0147,
+            "null_ece_q95": 0.0297
+          },
+          "since_onset_t2": {
+            "below_null_q95": true,
+            "brier": 0.0629,
+            "decisions": 930,
+            "ece": 0.0162,
+            "episodes": 426,
+            "null_ece_mean": 0.0105,
+            "null_ece_q95": 0.0197
+          },
+          "since_onset_t3": {
+            "below_null_q95": true,
+            "brier": 0.0401,
+            "decisions": 930,
+            "ece": 0.0146,
+            "episodes": 390,
+            "null_ece_mean": 0.0129,
+            "null_ece_q95": 0.0211
+          }
+        }
+      },
+      "decisions": {
+        "train": 3589,
+        "val": 1206
+      },
+      "episodes": {
+        "train": 599,
+        "val": 201
+      },
+      "incidents": "sim/incidents_stress.yaml",
+      "onset": {
+        "control_step_s": 1.8,
+        "decisions": 2410,
+        "first_window_end_minus_onset_s": {
+          "max": 39.565,
+          "min": 1.8077
+        },
+        "reproduction": {
+          "evidence_mismatches": 0,
+          "posterior_max_abs_diff": 0.0
+        },
+        "shift_+1_window": {
+          "argmin_set_changed": {
+            "count": 32,
+            "share": 0.0133
+          },
+          "decisions": 2410,
+          "gather_flipped": {
+            "count": 17,
+            "share": 0.0071
+          },
+          "max_abs_dpi": 0.7623,
+          "mean_abs_dpi": 0.0124,
+          "q95_abs_dpi": 0.0115
+        },
+        "shift_-1_window": {
+          "argmin_set_changed": {
+            "count": 11,
+            "share": 0.0046
+          },
+          "decisions": 2410,
+          "gather_flipped": {
+            "count": 11,
+            "share": 0.0046
+          },
+          "max_abs_dpi": 0.0127,
+          "mean_abs_dpi": 0.0056,
+          "q95_abs_dpi": 0.0112
+        },
+        "uniform_pm5_windows": {
+          "argmin_set_changed": {
+            "count": 78,
+            "share": 0.0324
+          },
+          "decisions": 2410,
+          "gather_flipped": {
+            "count": 46,
+            "share": 0.0191
+          },
+          "max_abs_dpi": 0.8347,
+          "mean_abs_dpi": 0.0336,
+          "q95_abs_dpi": 0.32
+        },
+        "uniform_pm5_windows_control_steps": {
+          "argmin_set_changed": {
+            "count": 75,
+            "share": 0.0311
+          },
+          "decisions": 2410,
+          "gather_flipped": {
+            "count": 43,
+            "share": 0.0178
+          },
+          "max_abs_dpi": 0.8333,
+          "mean_abs_dpi": 0.0333,
+          "q95_abs_dpi": 0.3104
+        },
+        "window_s": 36.0,
+        "windows_in_likelihood": {
+          "max": 63.0,
+          "mean": 13.5116,
+          "median": 11.0,
+          "min": 0.0,
+          "n": 2410,
+          "q05": 5.0,
+          "q25": 6.0,
+          "q75": 16.0,
+          "q95": 26.0,
+          "std": 8.7749
+        }
+      },
+      "pair_conditioning": {
+        "ambiguous": {
+          "decisions": 2790,
+          "share": 0.9265,
+          "with_signal_on_g": 2585,
+          "without_signal": 205,
+          "without_signal_post_onset_minutes": {
+            "max": 34.7531,
+            "mean": 9.6459,
+            "median": 6.3923,
+            "min": 0.0593,
+            "n": 205,
+            "q05": 0.6031,
+            "q25": 2.0713,
+            "q75": 16.3271,
+            "q95": 21.9676,
+            "std": 8.1374
+          },
+          "without_signal_pre_onset": 0
+        },
+        "decisions": 4795,
+        "signal_only_on_own_pair_group": 2585,
+        "signal_outside_pair": 0,
+        "signal_outside_pair_causes": {},
+        "with_groupwide_signal": 2585
+      },
+      "prior": {
+        "W_L": 15.0,
+        "W_L_actuator": 5.5,
+        "W_L_sensor": 9.5,
+        "W_M": 9.5,
+        "empirical_link_share": {
+          "ambiguous_episodes": 465,
+          "binomial_se_at_prior": 0.0226,
+          "decision_share": 0.3785,
+          "link_episodes": 176,
+          "share": 0.3785
+        },
+        "groups": {
+          "analyzers": {
+            "prior_link": 0.3878,
+            "w_L": 0.5,
+            "w_M": 0.5
+          },
+          "feeds": {
+            "prior_link": 0.3878,
+            "w_L": 2.0,
+            "w_M": 2.0
+          },
+          "reactor": {
+            "prior_link": 0.3878,
+            "w_L": 3.0,
+            "w_M": 3.0
+          },
+          "recycle": {
+            "prior_link": 0.3878,
+            "w_L": 0.5,
+            "w_M": 0.5
+          },
+          "separator": {
+            "prior_link": 0.3878,
+            "w_L": 0.5,
+            "w_M": 0.5
+          },
+          "stripper": {
+            "prior_link": 0.3878,
+            "w_L": 3.0,
+            "w_M": 3.0
+          }
+        },
+        "pi_L": 0.35,
+        "pi_M": 0.35,
+        "prior_link": 0.3878,
+        "same_for_every_group": true,
+        "stored_prior_matches": true
+      },
+      "root": "data/processed/tep_experience/20260927-085004-v2-stress",
+      "seconds": 49.3844
+    }
+  },
+  "subgroup_ece_range_across_sets": {
+    "all_below_null_q95": true,
+    "max": 0.0266,
+    "max_subgroup": "natural:since_onset_t1",
+    "min": 0.0085,
+    "min_subgroup": "stress:index_5",
+    "subgroups": [
+      "natural:index_0",
+      "natural:index_1",
+      "natural:index_2",
+      "natural:index_3",
+      "natural:since_onset_t1",
+      "natural:since_onset_t2",
+      "natural:since_onset_t3",
+      "stress:backup_available",
+      "stress:backup_unavailable",
+      "stress:index_0",
+      "stress:index_1",
+      "stress:index_2",
+      "stress:index_3",
+      "stress:index_4",
+      "stress:index_5",
+      "stress:since_onset_t1",
+      "stress:since_onset_t2",
+      "stress:since_onset_t3"
+    ]
+  },
+  "wall_s": 73.458
+}

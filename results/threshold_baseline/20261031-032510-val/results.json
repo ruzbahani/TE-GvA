@@ -1,0 +1,5154 @@
+{
+  "config": {
+    "bootstrap_seed": 0,
+    "costly_gap": 10.0,
+    "data": [
+      "data/processed/tep_decisions/v2-natural",
+      "data/processed/tep_decisions/v2-stress"
+    ],
+    "fold_splits": [
+      "group_kfold",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4",
+      "seed5"
+    ],
+    "folds": 5,
+    "lr_C": 1.0,
+    "margins": [
+      0.0,
+      0.1,
+      0.25,
+      0.5,
+      0.75,
+      1.0,
+      1.5,
+      2.0,
+      5.0
+    ],
+    "material_gap": 0.5,
+    "n_boot": 2000,
+    "references": [
+      "gbm_belief",
+      "playbook_investigate_first"
+    ],
+    "splits": [
+      "train",
+      "val"
+    ],
+    "stale_fraction": 0.5,
+    "thetas": [
+      0.5,
+      0.55,
+      0.6,
+      0.65,
+      0.7,
+      0.75,
+      0.8,
+      0.85,
+      0.9,
+      0.95,
+      0.99,
+      1.01
+    ],
+    "val_margins": [
+      0.0,
+      0.25,
+      0.5,
+      1.0
+    ],
+    "views": [
+      "all",
+      "family",
+      "backup_unavailable",
+      "family_backup_unavailable"
+    ]
+  },
+  "definitions": {
+    "bt": "BT(theta) in held situations (exact: held and in the family): max(p, 1 - p) < theta and no trace of sensor:g accepted or running -> trace_link sensor:g; such a trace pending -> monitor(300); otherwise p >= 0.5 -> the act-first playbook's choice, p < 0.5 -> replace_io_module source:g unless one is accepted, running or succeeded (then monitor(300)); outside held situations the act-first playbook (bt_<src>) or the GBM belief argmin (bt_<src>_gbm_fallback, same theta)",
+    "costly_gather_share": "the same share among the decisions with both whose labelled gap (lowest observe J minus lowest non-observe J, scoring labels) is at least 10 cost points (costly_n)",
+    "gate": "gated GBM: in held situations (exact: held and in the family, as in bt) gather (argmin of the GBM over observe candidates) if max(p, 1 - p) < theta, else the GBM argmin over non-observe candidates; elsewhere the GBM argmin; theta chosen on train with GBM predictions cross-fitted over the group_kfold split",
+    "gather_rate": "share of the decisions with both observe and non-observe candidates in which the chosen candidate is an observe action",
+    "gbm": "flat GBM (agents/flat_baseline.py) through train_direct.flat_predictions: fitted on train for each of the 8 grid points, the lowest val regret under its own training labels kept (as in the frozen evaluation); gbm_belief / gbm_hindsight: fitted on belief / hindsight labels",
+    "gbm_grid_points_below": "number of the 8 GBM grid points (belief labels, fitted on all of train) whose val regret (belief/all) is below the rule's",
+    "held_detector": "decision counts per split: family decisions, held situations, held in / outside the family, family decisions not held, decisions with several held groups, held decisions without a trace_link sensor:g or a monitor candidate, held family decisions without an exact posterior",
+    "held_situation": "a sensor group g whose valid stale alerts cover >= max(2, 0.5 x its channels) distinct channels (agents/playbook.py group-wide staleness test); with several, the largest share",
+    "intervals": "regret: point, 95% percentile cluster bootstrap over episodes (n_boot replicates, seed 0); minus_<ref>: method minus ref, paired cluster bootstrap on shared resamples, p_two_sided = 2 min(P(diff <= 0), P(diff >= 0)) over the replicates (0 means below 2 / n_boot)",
+    "margin": "gather only if (lowest predicted J among observe candidates) - (lowest among the others) < -m, else the GBM argmin among the others; decisions without both families: plain argmin",
+    "margin_train": "per fold split: 5-fold episode-grouped cross-fitted GBM (belief labels, the chosen belief grid point) on train; group_kfold = sklearn GroupKFold over candidate rows grouped by episode; seed<s> = the episodes in a random order of numpy seed s dealt round-robin to the folds; chosen_m = lowest regret (smallest m on ties); mean_curve = mean over the splits",
+    "margin_val": "descriptive val values at VAL_MARGINS with the GBM fitted on all of train; minus_margin_0 = paired difference against m = 0",
+    "p_link_exact": "P(link fault | E) from dec_posterior, the posterior of the episode's own cause (belief_sensitivity.family_cause gives the cause, also for pre-onset decisions); defined in the family only; privileged information (idealized observer)",
+    "p_link_lr": "soft-label logistic regression (C=1, standardised features, each row as a link row with weight p and a module row with weight 1 - p) on posterior_features at g, fitted on the held train decisions with the exact posterior as target; train values cross-fitted over 5 episode-grouped folds (GroupKFold over the held decisions), val values from the fit on all of train",
+    "playbooks": "the playbooks' recorded first actions (dec_baseline_act_first, dec_baseline_investigate_first)",
+    "posterior_lr_quality": "on the held family decisions (train: cross-fitted values; val: the fit on all of train): mae_vs_exact = mean |p_lr - p_exact|; brier_vs_cause = mean (p - 1[link fault])^2 for p_lr, brier_exact_vs_cause the same for p_exact; map_agreement_with_exact = share in which p_lr and p_exact name the same likelier cause",
+    "regret": "J of the chosen candidate minus the lowest J among the decision's candidates, under the scoring labels (belief: J_belief, the posterior mix over the link-vs-module pair; hindsight: J under the episode's true cause); mean over decisions",
+    "splits": "train fits and selects everything (GBM cross-fitting, logistic posterior, theta, margin curves); val is scored once per rule; the test split is never read",
+    "theta_selection": "theta in THETAS with the lowest mean train regret under belief labels (the smallest theta on ties); the lr posterior enters cross-fitted; gather_rate_held: share of the source's held decisions in which the rule chooses an observe candidate",
+    "train_references": "train regret under belief labels of the playbooks' recorded choices and of the GBM argmin cross-fitted over the group_kfold split (the margin rule at m = 0 up to ties)",
+    "views": "<scoring>/<subset>; all: every decision; family: the ambiguous decisions of the paper (dec_family: the episode's incident is a link fault on sensor:<g> or an I/O-module fault on <g>); backup_unavailable: scenarios without a backup channel (dec_backup_available false); family_backup_unavailable: both"
+  },
+  "log": [
+    "v2-natural: train 2346 decisions, val 783 decisions",
+    "flat baseline: 241 features, chosen {'center': True, 'learning_rate': 0.05, 'max_leaf_nodes': 63} (val regret 1.128); action prior on 90 action features; 96s",
+    "flat baseline: 241 features, chosen {'center': True, 'learning_rate': 0.1, 'max_leaf_nodes': 63} (val regret 1.408); action prior on 90 action features; 94s",
+    "v2-natural held situations: {\"train\": {\"decisions\": 2346, \"family\": 976, \"held\": 844, \"held_in_family\": 844, \"held_not_family\": 0, \"family_not_held\": 132, \"multi_group\": 0, \"held_without_trace_candidate\": 0, \"held_without_monitor\": 0, \"held_family_without_posterior\": 0}, \"val\": {\"decisions\": 783, \"family\": 348, \"held\": 300, \"held_in_family\": 300, \"held_not_family\": 0, \"family_not_held\": 48, \"multi_group\": 0, \"held_without_trace_candidate\": 0, \"held_without_monitor\": 0, \"held_family_without_posterior\": 0}}",
+    "v2-natural lr posterior: {\"features\": 94, \"fit_rows_train\": 844, \"train\": {\"n\": 844, \"mae_vs_exact\": 0.06924035326802713, \"brier_vs_cause\": 0.1465969763033447, \"brier_exact_vs_cause\": 0.11686194695614963, \"map_agreement_with_exact\": 0.9300947867298578}, \"val\": {\"n\": 300, \"mae_vs_exact\": 0.05374765254399923, \"brier_vs_cause\": 0.14058999474097786, \"brier_exact_vs_cause\": 0.13147914641648362, \"map_agreement_with_exact\": 0.9566666666666667}}",
+    "v2-natural BT exact: theta 0.8, train curve 0.5: 1.9495, 0.55: 1.4765, 0.6: 1.4247, 0.65: 1.3656, 0.7: 1.3571, 0.75: 1.3358, 0.8: 1.2970, 0.85: 1.2970, 0.9: 1.2972, 0.95: 1.3053, 0.99: 1.3245, 1.01: 1.3941",
+    "v2-natural BT lr: theta 0.75, train curve 0.5: 1.9656, 0.55: 1.8898, 0.6: 1.4178, 0.65: 1.3680, 0.7: 1.3661, 0.75: 1.3646, 0.8: 1.3751, 0.85: 1.3682, 0.9: 1.3803, 0.95: 1.4082, 0.99: 1.3841, 1.01: 1.3941",
+    "v2-natural margin, train cross-fitted (group_kfold): chosen m 0.0; 0.0: 1.1128, 0.1: 1.1290, 0.25: 1.1186, 0.5: 1.1179, 0.75: 1.1327, 1.0: 1.1377, 1.5: 1.1460, 2.0: 1.1445, 5.0: 1.1447",
+    "v2-natural margin, train cross-fitted (seed1): chosen m 0.1; 0.0: 1.0433, 0.1: 1.0349, 0.25: 1.0463, 0.5: 1.0504, 0.75: 1.0508, 1.0: 1.0774, 1.5: 1.0538, 2.0: 1.0496, 5.0: 1.0450",
+    "v2-natural margin, train cross-fitted (seed2): chosen m 1.0; 0.0: 1.0763, 0.1: 1.0735, 0.25: 1.0711, 0.5: 1.0480, 0.75: 1.0562, 1.0: 1.0473, 1.5: 1.0574, 2.0: 1.0688, 5.0: 1.0719",
+    "v2-natural margin, train cross-fitted (seed3): chosen m 0.0; 0.0: 1.0192, 0.1: 1.0329, 0.25: 1.0632, 0.5: 1.0788, 0.75: 1.0791, 1.0: 1.0959, 1.5: 1.0575, 2.0: 1.0547, 5.0: 1.0513",
+    "v2-natural margin, train cross-fitted (seed4): chosen m 0.0; 0.0: 1.0645, 0.1: 1.0762, 0.25: 1.0951, 0.5: 1.0903, 0.75: 1.0961, 1.0: 1.0986, 1.5: 1.1013, 2.0: 1.0942, 5.0: 1.0884",
+    "v2-natural margin, train cross-fitted (seed5): chosen m 0.25; 0.0: 1.1378, 0.1: 1.1349, 0.25: 1.1311, 0.5: 1.1502, 0.75: 1.1517, 1.0: 1.1737, 1.5: 1.1795, 2.0: 1.1716, 5.0: 1.1491",
+    "v2-natural margin, mean train curve: 0.0: 1.0757, 0.1: 1.0802, 0.25: 1.0876, 0.5: 1.0892, 0.75: 1.0944, 1.0: 1.1051, 1.5: 1.0993, 2.0: 1.0972, 5.0: 1.0917",
+    "v2-natural gate exact: theta 0.8",
+    "v2-natural gate lr: theta 0.7",
+    "v2-natural val belief/all gbm_belief: 1.128 [0.715, 1.626]; minus playbook_investigate_first -0.439 [-1.007, -0.001] p=0.050",
+    "v2-natural val belief/all gbm_hindsight: 1.219 [0.820, 1.697]; minus gbm_belief 0.091 [-0.133, 0.298] p=0.397; minus playbook_investigate_first -0.348 [-0.868, 0.048] p=0.106",
+    "v2-natural val belief/all playbook_act_first: 1.632 [1.029, 2.472]; minus gbm_belief 0.503 [0.034, 1.069] p=0.035; minus playbook_investigate_first 0.064 [-0.050, 0.185] p=0.276",
+    "v2-natural val belief/all playbook_investigate_first: 1.568 [0.968, 2.403]; minus gbm_belief 0.439 [0.001, 1.007] p=0.050",
+    "v2-natural val belief/all bt_exact: 1.459 [0.866, 2.313]; minus gbm_belief 0.330 [-0.091, 0.885] p=0.142; minus playbook_investigate_first -0.109 [-0.258, -0.003] p=0.043",
+    "v2-natural val belief/all bt_exact_gbm_fallback: 1.444 [0.820, 2.340]; minus gbm_belief 0.316 [0.006, 0.819] p=0.042; minus playbook_investigate_first -0.123 [-0.356, 0.164] p=0.356",
+    "v2-natural val belief/all bt_lr: 1.463 [0.871, 2.320]; minus gbm_belief 0.334 [-0.087, 0.890] p=0.138; minus playbook_investigate_first -0.105 [-0.253, 0.002] p=0.055",
+    "v2-natural val belief/all bt_lr_gbm_fallback: 1.448 [0.826, 2.345]; minus gbm_belief 0.320 [0.010, 0.823] p=0.039; minus playbook_investigate_first -0.119 [-0.354, 0.166] p=0.366",
+    "v2-natural val belief/all gate_exact: 1.157 [0.743, 1.666]; minus gbm_belief 0.029 [-0.032, 0.100] p=0.336; minus playbook_investigate_first -0.410 [-0.967, 0.027] p=0.073",
+    "v2-natural val belief/all gate_lr: 1.150 [0.738, 1.655]; minus gbm_belief 0.022 [-0.038, 0.093] p=0.461; minus playbook_investigate_first -0.417 [-0.978, 0.014] p=0.064",
+    "v2-stress: train 3589 decisions, val 1206 decisions",
+    "flat baseline: 241 features, chosen {'center': True, 'learning_rate': 0.05, 'max_leaf_nodes': 15} (val regret 1.751); action prior on 90 action features; 112s",
+    "flat baseline: 241 features, chosen {'center': True, 'learning_rate': 0.05, 'max_leaf_nodes': 15} (val regret 2.399); action prior on 90 action features; 76s",
+    "v2-stress held situations: {\"train\": {\"decisions\": 3589, \"family\": 2112, \"held\": 1952, \"held_in_family\": 1952, \"held_not_family\": 0, \"family_not_held\": 160, \"multi_group\": 0, \"held_without_trace_candidate\": 0, \"held_without_monitor\": 0, \"held_family_without_posterior\": 0}, \"val\": {\"decisions\": 1206, \"family\": 678, \"held\": 633, \"held_in_family\": 633, \"held_not_family\": 0, \"family_not_held\": 45, \"multi_group\": 0, \"held_without_trace_candidate\": 0, \"held_without_monitor\": 0, \"held_family_without_posterior\": 0}}",
+    "v2-stress lr posterior: {\"features\": 94, \"fit_rows_train\": 1952, \"train\": {\"n\": 1952, \"mae_vs_exact\": 0.06943618092612404, \"brier_vs_cause\": 0.11926214225517467, \"brier_exact_vs_cause\": 0.09263357267108863, \"map_agreement_with_exact\": 0.9559426229508197}, \"val\": {\"n\": 633, \"mae_vs_exact\": 0.05677812233416104, \"brier_vs_cause\": 0.1104395335252833, \"brier_exact_vs_cause\": 0.08948094158558527, \"map_agreement_with_exact\": 0.9636650868878357}}",
+    "v2-stress BT exact: theta 0.75, train curve 0.5: 3.4674, 0.55: 3.4665, 0.6: 3.4665, 0.65: 3.4665, 0.7: 2.7223, 0.75: 2.6752, 0.8: 2.6856, 0.85: 2.7194, 0.9: 2.7015, 0.95: 2.6769, 0.99: 2.7165, 1.01: 2.7631",
+    "v2-stress BT lr: theta 0.95, train curve 0.5: 3.5366, 0.55: 3.5261, 0.6: 3.4994, 0.65: 3.5026, 0.7: 2.8191, 0.75: 2.7359, 0.8: 2.7346, 0.85: 2.7347, 0.9: 2.7296, 0.95: 2.6951, 0.99: 2.7415, 1.01: 2.7631",
+    "v2-stress margin, train cross-fitted (group_kfold): chosen m 0.0; 0.0: 1.6430, 0.1: 1.6443, 0.25: 1.6523, 0.5: 1.6809, 0.75: 1.6709, 1.0: 1.6942, 1.5: 1.7281, 2.0: 1.7569, 5.0: 1.8960",
+    "v2-stress margin, train cross-fitted (seed1): chosen m 0.5; 0.0: 1.7320, 0.1: 1.7369, 0.25: 1.7403, 0.5: 1.7296, 0.75: 1.7468, 1.0: 1.7510, 1.5: 1.7309, 2.0: 1.7782, 5.0: 1.8525",
+    "v2-stress margin, train cross-fitted (seed2): chosen m 1.5; 0.0: 1.7458, 0.1: 1.7132, 0.25: 1.7169, 0.5: 1.7197, 0.75: 1.6970, 1.0: 1.6902, 1.5: 1.6748, 2.0: 1.7248, 5.0: 1.7712",
+    "v2-stress margin, train cross-fitted (seed3): chosen m 0.1; 0.0: 1.6590, 0.1: 1.6477, 0.25: 1.6637, 0.5: 1.6756, 0.75: 1.6619, 1.0: 1.6688, 1.5: 1.7196, 2.0: 1.7710, 5.0: 1.8201",
+    "v2-stress margin, train cross-fitted (seed4): chosen m 0.75; 0.0: 1.6801, 0.1: 1.6794, 0.25: 1.6926, 0.5: 1.6726, 0.75: 1.6691, 1.0: 1.6730, 1.5: 1.6998, 2.0: 1.7187, 5.0: 1.8800",
+    "v2-stress margin, train cross-fitted (seed5): chosen m 0.5; 0.0: 1.7023, 0.1: 1.7099, 0.25: 1.7075, 0.5: 1.6893, 0.75: 1.7182, 1.0: 1.7077, 1.5: 1.7307, 2.0: 1.7403, 5.0: 1.9056",
+    "v2-stress margin, mean train curve: 0.0: 1.6937, 0.1: 1.6886, 0.25: 1.6955, 0.5: 1.6946, 0.75: 1.6940, 1.0: 1.6975, 1.5: 1.7140, 2.0: 1.7483, 5.0: 1.8542",
+    "v2-stress gate exact: theta 0.75",
+    "v2-stress gate lr: theta 0.95",
+    "v2-stress val belief/all gbm_belief: 1.751 [1.212, 2.392]; minus playbook_investigate_first -1.374 [-2.317, -0.612] p=0.000",
+    "v2-stress val belief/all gbm_hindsight: 2.099 [1.459, 2.885]; minus gbm_belief 0.348 [0.148, 0.596] p=0.000; minus playbook_investigate_first -1.026 [-1.889, -0.279] p=0.007",
+    "v2-stress val belief/all playbook_act_first: 5.820 [4.120, 7.738]; minus gbm_belief 4.070 [2.678, 5.610] p=0.000; minus playbook_investigate_first 2.695 [1.619, 3.946] p=0.000",
+    "v2-stress val belief/all playbook_investigate_first: 3.125 [2.051, 4.439]; minus gbm_belief 1.374 [0.612, 2.317] p=0.000",
+    "v2-stress val belief/all bt_exact: 2.984 [1.915, 4.304]; minus gbm_belief 1.234 [0.463, 2.180] p=0.000; minus playbook_investigate_first -0.141 [-0.270, -0.023] p=0.014",
+    "v2-stress val belief/all bt_exact_gbm_fallback: 2.708 [1.646, 4.015]; minus gbm_belief 0.958 [0.184, 1.910] p=0.012; minus playbook_investigate_first -0.417 [-0.595, -0.239] p=0.000",
+    "v2-stress val belief/all bt_lr: 3.053 [1.998, 4.370]; minus gbm_belief 1.302 [0.543, 2.248] p=0.000; minus playbook_investigate_first -0.072 [-0.175, 0.013] p=0.111",
+    "v2-stress val belief/all bt_lr_gbm_fallback: 2.777 [1.711, 4.097]; minus gbm_belief 1.026 [0.263, 1.971] p=0.009; minus playbook_investigate_first -0.348 [-0.523, -0.187] p=0.000",
+    "v2-stress val belief/all gate_exact: 1.881 [1.275, 2.629]; minus gbm_belief 0.130 [-0.039, 0.372] p=0.170; minus playbook_investigate_first -1.244 [-2.226, -0.376] p=0.003",
+    "v2-stress val belief/all gate_lr: 1.715 [1.180, 2.332]; minus gbm_belief -0.036 [-0.252, 0.115] p=0.750; minus playbook_investigate_first -1.410 [-2.371, -0.662] p=0.000"
+  ],
+  "sets": {
+    "v2-natural": {
+      "decisions": {
+        "train": 2346,
+        "val": 783
+      },
+      "gate_selection": {
+        "exact": {
+          "chosen_theta": 0.8,
+          "curve": [
+            {
+              "gather_rate_held": 0.0,
+              "regret_belief": 1.1376,
+              "theta": 0.5
+            },
+            {
+              "gather_rate_held": 0.2287,
+              "regret_belief": 1.0806,
+              "theta": 0.55
+            },
+            {
+              "gather_rate_held": 0.4088,
+              "regret_belief": 1.0784,
+              "theta": 0.6
+            },
+            {
+              "gather_rate_held": 0.4396,
+              "regret_belief": 1.0801,
+              "theta": 0.65
+            },
+            {
+              "gather_rate_held": 0.4514,
+              "regret_belief": 1.0673,
+              "theta": 0.7
+            },
+            {
+              "gather_rate_held": 0.4538,
+              "regret_belief": 1.0703,
+              "theta": 0.75
+            },
+            {
+              "gather_rate_held": 0.4573,
+              "regret_belief": 1.0444,
+              "theta": 0.8
+            },
+            {
+              "gather_rate_held": 0.4573,
+              "regret_belief": 1.0444,
+              "theta": 0.85
+            },
+            {
+              "gather_rate_held": 0.4822,
+              "regret_belief": 1.0465,
+              "theta": 0.9
+            },
+            {
+              "gather_rate_held": 0.5071,
+              "regret_belief": 1.0449,
+              "theta": 0.95
+            },
+            {
+              "gather_rate_held": 0.6682,
+              "regret_belief": 1.1397,
+              "theta": 0.99
+            },
+            {
+              "gather_rate_held": 1.0,
+              "regret_belief": 1.1493,
+              "theta": 1.01
+            }
+          ]
+        },
+        "lr": {
+          "chosen_theta": 0.7,
+          "curve": [
+            {
+              "gather_rate_held": 0.0,
+              "regret_belief": 1.1376,
+              "theta": 0.5
+            },
+            {
+              "gather_rate_held": 0.1706,
+              "regret_belief": 1.1233,
+              "theta": 0.55
+            },
+            {
+              "gather_rate_held": 0.4645,
+              "regret_belief": 1.0808,
+              "theta": 0.6
+            },
+            {
+              "gather_rate_held": 0.5047,
+              "regret_belief": 1.0655,
+              "theta": 0.65
+            },
+            {
+              "gather_rate_held": 0.5142,
+              "regret_belief": 1.0654,
+              "theta": 0.7
+            },
+            {
+              "gather_rate_held": 0.5178,
+              "regret_belief": 1.0661,
+              "theta": 0.75
+            },
+            {
+              "gather_rate_held": 0.5225,
+              "regret_belief": 1.0667,
+              "theta": 0.8
+            },
+            {
+              "gather_rate_held": 0.5332,
+              "regret_belief": 1.0786,
+              "theta": 0.85
+            },
+            {
+              "gather_rate_held": 0.5533,
+              "regret_belief": 1.0883,
+              "theta": 0.9
+            },
+            {
+              "gather_rate_held": 0.6931,
+              "regret_belief": 1.0964,
+              "theta": 0.95
+            },
+            {
+              "gather_rate_held": 0.8827,
+              "regret_belief": 1.1574,
+              "theta": 0.99
+            },
+            {
+              "gather_rate_held": 1.0,
+              "regret_belief": 1.1493,
+              "theta": 1.01
+            }
+          ]
+        }
+      },
+      "gbm": {
+        "belief": {
+          "chosen": {
+            "center": true,
+            "learning_rate": 0.05,
+            "max_leaf_nodes": 63
+          },
+          "grid": [
+            {
+              "center": false,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.3722
+            },
+            {
+              "center": false,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.1624
+            },
+            {
+              "center": false,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.3265
+            },
+            {
+              "center": false,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.2851
+            },
+            {
+              "center": true,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.1588
+            },
+            {
+              "center": true,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.1283
+            },
+            {
+              "center": true,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.1497
+            },
+            {
+              "center": true,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.1487
+            }
+          ]
+        },
+        "hindsight": {
+          "chosen": {
+            "center": true,
+            "learning_rate": 0.1,
+            "max_leaf_nodes": 63
+          },
+          "grid": [
+            {
+              "center": false,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.7597
+            },
+            {
+              "center": false,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.635
+            },
+            {
+              "center": false,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.6372
+            },
+            {
+              "center": false,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.5873
+            },
+            {
+              "center": true,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.4538
+            },
+            {
+              "center": true,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.4642
+            },
+            {
+              "center": true,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.4601
+            },
+            {
+              "center": true,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.4082
+            }
+          ]
+        }
+      },
+      "gbm_grid_points_below": {
+        "bt_exact": 8,
+        "bt_exact_gbm_fallback": 8,
+        "bt_lr": 8,
+        "bt_lr_gbm_fallback": 8,
+        "gate_exact": 3,
+        "gate_lr": 3
+      },
+      "held_detector": {
+        "train": {
+          "decisions": 2346,
+          "family": 976,
+          "family_not_held": 132,
+          "held": 844,
+          "held_family_without_posterior": 0,
+          "held_in_family": 844,
+          "held_not_family": 0,
+          "held_without_monitor": 0,
+          "held_without_trace_candidate": 0,
+          "multi_group": 0
+        },
+        "val": {
+          "decisions": 783,
+          "family": 348,
+          "family_not_held": 48,
+          "held": 300,
+          "held_family_without_posterior": 0,
+          "held_in_family": 300,
+          "held_not_family": 0,
+          "held_without_monitor": 0,
+          "held_without_trace_candidate": 0,
+          "multi_group": 0
+        }
+      },
+      "margin": {
+        "train_crossfit": {
+          "chosen_m_mean_curve": 0.0,
+          "mean_curve": [
+            {
+              "costly_gather_share": 0.3475,
+              "gather_rate": 0.2064,
+              "m": 0.0,
+              "regret": 1.0757
+            },
+            {
+              "costly_gather_share": 0.3014,
+              "gather_rate": 0.1392,
+              "m": 0.1,
+              "regret": 1.0802
+            },
+            {
+              "costly_gather_share": 0.2624,
+              "gather_rate": 0.0957,
+              "m": 0.25,
+              "regret": 1.0876
+            },
+            {
+              "costly_gather_share": 0.1986,
+              "gather_rate": 0.0631,
+              "m": 0.5,
+              "regret": 1.0892
+            },
+            {
+              "costly_gather_share": 0.1418,
+              "gather_rate": 0.0421,
+              "m": 0.75,
+              "regret": 1.0944
+            },
+            {
+              "costly_gather_share": 0.0922,
+              "gather_rate": 0.0265,
+              "m": 1.0,
+              "regret": 1.1051
+            },
+            {
+              "costly_gather_share": 0.039,
+              "gather_rate": 0.0108,
+              "m": 1.5,
+              "regret": 1.0993
+            },
+            {
+              "costly_gather_share": 0.0248,
+              "gather_rate": 0.0032,
+              "m": 2.0,
+              "regret": 1.0972
+            },
+            {
+              "costly_gather_share": 0.0,
+              "gather_rate": 0.0003,
+              "m": 5.0,
+              "regret": 1.0917
+            }
+          ],
+          "splits": {
+            "group_kfold": {
+              "chosen_m": 0.0,
+              "curve": [
+                {
+                  "costly_gather_share": 0.3404,
+                  "gather_rate": 0.1894,
+                  "m": 0.0,
+                  "regret": 1.1128
+                },
+                {
+                  "costly_gather_share": 0.2766,
+                  "gather_rate": 0.1337,
+                  "m": 0.1,
+                  "regret": 1.129
+                },
+                {
+                  "costly_gather_share": 0.2553,
+                  "gather_rate": 0.0981,
+                  "m": 0.25,
+                  "regret": 1.1186
+                },
+                {
+                  "costly_gather_share": 0.1915,
+                  "gather_rate": 0.0686,
+                  "m": 0.5,
+                  "regret": 1.1179
+                },
+                {
+                  "costly_gather_share": 0.1702,
+                  "gather_rate": 0.0437,
+                  "m": 0.75,
+                  "regret": 1.1327
+                },
+                {
+                  "costly_gather_share": 0.1277,
+                  "gather_rate": 0.0257,
+                  "m": 1.0,
+                  "regret": 1.1377
+                },
+                {
+                  "costly_gather_share": 0.0426,
+                  "gather_rate": 0.0099,
+                  "m": 1.5,
+                  "regret": 1.146
+                },
+                {
+                  "costly_gather_share": 0.0213,
+                  "gather_rate": 0.0021,
+                  "m": 2.0,
+                  "regret": 1.1445
+                },
+                {
+                  "costly_gather_share": 0.0,
+                  "gather_rate": 0.0004,
+                  "m": 5.0,
+                  "regret": 1.1447
+                }
+              ],
+              "plain_argmin_regret": 1.1128
+            },
+            "seed1": {
+              "chosen_m": 0.1,
+              "curve": [
+                {
+                  "costly_gather_share": 0.3617,
+                  "gather_rate": 0.1877,
+                  "m": 0.0,
+                  "regret": 1.0433
+                },
+                {
+                  "costly_gather_share": 0.3404,
+                  "gather_rate": 0.1358,
+                  "m": 0.1,
+                  "regret": 1.0349
+                },
+                {
+                  "costly_gather_share": 0.2766,
+                  "gather_rate": 0.0891,
+                  "m": 0.25,
+                  "regret": 1.0463
+                },
+                {
+                  "costly_gather_share": 0.1915,
+                  "gather_rate": 0.0596,
+                  "m": 0.5,
+                  "regret": 1.0504
+                },
+                {
+                  "costly_gather_share": 0.1277,
+                  "gather_rate": 0.0386,
+                  "m": 0.75,
+                  "regret": 1.0508
+                },
+                {
+                  "costly_gather_share": 0.0851,
+                  "gather_rate": 0.0244,
+                  "m": 1.0,
+                  "regret": 1.0774
+                },
+                {
+                  "costly_gather_share": 0.0426,
+                  "gather_rate": 0.009,
+                  "m": 1.5,
+                  "regret": 1.0538
+                },
+                {
+                  "costly_gather_share": 0.0426,
+                  "gather_rate": 0.0034,
+                  "m": 2.0,
+                  "regret": 1.0496
+                },
+                {
+                  "costly_gather_share": 0.0,
+                  "gather_rate": 0.0004,
+                  "m": 5.0,
+                  "regret": 1.045
+                }
+              ],
+              "plain_argmin_regret": 1.0433
+            },
+            "seed2": {
+              "chosen_m": 1.0,
+              "curve": [
+                {
+                  "costly_gather_share": 0.3191,
+                  "gather_rate": 0.2129,
+                  "m": 0.0,
+                  "regret": 1.0763
+                },
+                {
+                  "costly_gather_share": 0.234,
+                  "gather_rate": 0.144,
+                  "m": 0.1,
+                  "regret": 1.0735
+                },
+                {
+                  "costly_gather_share": 0.2128,
+                  "gather_rate": 0.1007,
+                  "m": 0.25,
+                  "regret": 1.0711
+                },
+                {
+                  "costly_gather_share": 0.1489,
+                  "gather_rate": 0.0673,
+                  "m": 0.5,
+                  "regret": 1.048
+                },
+                {
+                  "costly_gather_share": 0.0851,
+                  "gather_rate": 0.0454,
+                  "m": 0.75,
+                  "regret": 1.0562
+                },
+                {
+                  "costly_gather_share": 0.0638,
+                  "gather_rate": 0.0278,
+                  "m": 1.0,
+                  "regret": 1.0473
+                },
+                {
+                  "costly_gather_share": 0.0426,
+                  "gather_rate": 0.0094,
+                  "m": 1.5,
+                  "regret": 1.0574
+                },
+                {
+                  "costly_gather_share": 0.0213,
+                  "gather_rate": 0.0026,
+                  "m": 2.0,
+                  "regret": 1.0688
+                },
+                {
+                  "costly_gather_share": 0.0,
+                  "gather_rate": 0.0,
+                  "m": 5.0,
+                  "regret": 1.0719
+                }
+              ],
+              "plain_argmin_regret": 1.0763
+            },
+            "seed3": {
+              "chosen_m": 0.0,
+              "curve": [
+                {
+                  "costly_gather_share": 0.3191,
+                  "gather_rate": 0.1949,
+                  "m": 0.0,
+                  "regret": 1.0192
+                },
+                {
+                  "costly_gather_share": 0.2979,
+                  "gather_rate": 0.1298,
+                  "m": 0.1,
+                  "regret": 1.0329
+                },
+                {
+                  "costly_gather_share": 0.2553,
+                  "gather_rate": 0.0823,
+                  "m": 0.25,
+                  "regret": 1.0632
+                },
+                {
+                  "costly_gather_share": 0.2128,
+                  "gather_rate": 0.0548,
+                  "m": 0.5,
+                  "regret": 1.0788
+                },
+                {
+                  "costly_gather_share": 0.1702,
+                  "gather_rate": 0.0407,
+                  "m": 0.75,
+                  "regret": 1.0791
+                },
+                {
+                  "costly_gather_share": 0.0851,
+                  "gather_rate": 0.0287,
+                  "m": 1.0,
+                  "regret": 1.0959
+                },
+                {
+                  "costly_gather_share": 0.0426,
+                  "gather_rate": 0.0133,
+                  "m": 1.5,
+                  "regret": 1.0575
+                },
+                {
+                  "costly_gather_share": 0.0,
+                  "gather_rate": 0.0047,
+                  "m": 2.0,
+                  "regret": 1.0547
+                },
+                {
+                  "costly_gather_share": 0.0,
+                  "gather_rate": 0.0004,
+                  "m": 5.0,
+                  "regret": 1.0513
+                }
+              ],
+              "plain_argmin_regret": 1.0192
+            },
+            "seed4": {
+              "chosen_m": 0.0,
+              "curve": [
+                {
+                  "costly_gather_share": 0.4043,
+                  "gather_rate": 0.2215,
+                  "m": 0.0,
+                  "regret": 1.0645
+                },
+                {
+                  "costly_gather_share": 0.3617,
+                  "gather_rate": 0.1452,
+                  "m": 0.1,
+                  "regret": 1.0762
+                },
+                {
+                  "costly_gather_share": 0.3191,
+                  "gather_rate": 0.0998,
+                  "m": 0.25,
+                  "regret": 1.0951
+                },
+                {
+                  "costly_gather_share": 0.2128,
+                  "gather_rate": 0.0608,
+                  "m": 0.5,
+                  "regret": 1.0903
+                },
+                {
+                  "costly_gather_share": 0.1489,
+                  "gather_rate": 0.0403,
+                  "m": 0.75,
+                  "regret": 1.0961
+                },
+                {
+                  "costly_gather_share": 0.1277,
+                  "gather_rate": 0.03,
+                  "m": 1.0,
+                  "regret": 1.0986
+                },
+                {
+                  "costly_gather_share": 0.0213,
+                  "gather_rate": 0.0137,
+                  "m": 1.5,
+                  "regret": 1.1013
+                },
+                {
+                  "costly_gather_share": 0.0213,
+                  "gather_rate": 0.0034,
+                  "m": 2.0,
+                  "regret": 1.0942
+                },
+                {
+                  "costly_gather_share": 0.0,
+                  "gather_rate": 0.0004,
+                  "m": 5.0,
+                  "regret": 1.0884
+                }
+              ],
+              "plain_argmin_regret": 1.0645
+            },
+            "seed5": {
+              "chosen_m": 0.25,
+              "curve": [
+                {
+                  "costly_gather_share": 0.3404,
+                  "gather_rate": 0.2318,
+                  "m": 0.0,
+                  "regret": 1.1378
+                },
+                {
+                  "costly_gather_share": 0.2979,
+                  "gather_rate": 0.1465,
+                  "m": 0.1,
+                  "regret": 1.1349
+                },
+                {
+                  "costly_gather_share": 0.2553,
+                  "gather_rate": 0.1041,
+                  "m": 0.25,
+                  "regret": 1.1311
+                },
+                {
+                  "costly_gather_share": 0.234,
+                  "gather_rate": 0.0677,
+                  "m": 0.5,
+                  "regret": 1.1502
+                },
+                {
+                  "costly_gather_share": 0.1489,
+                  "gather_rate": 0.0437,
+                  "m": 0.75,
+                  "regret": 1.1517
+                },
+                {
+                  "costly_gather_share": 0.0638,
+                  "gather_rate": 0.0223,
+                  "m": 1.0,
+                  "regret": 1.1737
+                },
+                {
+                  "costly_gather_share": 0.0426,
+                  "gather_rate": 0.0094,
+                  "m": 1.5,
+                  "regret": 1.1795
+                },
+                {
+                  "costly_gather_share": 0.0426,
+                  "gather_rate": 0.003,
+                  "m": 2.0,
+                  "regret": 1.1716
+                },
+                {
+                  "costly_gather_share": 0.0,
+                  "gather_rate": 0.0,
+                  "m": 5.0,
+                  "regret": 1.1491
+                }
+              ],
+              "plain_argmin_regret": 1.1378
+            }
+          }
+        },
+        "val": {
+          "belief/all": {
+            "costly_n": 27,
+            "decisions": 783,
+            "episodes": 199,
+            "methods": {
+              "margin_0": {
+                "costly_gather_share": 0.2593,
+                "gather_rate": 0.2281,
+                "regret": {
+                  "hi": 1.6259,
+                  "lo": 0.7153,
+                  "point": 1.1283
+                }
+              },
+              "margin_0.25": {
+                "costly_gather_share": 0.2593,
+                "gather_rate": 0.1263,
+                "minus_margin_0": {
+                  "hi": 0.1135,
+                  "lo": -0.0095,
+                  "p_two_sided": 0.314,
+                  "point": 0.0348
+                },
+                "regret": {
+                  "hi": 1.6631,
+                  "lo": 0.7498,
+                  "point": 1.1631
+                }
+              },
+              "margin_0.5": {
+                "costly_gather_share": 0.2593,
+                "gather_rate": 0.0915,
+                "minus_margin_0": {
+                  "hi": 0.1253,
+                  "lo": -0.0031,
+                  "p_two_sided": 0.099,
+                  "point": 0.0434
+                },
+                "regret": {
+                  "hi": 1.6689,
+                  "lo": 0.762,
+                  "point": 1.1717
+                }
+              },
+              "margin_1": {
+                "costly_gather_share": 0.037,
+                "gather_rate": 0.0129,
+                "minus_margin_0": {
+                  "hi": 0.2193,
+                  "lo": 0.0467,
+                  "p_two_sided": 0.0,
+                  "point": 0.1199
+                },
+                "regret": {
+                  "hi": 1.7579,
+                  "lo": 0.8278,
+                  "point": 1.2482
+                }
+              }
+            },
+            "with_both": 776
+          },
+          "belief/family": {
+            "costly_n": 23,
+            "decisions": 348,
+            "episodes": 87,
+            "methods": {
+              "margin_0": {
+                "costly_gather_share": 0.3043,
+                "gather_rate": 0.3534,
+                "regret": {
+                  "hi": 2.3492,
+                  "lo": 1.0415,
+                  "point": 1.6003
+                }
+              },
+              "margin_0.25": {
+                "costly_gather_share": 0.3043,
+                "gather_rate": 0.2184,
+                "minus_margin_0": {
+                  "hi": 0.2519,
+                  "lo": -0.0157,
+                  "p_two_sided": 0.226,
+                  "point": 0.0815
+                },
+                "regret": {
+                  "hi": 2.4314,
+                  "lo": 1.1073,
+                  "point": 1.6818
+                }
+              },
+              "margin_0.5": {
+                "costly_gather_share": 0.3043,
+                "gather_rate": 0.1667,
+                "minus_margin_0": {
+                  "hi": 0.274,
+                  "lo": -0.0008,
+                  "p_two_sided": 0.057,
+                  "point": 0.1002
+                },
+                "regret": {
+                  "hi": 2.4486,
+                  "lo": 1.1212,
+                  "point": 1.7004
+                }
+              },
+              "margin_1": {
+                "costly_gather_share": 0.0435,
+                "gather_rate": 0.0259,
+                "minus_margin_0": {
+                  "hi": 0.4715,
+                  "lo": 0.1031,
+                  "p_two_sided": 0.0,
+                  "point": 0.2614
+                },
+                "regret": {
+                  "hi": 2.618,
+                  "lo": 1.2541,
+                  "point": 1.8617
+                }
+              }
+            },
+            "with_both": 348
+          },
+          "hindsight/all": {
+            "costly_n": 23,
+            "decisions": 783,
+            "episodes": 199,
+            "methods": {
+              "margin_0": {
+                "costly_gather_share": 0.2174,
+                "gather_rate": 0.2281,
+                "regret": {
+                  "hi": 1.9743,
+                  "lo": 0.864,
+                  "point": 1.375
+                }
+              },
+              "margin_0.25": {
+                "costly_gather_share": 0.2174,
+                "gather_rate": 0.1263,
+                "minus_margin_0": {
+                  "hi": 0.208,
+                  "lo": -0.0075,
+                  "p_two_sided": 0.184,
+                  "point": 0.068
+                },
+                "regret": {
+                  "hi": 2.047,
+                  "lo": 0.9253,
+                  "point": 1.4431
+                }
+              },
+              "margin_0.5": {
+                "costly_gather_share": 0.2174,
+                "gather_rate": 0.0915,
+                "minus_margin_0": {
+                  "hi": 0.2252,
+                  "lo": 0.0028,
+                  "p_two_sided": 0.031,
+                  "point": 0.0799
+                },
+                "regret": {
+                  "hi": 2.0559,
+                  "lo": 0.9377,
+                  "point": 1.455
+                }
+              },
+              "margin_1": {
+                "costly_gather_share": 0.0435,
+                "gather_rate": 0.0129,
+                "minus_margin_0": {
+                  "hi": 0.3261,
+                  "lo": 0.0394,
+                  "p_two_sided": 0.001,
+                  "point": 0.1578
+                },
+                "regret": {
+                  "hi": 2.1652,
+                  "lo": 0.9831,
+                  "point": 1.5328
+                }
+              }
+            },
+            "with_both": 776
+          },
+          "hindsight/family": {
+            "costly_n": 19,
+            "decisions": 348,
+            "episodes": 87,
+            "methods": {
+              "margin_0": {
+                "costly_gather_share": 0.2632,
+                "gather_rate": 0.3534,
+                "regret": {
+                  "hi": 3.2642,
+                  "lo": 1.2901,
+                  "point": 2.1554
+                }
+              },
+              "margin_0.25": {
+                "costly_gather_share": 0.2632,
+                "gather_rate": 0.2184,
+                "minus_margin_0": {
+                  "hi": 0.4594,
+                  "lo": -0.0108,
+                  "p_two_sided": 0.139,
+                  "point": 0.1562
+                },
+                "regret": {
+                  "hi": 3.4263,
+                  "lo": 1.3643,
+                  "point": 2.3116
+                }
+              },
+              "margin_0.5": {
+                "costly_gather_share": 0.2632,
+                "gather_rate": 0.1667,
+                "minus_margin_0": {
+                  "hi": 0.4987,
+                  "lo": 0.0107,
+                  "p_two_sided": 0.02,
+                  "point": 0.1825
+                },
+                "regret": {
+                  "hi": 3.4462,
+                  "lo": 1.3914,
+                  "point": 2.3379
+                }
+              },
+              "margin_1": {
+                "costly_gather_share": 0.0526,
+                "gather_rate": 0.0259,
+                "minus_margin_0": {
+                  "hi": 0.6969,
+                  "lo": 0.0953,
+                  "p_two_sided": 0.0,
+                  "point": 0.3468
+                },
+                "regret": {
+                  "hi": 3.7144,
+                  "lo": 1.4812,
+                  "point": 2.5022
+                }
+              }
+            },
+            "with_both": 348
+          }
+        }
+      },
+      "posterior_lr": {
+        "features": 94,
+        "fit_rows_train": 844,
+        "train": {
+          "brier_exact_vs_cause": 0.1169,
+          "brier_vs_cause": 0.1466,
+          "mae_vs_exact": 0.0692,
+          "map_agreement_with_exact": 0.9301,
+          "n": 844
+        },
+        "val": {
+          "brier_exact_vs_cause": 0.1315,
+          "brier_vs_cause": 0.1406,
+          "mae_vs_exact": 0.0537,
+          "map_agreement_with_exact": 0.9567,
+          "n": 300
+        }
+      },
+      "theta_selection": {
+        "exact": {
+          "chosen_theta": 0.8,
+          "curve": [
+            {
+              "gather_rate_held": 0.0,
+              "regret_belief": 1.9495,
+              "regret_hindsight": 1.9783,
+              "theta": 0.5
+            },
+            {
+              "gather_rate_held": 0.2263,
+              "regret_belief": 1.4765,
+              "regret_hindsight": 1.5533,
+              "theta": 0.55
+            },
+            {
+              "gather_rate_held": 0.378,
+              "regret_belief": 1.4247,
+              "regret_hindsight": 1.5597,
+              "theta": 0.6
+            },
+            {
+              "gather_rate_held": 0.4064,
+              "regret_belief": 1.3656,
+              "regret_hindsight": 1.4756,
+              "theta": 0.65
+            },
+            {
+              "gather_rate_held": 0.4159,
+              "regret_belief": 1.3571,
+              "regret_hindsight": 1.4754,
+              "theta": 0.7
+            },
+            {
+              "gather_rate_held": 0.4182,
+              "regret_belief": 1.3358,
+              "regret_hindsight": 1.4462,
+              "theta": 0.75
+            },
+            {
+              "gather_rate_held": 0.4218,
+              "regret_belief": 1.297,
+              "regret_hindsight": 1.3968,
+              "theta": 0.8
+            },
+            {
+              "gather_rate_held": 0.4218,
+              "regret_belief": 1.297,
+              "regret_hindsight": 1.3968,
+              "theta": 0.85
+            },
+            {
+              "gather_rate_held": 0.4455,
+              "regret_belief": 1.2972,
+              "regret_hindsight": 1.3964,
+              "theta": 0.9
+            },
+            {
+              "gather_rate_held": 0.4692,
+              "regret_belief": 1.3053,
+              "regret_hindsight": 1.4081,
+              "theta": 0.95
+            },
+            {
+              "gather_rate_held": 0.6244,
+              "regret_belief": 1.3245,
+              "regret_hindsight": 1.4396,
+              "theta": 0.99
+            },
+            {
+              "gather_rate_held": 0.9467,
+              "regret_belief": 1.3941,
+              "regret_hindsight": 1.5097,
+              "theta": 1.01
+            }
+          ]
+        },
+        "lr": {
+          "chosen_theta": 0.75,
+          "curve": [
+            {
+              "gather_rate_held": 0.0,
+              "regret_belief": 1.9656,
+              "regret_hindsight": 1.9955,
+              "theta": 0.5
+            },
+            {
+              "gather_rate_held": 0.1445,
+              "regret_belief": 1.8898,
+              "regret_hindsight": 1.898,
+              "theta": 0.55
+            },
+            {
+              "gather_rate_held": 0.4265,
+              "regret_belief": 1.4178,
+              "regret_hindsight": 1.5045,
+              "theta": 0.6
+            },
+            {
+              "gather_rate_held": 0.4645,
+              "regret_belief": 1.368,
+              "regret_hindsight": 1.4868,
+              "theta": 0.65
+            },
+            {
+              "gather_rate_held": 0.4727,
+              "regret_belief": 1.3661,
+              "regret_hindsight": 1.4844,
+              "theta": 0.7
+            },
+            {
+              "gather_rate_held": 0.4763,
+              "regret_belief": 1.3646,
+              "regret_hindsight": 1.483,
+              "theta": 0.75
+            },
+            {
+              "gather_rate_held": 0.481,
+              "regret_belief": 1.3751,
+              "regret_hindsight": 1.4936,
+              "theta": 0.8
+            },
+            {
+              "gather_rate_held": 0.4917,
+              "regret_belief": 1.3682,
+              "regret_hindsight": 1.4846,
+              "theta": 0.85
+            },
+            {
+              "gather_rate_held": 0.5118,
+              "regret_belief": 1.3803,
+              "regret_hindsight": 1.4967,
+              "theta": 0.9
+            },
+            {
+              "gather_rate_held": 0.6505,
+              "regret_belief": 1.4082,
+              "regret_hindsight": 1.5348,
+              "theta": 0.95
+            },
+            {
+              "gather_rate_held": 0.8318,
+              "regret_belief": 1.3841,
+              "regret_hindsight": 1.4996,
+              "theta": 0.99
+            },
+            {
+              "gather_rate_held": 0.9467,
+              "regret_belief": 1.3941,
+              "regret_hindsight": 1.5097,
+              "theta": 1.01
+            }
+          ]
+        }
+      },
+      "train_references": {
+        "gbm_belief_crossfit_group_kfold": 1.1128,
+        "playbook_act_first": 1.4912,
+        "playbook_investigate_first": 1.405
+      },
+      "val": {
+        "belief/all": {
+          "costly_n": 27,
+          "decisions": 783,
+          "episodes": 199,
+          "methods": {
+            "bt_exact": {
+              "costly_gather_share": 0.4074,
+              "gather_rate": 0.1753,
+              "minus_gbm_belief": {
+                "hi": 0.8849,
+                "lo": -0.0907,
+                "p_two_sided": 0.142,
+                "point": 0.3304
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0026,
+                "lo": -0.2581,
+                "p_two_sided": 0.043,
+                "point": -0.1089
+              },
+              "regret": {
+                "hi": 2.3129,
+                "lo": 0.8663,
+                "point": 1.4586
+              }
+            },
+            "bt_exact_gbm_fallback": {
+              "costly_gather_share": 0.4074,
+              "gather_rate": 0.2616,
+              "minus_gbm_belief": {
+                "hi": 0.8187,
+                "lo": 0.0061,
+                "p_two_sided": 0.042,
+                "point": 0.3159
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.1644,
+                "lo": -0.3561,
+                "p_two_sided": 0.356,
+                "point": -0.1233
+              },
+              "regret": {
+                "hi": 2.3399,
+                "lo": 0.8195,
+                "point": 1.4442
+              }
+            },
+            "bt_lr": {
+              "costly_gather_share": 0.4074,
+              "gather_rate": 0.1817,
+              "minus_gbm_belief": {
+                "hi": 0.8897,
+                "lo": -0.0873,
+                "p_two_sided": 0.138,
+                "point": 0.3342
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0016,
+                "lo": -0.2527,
+                "p_two_sided": 0.055,
+                "point": -0.105
+              },
+              "regret": {
+                "hi": 2.3199,
+                "lo": 0.8705,
+                "point": 1.4625
+              }
+            },
+            "bt_lr_gbm_fallback": {
+              "costly_gather_share": 0.4074,
+              "gather_rate": 0.268,
+              "minus_gbm_belief": {
+                "hi": 0.8231,
+                "lo": 0.0098,
+                "p_two_sided": 0.039,
+                "point": 0.3198
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.1661,
+                "lo": -0.3539,
+                "p_two_sided": 0.366,
+                "point": -0.1195
+              },
+              "regret": {
+                "hi": 2.345,
+                "lo": 0.8259,
+                "point": 1.4481
+              }
+            },
+            "gate_exact": {
+              "costly_gather_share": 0.4444,
+              "gather_rate": 0.2784,
+              "minus_gbm_belief": {
+                "hi": 0.0997,
+                "lo": -0.0321,
+                "p_two_sided": 0.336,
+                "point": 0.0289
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0274,
+                "lo": -0.967,
+                "p_two_sided": 0.073,
+                "point": -0.4104
+              },
+              "regret": {
+                "hi": 1.6658,
+                "lo": 0.7426,
+                "point": 1.1572
+              }
+            },
+            "gate_lr": {
+              "costly_gather_share": 0.4444,
+              "gather_rate": 0.2874,
+              "minus_gbm_belief": {
+                "hi": 0.093,
+                "lo": -0.0377,
+                "p_two_sided": 0.461,
+                "point": 0.0219
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0143,
+                "lo": -0.9784,
+                "p_two_sided": 0.064,
+                "point": -0.4173
+              },
+              "regret": {
+                "hi": 1.6554,
+                "lo": 0.7378,
+                "point": 1.1502
+              }
+            },
+            "gbm_belief": {
+              "costly_gather_share": 0.2593,
+              "gather_rate": 0.2281,
+              "minus_playbook_investigate_first": {
+                "hi": -0.0013,
+                "lo": -1.0068,
+                "p_two_sided": 0.05,
+                "point": -0.4392
+              },
+              "regret": {
+                "hi": 1.6259,
+                "lo": 0.7153,
+                "point": 1.1283
+              }
+            },
+            "gbm_hindsight": {
+              "costly_gather_share": 0.3333,
+              "gather_rate": 0.2101,
+              "minus_gbm_belief": {
+                "hi": 0.2976,
+                "lo": -0.1328,
+                "p_two_sided": 0.397,
+                "point": 0.0908
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0477,
+                "lo": -0.8684,
+                "p_two_sided": 0.106,
+                "point": -0.3485
+              },
+              "regret": {
+                "hi": 1.6965,
+                "lo": 0.8196,
+                "point": 1.2191
+              }
+            },
+            "playbook_act_first": {
+              "costly_gather_share": 0.0,
+              "gather_rate": 0.0,
+              "minus_gbm_belief": {
+                "hi": 1.0688,
+                "lo": 0.0339,
+                "p_two_sided": 0.035,
+                "point": 0.5033
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.1853,
+                "lo": -0.0502,
+                "p_two_sided": 0.276,
+                "point": 0.064
+              },
+              "regret": {
+                "hi": 2.4724,
+                "lo": 1.0285,
+                "point": 1.6316
+              }
+            },
+            "playbook_investigate_first": {
+              "costly_gather_share": 0.3333,
+              "gather_rate": 0.2461,
+              "minus_gbm_belief": {
+                "hi": 1.0068,
+                "lo": 0.0013,
+                "p_two_sided": 0.05,
+                "point": 0.4392
+              },
+              "regret": {
+                "hi": 2.4034,
+                "lo": 0.9677,
+                "point": 1.5675
+              }
+            }
+          },
+          "with_both": 776
+        },
+        "belief/family": {
+          "costly_n": 23,
+          "decisions": 348,
+          "episodes": 87,
+          "methods": {
+            "bt_exact": {
+              "costly_gather_share": 0.4783,
+              "gather_rate": 0.3908,
+              "minus_gbm_belief": {
+                "hi": 1.8294,
+                "lo": -0.1148,
+                "p_two_sided": 0.137,
+                "point": 0.6082
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0179,
+                "lo": -0.5049,
+                "p_two_sided": 0.007,
+                "point": -0.2033
+              },
+              "regret": {
+                "hi": 4.0281,
+                "lo": 1.1387,
+                "point": 2.2085
+              }
+            },
+            "bt_exact_gbm_fallback": {
+              "costly_gather_share": 0.4783,
+              "gather_rate": 0.4282,
+              "minus_gbm_belief": {
+                "hi": 1.9018,
+                "lo": 0.0408,
+                "p_two_sided": 0.025,
+                "point": 0.7108
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.1961,
+                "lo": -0.4341,
+                "p_two_sided": 0.576,
+                "point": -0.1007
+              },
+              "regret": {
+                "hi": 4.1571,
+                "lo": 1.2114,
+                "point": 2.311
+              }
+            },
+            "bt_lr": {
+              "costly_gather_share": 0.4783,
+              "gather_rate": 0.4052,
+              "minus_gbm_belief": {
+                "hi": 1.841,
+                "lo": -0.1065,
+                "p_two_sided": 0.13,
+                "point": 0.6169
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0099,
+                "lo": -0.4944,
+                "p_two_sided": 0.018,
+                "point": -0.1946
+              },
+              "regret": {
+                "hi": 4.0426,
+                "lo": 1.1504,
+                "point": 2.2172
+              }
+            },
+            "bt_lr_gbm_fallback": {
+              "costly_gather_share": 0.4783,
+              "gather_rate": 0.4425,
+              "minus_gbm_belief": {
+                "hi": 1.9104,
+                "lo": 0.0506,
+                "p_two_sided": 0.024,
+                "point": 0.7195
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.2035,
+                "lo": -0.4247,
+                "p_two_sided": 0.624,
+                "point": -0.0921
+              },
+              "regret": {
+                "hi": 4.1694,
+                "lo": 1.2175,
+                "point": 2.3197
+              }
+            },
+            "gate_exact": {
+              "costly_gather_share": 0.5217,
+              "gather_rate": 0.4655,
+              "minus_gbm_belief": {
+                "hi": 0.2215,
+                "lo": -0.0875,
+                "p_two_sided": 0.381,
+                "point": 0.065
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0039,
+                "lo": -1.9579,
+                "p_two_sided": 0.049,
+                "point": -0.7466
+              },
+              "regret": {
+                "hi": 2.4494,
+                "lo": 1.0759,
+                "point": 1.6652
+              }
+            },
+            "gate_lr": {
+              "costly_gather_share": 0.5217,
+              "gather_rate": 0.4856,
+              "minus_gbm_belief": {
+                "hi": 0.2041,
+                "lo": -0.0972,
+                "p_two_sided": 0.509,
+                "point": 0.0492
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0177,
+                "lo": -1.9773,
+                "p_two_sided": 0.042,
+                "point": -0.7623
+              },
+              "regret": {
+                "hi": 2.405,
+                "lo": 1.0652,
+                "point": 1.6495
+              }
+            },
+            "gbm_belief": {
+              "costly_gather_share": 0.3043,
+              "gather_rate": 0.3534,
+              "minus_playbook_investigate_first": {
+                "hi": -0.0478,
+                "lo": -2.0408,
+                "p_two_sided": 0.032,
+                "point": -0.8115
+              },
+              "regret": {
+                "hi": 2.3492,
+                "lo": 1.0415,
+                "point": 1.6003
+              }
+            },
+            "gbm_hindsight": {
+              "costly_gather_share": 0.3913,
+              "gather_rate": 0.2931,
+              "minus_gbm_belief": {
+                "hi": 0.7459,
+                "lo": -0.0455,
+                "p_two_sided": 0.095,
+                "point": 0.3213
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.3866,
+                "lo": -1.7868,
+                "p_two_sided": 0.363,
+                "point": -0.4902
+              },
+              "regret": {
+                "hi": 2.6965,
+                "lo": 1.3133,
+                "point": 1.9216
+              }
+            },
+            "playbook_act_first": {
+              "costly_gather_share": 0.0,
+              "gather_rate": 0.0,
+              "minus_gbm_belief": {
+                "hi": 2.2403,
+                "lo": 0.1812,
+                "p_two_sided": 0.008,
+                "point": 0.9973
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.4139,
+                "lo": -0.0057,
+                "p_two_sided": 0.061,
+                "point": 0.1858
+              },
+              "regret": {
+                "hi": 4.4269,
+                "lo": 1.4516,
+                "point": 2.5976
+              }
+            },
+            "playbook_investigate_first": {
+              "costly_gather_share": 0.2609,
+              "gather_rate": 0.3563,
+              "minus_gbm_belief": {
+                "hi": 2.0408,
+                "lo": 0.0478,
+                "p_two_sided": 0.032,
+                "point": 0.8115
+              },
+              "regret": {
+                "hi": 4.2698,
+                "lo": 1.3162,
+                "point": 2.4118
+              }
+            }
+          },
+          "with_both": 348
+        },
+        "hindsight/all": {
+          "costly_n": 23,
+          "decisions": 783,
+          "episodes": 199,
+          "methods": {
+            "bt_exact": {
+              "costly_gather_share": 0.3913,
+              "gather_rate": 0.1753,
+              "minus_gbm_belief": {
+                "hi": 0.9235,
+                "lo": -0.1091,
+                "p_two_sided": 0.15,
+                "point": 0.3476
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0077,
+                "lo": -0.2827,
+                "p_two_sided": 0.026,
+                "point": -0.1269
+              },
+              "regret": {
+                "hi": 2.6529,
+                "lo": 1.0231,
+                "point": 1.7227
+              }
+            },
+            "bt_exact_gbm_fallback": {
+              "costly_gather_share": 0.3913,
+              "gather_rate": 0.2616,
+              "minus_gbm_belief": {
+                "hi": 0.8457,
+                "lo": 0.0137,
+                "p_two_sided": 0.032,
+                "point": 0.3345
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.1779,
+                "lo": -0.3937,
+                "p_two_sided": 0.335,
+                "point": -0.14
+              },
+              "regret": {
+                "hi": 2.6796,
+                "lo": 0.9815,
+                "point": 1.7095
+              }
+            },
+            "bt_lr": {
+              "costly_gather_share": 0.3913,
+              "gather_rate": 0.1817,
+              "minus_gbm_belief": {
+                "hi": 0.9288,
+                "lo": -0.1045,
+                "p_two_sided": 0.138,
+                "point": 0.3535
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0018,
+                "lo": -0.2739,
+                "p_two_sided": 0.04,
+                "point": -0.121
+              },
+              "regret": {
+                "hi": 2.6581,
+                "lo": 1.0292,
+                "point": 1.7286
+              }
+            },
+            "bt_lr_gbm_fallback": {
+              "costly_gather_share": 0.3913,
+              "gather_rate": 0.268,
+              "minus_gbm_belief": {
+                "hi": 0.8498,
+                "lo": 0.021,
+                "p_two_sided": 0.03,
+                "point": 0.3404
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.1814,
+                "lo": -0.3876,
+                "p_two_sided": 0.353,
+                "point": -0.1341
+              },
+              "regret": {
+                "hi": 2.6863,
+                "lo": 0.9871,
+                "point": 1.7154
+              }
+            },
+            "gate_exact": {
+              "costly_gather_share": 0.3913,
+              "gather_rate": 0.2784,
+              "minus_gbm_belief": {
+                "hi": 0.1594,
+                "lo": -0.0159,
+                "p_two_sided": 0.172,
+                "point": 0.057
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0391,
+                "lo": -0.978,
+                "p_two_sided": 0.08,
+                "point": -0.4175
+              },
+              "regret": {
+                "hi": 2.047,
+                "lo": 0.9077,
+                "point": 1.432
+              }
+            },
+            "gate_lr": {
+              "costly_gather_share": 0.3913,
+              "gather_rate": 0.2874,
+              "minus_gbm_belief": {
+                "hi": 0.1514,
+                "lo": -0.0205,
+                "p_two_sided": 0.235,
+                "point": 0.0504
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0351,
+                "lo": -0.9879,
+                "p_two_sided": 0.075,
+                "point": -0.4241
+              },
+              "regret": {
+                "hi": 2.0445,
+                "lo": 0.9084,
+                "point": 1.4254
+              }
+            },
+            "gbm_belief": {
+              "costly_gather_share": 0.2174,
+              "gather_rate": 0.2281,
+              "minus_playbook_investigate_first": {
+                "hi": -0.0152,
+                "lo": -1.0347,
+                "p_two_sided": 0.042,
+                "point": -0.4745
+              },
+              "regret": {
+                "hi": 1.9743,
+                "lo": 0.864,
+                "point": 1.375
+              }
+            },
+            "gbm_hindsight": {
+              "costly_gather_share": 0.3043,
+              "gather_rate": 0.2101,
+              "minus_gbm_belief": {
+                "hi": 0.3126,
+                "lo": -0.26,
+                "p_two_sided": 0.823,
+                "point": 0.0332
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0108,
+                "lo": -0.989,
+                "p_two_sided": 0.057,
+                "point": -0.4413
+              },
+              "regret": {
+                "hi": 1.9576,
+                "lo": 0.9343,
+                "point": 1.4082
+              }
+            },
+            "playbook_act_first": {
+              "costly_gather_share": 0.0,
+              "gather_rate": 0.0,
+              "minus_gbm_belief": {
+                "hi": 1.1655,
+                "lo": 0.0357,
+                "p_two_sided": 0.036,
+                "point": 0.5695
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.2899,
+                "lo": -0.0658,
+                "p_two_sided": 0.271,
+                "point": 0.095
+              },
+              "regret": {
+                "hi": 2.9074,
+                "lo": 1.1979,
+                "point": 1.9446
+              }
+            },
+            "playbook_investigate_first": {
+              "costly_gather_share": 0.3478,
+              "gather_rate": 0.2461,
+              "minus_gbm_belief": {
+                "hi": 1.0347,
+                "lo": 0.0152,
+                "p_two_sided": 0.042,
+                "point": 0.4745
+              },
+              "regret": {
+                "hi": 2.7814,
+                "lo": 1.1411,
+                "point": 1.8495
+              }
+            }
+          },
+          "with_both": 776
+        },
+        "hindsight/family": {
+          "costly_n": 19,
+          "decisions": 348,
+          "episodes": 87,
+          "methods": {
+            "bt_exact": {
+              "costly_gather_share": 0.4737,
+              "gather_rate": 0.3908,
+              "minus_gbm_belief": {
+                "hi": 1.8778,
+                "lo": -0.1449,
+                "p_two_sided": 0.155,
+                "point": 0.6472
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0261,
+                "lo": -0.5713,
+                "p_two_sided": 0.003,
+                "point": -0.2437
+              },
+              "regret": {
+                "hi": 4.838,
+                "lo": 1.4318,
+                "point": 2.8026
+              }
+            },
+            "bt_exact_gbm_fallback": {
+              "costly_gather_share": 0.4737,
+              "gather_rate": 0.4282,
+              "minus_gbm_belief": {
+                "hi": 1.9882,
+                "lo": 0.0506,
+                "p_two_sided": 0.032,
+                "point": 0.7526
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.299,
+                "lo": -0.5379,
+                "p_two_sided": 0.527,
+                "point": -0.1383
+              },
+              "regret": {
+                "hi": 4.9368,
+                "lo": 1.5001,
+                "point": 2.908
+              }
+            },
+            "bt_lr": {
+              "costly_gather_share": 0.4737,
+              "gather_rate": 0.4052,
+              "minus_gbm_belief": {
+                "hi": 1.8922,
+                "lo": -0.1332,
+                "p_two_sided": 0.139,
+                "point": 0.6604
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0147,
+                "lo": -0.5609,
+                "p_two_sided": 0.011,
+                "point": -0.2305
+              },
+              "regret": {
+                "hi": 4.8482,
+                "lo": 1.4407,
+                "point": 2.8158
+              }
+            },
+            "bt_lr_gbm_fallback": {
+              "costly_gather_share": 0.4737,
+              "gather_rate": 0.4425,
+              "minus_gbm_belief": {
+                "hi": 2.0013,
+                "lo": 0.0657,
+                "p_two_sided": 0.028,
+                "point": 0.7658
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.3149,
+                "lo": -0.5244,
+                "p_two_sided": 0.555,
+                "point": -0.1251
+              },
+              "regret": {
+                "hi": 4.9475,
+                "lo": 1.5117,
+                "point": 2.9212
+              }
+            },
+            "gate_exact": {
+              "costly_gather_share": 0.4737,
+              "gather_rate": 0.4655,
+              "minus_gbm_belief": {
+                "hi": 0.3489,
+                "lo": -0.0297,
+                "p_two_sided": 0.156,
+                "point": 0.1282
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0753,
+                "lo": -2.0117,
+                "p_two_sided": 0.088,
+                "point": -0.7627
+              },
+              "regret": {
+                "hi": 3.4277,
+                "lo": 1.3731,
+                "point": 2.2836
+              }
+            },
+            "gate_lr": {
+              "costly_gather_share": 0.4737,
+              "gather_rate": 0.4856,
+              "minus_gbm_belief": {
+                "hi": 0.3388,
+                "lo": -0.0457,
+                "p_two_sided": 0.212,
+                "point": 0.1134
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0498,
+                "lo": -2.0246,
+                "p_two_sided": 0.07,
+                "point": -0.7774
+              },
+              "regret": {
+                "hi": 3.3995,
+                "lo": 1.36,
+                "point": 2.2688
+              }
+            },
+            "gbm_belief": {
+              "costly_gather_share": 0.2632,
+              "gather_rate": 0.3534,
+              "minus_playbook_investigate_first": {
+                "hi": -0.0189,
+                "lo": -2.1525,
+                "p_two_sided": 0.038,
+                "point": -0.8909
+              },
+              "regret": {
+                "hi": 3.2642,
+                "lo": 1.2901,
+                "point": 2.1554
+              }
+            },
+            "gbm_hindsight": {
+              "costly_gather_share": 0.3684,
+              "gather_rate": 0.2931,
+              "minus_gbm_belief": {
+                "hi": 0.8012,
+                "lo": -0.4082,
+                "p_two_sided": 0.576,
+                "point": 0.1919
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.3078,
+                "lo": -2.061,
+                "p_two_sided": 0.203,
+                "point": -0.699
+              },
+              "regret": {
+                "hi": 3.3814,
+                "lo": 1.532,
+                "point": 2.3473
+              }
+            },
+            "playbook_act_first": {
+              "costly_gather_share": 0.0,
+              "gather_rate": 0.0,
+              "minus_gbm_belief": {
+                "hi": 2.4613,
+                "lo": 0.198,
+                "p_two_sided": 0.015,
+                "point": 1.1464
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.6579,
+                "lo": -0.0503,
+                "p_two_sided": 0.129,
+                "point": 0.2555
+              },
+              "regret": {
+                "hi": 5.3907,
+                "lo": 1.8383,
+                "point": 3.3018
+              }
+            },
+            "playbook_investigate_first": {
+              "costly_gather_share": 0.2632,
+              "gather_rate": 0.3563,
+              "minus_gbm_belief": {
+                "hi": 2.1525,
+                "lo": 0.0189,
+                "p_two_sided": 0.038,
+                "point": 0.8909
+              },
+              "regret": {
+                "hi": 5.0453,
+                "lo": 1.6598,
+                "point": 3.0463
+              }
+            }
+          },
+          "with_both": 348
+        }
+      },
+      "wall_s": 569.7808
+    },
+    "v2-stress": {
+      "decisions": {
+        "train": 3589,
+        "val": 1206
+      },
+      "gate_selection": {
+        "exact": {
+          "chosen_theta": 0.75,
+          "curve": [
+            {
+              "gather_rate_held": 0.0,
+              "regret_belief": 2.4764,
+              "theta": 0.5
+            },
+            {
+              "gather_rate_held": 0.0005,
+              "regret_belief": 2.477,
+              "theta": 0.55
+            },
+            {
+              "gather_rate_held": 0.0005,
+              "regret_belief": 2.477,
+              "theta": 0.6
+            },
+            {
+              "gather_rate_held": 0.0005,
+              "regret_belief": 2.477,
+              "theta": 0.65
+            },
+            {
+              "gather_rate_held": 0.2408,
+              "regret_belief": 1.6776,
+              "theta": 0.7
+            },
+            {
+              "gather_rate_held": 0.3028,
+              "regret_belief": 1.6328,
+              "theta": 0.75
+            },
+            {
+              "gather_rate_held": 0.3822,
+              "regret_belief": 1.6665,
+              "theta": 0.8
+            },
+            {
+              "gather_rate_held": 0.4267,
+              "regret_belief": 1.7361,
+              "theta": 0.85
+            },
+            {
+              "gather_rate_held": 0.4426,
+              "regret_belief": 1.7529,
+              "theta": 0.9
+            },
+            {
+              "gather_rate_held": 0.5046,
+              "regret_belief": 1.7196,
+              "theta": 0.95
+            },
+            {
+              "gather_rate_held": 0.6522,
+              "regret_belief": 1.7665,
+              "theta": 0.99
+            },
+            {
+              "gather_rate_held": 1.0,
+              "regret_belief": 2.386,
+              "theta": 1.01
+            }
+          ]
+        },
+        "lr": {
+          "chosen_theta": 0.95,
+          "curve": [
+            {
+              "gather_rate_held": 0.0,
+              "regret_belief": 2.4764,
+              "theta": 0.5
+            },
+            {
+              "gather_rate_held": 0.0061,
+              "regret_belief": 2.4727,
+              "theta": 0.55
+            },
+            {
+              "gather_rate_held": 0.0261,
+              "regret_belief": 2.4454,
+              "theta": 0.6
+            },
+            {
+              "gather_rate_held": 0.1035,
+              "regret_belief": 2.4289,
+              "theta": 0.65
+            },
+            {
+              "gather_rate_held": 0.3817,
+              "regret_belief": 1.7157,
+              "theta": 0.7
+            },
+            {
+              "gather_rate_held": 0.4785,
+              "regret_belief": 1.6913,
+              "theta": 0.75
+            },
+            {
+              "gather_rate_held": 0.4903,
+              "regret_belief": 1.7103,
+              "theta": 0.8
+            },
+            {
+              "gather_rate_held": 0.4954,
+              "regret_belief": 1.7098,
+              "theta": 0.85
+            },
+            {
+              "gather_rate_held": 0.5026,
+              "regret_belief": 1.7069,
+              "theta": 0.9
+            },
+            {
+              "gather_rate_held": 0.5774,
+              "regret_belief": 1.6539,
+              "theta": 0.95
+            },
+            {
+              "gather_rate_held": 0.9185,
+              "regret_belief": 2.3781,
+              "theta": 0.99
+            },
+            {
+              "gather_rate_held": 1.0,
+              "regret_belief": 2.386,
+              "theta": 1.01
+            }
+          ]
+        }
+      },
+      "gbm": {
+        "belief": {
+          "chosen": {
+            "center": true,
+            "learning_rate": 0.05,
+            "max_leaf_nodes": 15
+          },
+          "grid": [
+            {
+              "center": false,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 15,
+              "val_regret": 2.2821
+            },
+            {
+              "center": false,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 63,
+              "val_regret": 2.2224
+            },
+            {
+              "center": false,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 15,
+              "val_regret": 2.3584
+            },
+            {
+              "center": false,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.9965
+            },
+            {
+              "center": true,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.7506
+            },
+            {
+              "center": true,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.831
+            },
+            {
+              "center": true,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.802
+            },
+            {
+              "center": true,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 63,
+              "val_regret": 2.0048
+            }
+          ]
+        },
+        "hindsight": {
+          "chosen": {
+            "center": true,
+            "learning_rate": 0.05,
+            "max_leaf_nodes": 15
+          },
+          "grid": [
+            {
+              "center": false,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 15,
+              "val_regret": 2.8048
+            },
+            {
+              "center": false,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 63,
+              "val_regret": 2.6899
+            },
+            {
+              "center": false,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 15,
+              "val_regret": 2.757
+            },
+            {
+              "center": false,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 63,
+              "val_regret": 2.7198
+            },
+            {
+              "center": true,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 15,
+              "val_regret": 2.3995
+            },
+            {
+              "center": true,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 63,
+              "val_regret": 2.4248
+            },
+            {
+              "center": true,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 15,
+              "val_regret": 2.6028
+            },
+            {
+              "center": true,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 63,
+              "val_regret": 2.8016
+            }
+          ]
+        }
+      },
+      "gbm_grid_points_below": {
+        "bt_exact": 8,
+        "bt_exact_gbm_fallback": 8,
+        "bt_lr": 8,
+        "bt_lr_gbm_fallback": 8,
+        "gate_exact": 3,
+        "gate_lr": 0
+      },
+      "held_detector": {
+        "train": {
+          "decisions": 3589,
+          "family": 2112,
+          "family_not_held": 160,
+          "held": 1952,
+          "held_family_without_posterior": 0,
+          "held_in_family": 1952,
+          "held_not_family": 0,
+          "held_without_monitor": 0,
+          "held_without_trace_candidate": 0,
+          "multi_group": 0
+        },
+        "val": {
+          "decisions": 1206,
+          "family": 678,
+          "family_not_held": 45,
+          "held": 633,
+          "held_family_without_posterior": 0,
+          "held_in_family": 633,
+          "held_not_family": 0,
+          "held_without_monitor": 0,
+          "held_without_trace_candidate": 0,
+          "multi_group": 0
+        }
+      },
+      "margin": {
+        "train_crossfit": {
+          "chosen_m_mean_curve": 0.1,
+          "mean_curve": [
+            {
+              "costly_gather_share": 0.4795,
+              "gather_rate": 0.6614,
+              "m": 0.0,
+              "regret": 1.6937
+            },
+            {
+              "costly_gather_share": 0.4624,
+              "gather_rate": 0.6257,
+              "m": 0.1,
+              "regret": 1.6886
+            },
+            {
+              "costly_gather_share": 0.4308,
+              "gather_rate": 0.4964,
+              "m": 0.25,
+              "regret": 1.6955
+            },
+            {
+              "costly_gather_share": 0.3735,
+              "gather_rate": 0.3025,
+              "m": 0.5,
+              "regret": 1.6946
+            },
+            {
+              "costly_gather_share": 0.3256,
+              "gather_rate": 0.2535,
+              "m": 0.75,
+              "regret": 1.694
+            },
+            {
+              "costly_gather_share": 0.2812,
+              "gather_rate": 0.218,
+              "m": 1.0,
+              "regret": 1.6975
+            },
+            {
+              "costly_gather_share": 0.2453,
+              "gather_rate": 0.1707,
+              "m": 1.5,
+              "regret": 1.714
+            },
+            {
+              "costly_gather_share": 0.2256,
+              "gather_rate": 0.142,
+              "m": 2.0,
+              "regret": 1.7483
+            },
+            {
+              "costly_gather_share": 0.1265,
+              "gather_rate": 0.0783,
+              "m": 5.0,
+              "regret": 1.8542
+            }
+          ],
+          "splits": {
+            "group_kfold": {
+              "chosen_m": 0.0,
+              "curve": [
+                {
+                  "costly_gather_share": 0.4923,
+                  "gather_rate": 0.6554,
+                  "m": 0.0,
+                  "regret": 1.643
+                },
+                {
+                  "costly_gather_share": 0.4667,
+                  "gather_rate": 0.6193,
+                  "m": 0.1,
+                  "regret": 1.6443
+                },
+                {
+                  "costly_gather_share": 0.4308,
+                  "gather_rate": 0.4804,
+                  "m": 0.25,
+                  "regret": 1.6523
+                },
+                {
+                  "costly_gather_share": 0.3846,
+                  "gather_rate": 0.3102,
+                  "m": 0.5,
+                  "regret": 1.6809
+                },
+                {
+                  "costly_gather_share": 0.3179,
+                  "gather_rate": 0.2574,
+                  "m": 0.75,
+                  "regret": 1.6709
+                },
+                {
+                  "costly_gather_share": 0.2769,
+                  "gather_rate": 0.2202,
+                  "m": 1.0,
+                  "regret": 1.6942
+                },
+                {
+                  "costly_gather_share": 0.2513,
+                  "gather_rate": 0.1683,
+                  "m": 1.5,
+                  "regret": 1.7281
+                },
+                {
+                  "costly_gather_share": 0.2308,
+                  "gather_rate": 0.1434,
+                  "m": 2.0,
+                  "regret": 1.7569
+                },
+                {
+                  "costly_gather_share": 0.1487,
+                  "gather_rate": 0.0791,
+                  "m": 5.0,
+                  "regret": 1.896
+                }
+              ],
+              "plain_argmin_regret": 1.643
+            },
+            "seed1": {
+              "chosen_m": 0.5,
+              "curve": [
+                {
+                  "costly_gather_share": 0.5179,
+                  "gather_rate": 0.6596,
+                  "m": 0.0,
+                  "regret": 1.732
+                },
+                {
+                  "costly_gather_share": 0.4974,
+                  "gather_rate": 0.6241,
+                  "m": 0.1,
+                  "regret": 1.7369
+                },
+                {
+                  "costly_gather_share": 0.4564,
+                  "gather_rate": 0.5414,
+                  "m": 0.25,
+                  "regret": 1.7403
+                },
+                {
+                  "costly_gather_share": 0.3846,
+                  "gather_rate": 0.2937,
+                  "m": 0.5,
+                  "regret": 1.7296
+                },
+                {
+                  "costly_gather_share": 0.3333,
+                  "gather_rate": 0.2457,
+                  "m": 0.75,
+                  "regret": 1.7468
+                },
+                {
+                  "costly_gather_share": 0.2872,
+                  "gather_rate": 0.2166,
+                  "m": 1.0,
+                  "regret": 1.751
+                },
+                {
+                  "costly_gather_share": 0.241,
+                  "gather_rate": 0.1744,
+                  "m": 1.5,
+                  "regret": 1.7309
+                },
+                {
+                  "costly_gather_share": 0.2256,
+                  "gather_rate": 0.1431,
+                  "m": 2.0,
+                  "regret": 1.7782
+                },
+                {
+                  "costly_gather_share": 0.1231,
+                  "gather_rate": 0.0783,
+                  "m": 5.0,
+                  "regret": 1.8525
+                }
+              ],
+              "plain_argmin_regret": 1.732
+            },
+            "seed2": {
+              "chosen_m": 1.5,
+              "curve": [
+                {
+                  "costly_gather_share": 0.4718,
+                  "gather_rate": 0.6523,
+                  "m": 0.0,
+                  "regret": 1.7458
+                },
+                {
+                  "costly_gather_share": 0.4513,
+                  "gather_rate": 0.6241,
+                  "m": 0.1,
+                  "regret": 1.7132
+                },
+                {
+                  "costly_gather_share": 0.4256,
+                  "gather_rate": 0.4857,
+                  "m": 0.25,
+                  "regret": 1.7169
+                },
+                {
+                  "costly_gather_share": 0.3744,
+                  "gather_rate": 0.2993,
+                  "m": 0.5,
+                  "regret": 1.7197
+                },
+                {
+                  "costly_gather_share": 0.3487,
+                  "gather_rate": 0.2504,
+                  "m": 0.75,
+                  "regret": 1.697
+                },
+                {
+                  "costly_gather_share": 0.2872,
+                  "gather_rate": 0.2146,
+                  "m": 1.0,
+                  "regret": 1.6902
+                },
+                {
+                  "costly_gather_share": 0.2462,
+                  "gather_rate": 0.1708,
+                  "m": 1.5,
+                  "regret": 1.6748
+                },
+                {
+                  "costly_gather_share": 0.2256,
+                  "gather_rate": 0.1406,
+                  "m": 2.0,
+                  "regret": 1.7248
+                },
+                {
+                  "costly_gather_share": 0.1077,
+                  "gather_rate": 0.076,
+                  "m": 5.0,
+                  "regret": 1.7712
+                }
+              ],
+              "plain_argmin_regret": 1.7458
+            },
+            "seed3": {
+              "chosen_m": 0.1,
+              "curve": [
+                {
+                  "costly_gather_share": 0.4667,
+                  "gather_rate": 0.6504,
+                  "m": 0.0,
+                  "regret": 1.659
+                },
+                {
+                  "costly_gather_share": 0.4513,
+                  "gather_rate": 0.6258,
+                  "m": 0.1,
+                  "regret": 1.6477
+                },
+                {
+                  "costly_gather_share": 0.4154,
+                  "gather_rate": 0.495,
+                  "m": 0.25,
+                  "regret": 1.6637
+                },
+                {
+                  "costly_gather_share": 0.3436,
+                  "gather_rate": 0.299,
+                  "m": 0.5,
+                  "regret": 1.6756
+                },
+                {
+                  "costly_gather_share": 0.3077,
+                  "gather_rate": 0.2507,
+                  "m": 0.75,
+                  "regret": 1.6619
+                },
+                {
+                  "costly_gather_share": 0.2615,
+                  "gather_rate": 0.2135,
+                  "m": 1.0,
+                  "regret": 1.6688
+                },
+                {
+                  "costly_gather_share": 0.2359,
+                  "gather_rate": 0.171,
+                  "m": 1.5,
+                  "regret": 1.7196
+                },
+                {
+                  "costly_gather_share": 0.2205,
+                  "gather_rate": 0.1406,
+                  "m": 2.0,
+                  "regret": 1.771
+                },
+                {
+                  "costly_gather_share": 0.1128,
+                  "gather_rate": 0.0771,
+                  "m": 5.0,
+                  "regret": 1.8201
+                }
+              ],
+              "plain_argmin_regret": 1.659
+            },
+            "seed4": {
+              "chosen_m": 0.75,
+              "curve": [
+                {
+                  "costly_gather_share": 0.4769,
+                  "gather_rate": 0.6772,
+                  "m": 0.0,
+                  "regret": 1.6801
+                },
+                {
+                  "costly_gather_share": 0.4769,
+                  "gather_rate": 0.6504,
+                  "m": 0.1,
+                  "regret": 1.6794
+                },
+                {
+                  "costly_gather_share": 0.4513,
+                  "gather_rate": 0.5137,
+                  "m": 0.25,
+                  "regret": 1.6926
+                },
+                {
+                  "costly_gather_share": 0.4,
+                  "gather_rate": 0.3155,
+                  "m": 0.5,
+                  "regret": 1.6726
+                },
+                {
+                  "costly_gather_share": 0.3179,
+                  "gather_rate": 0.2644,
+                  "m": 0.75,
+                  "regret": 1.6691
+                },
+                {
+                  "costly_gather_share": 0.2872,
+                  "gather_rate": 0.2286,
+                  "m": 1.0,
+                  "regret": 1.673
+                },
+                {
+                  "costly_gather_share": 0.2615,
+                  "gather_rate": 0.1752,
+                  "m": 1.5,
+                  "regret": 1.6998
+                },
+                {
+                  "costly_gather_share": 0.2513,
+                  "gather_rate": 0.1465,
+                  "m": 2.0,
+                  "regret": 1.7187
+                },
+                {
+                  "costly_gather_share": 0.1385,
+                  "gather_rate": 0.0788,
+                  "m": 5.0,
+                  "regret": 1.88
+                }
+              ],
+              "plain_argmin_regret": 1.6801
+            },
+            "seed5": {
+              "chosen_m": 0.5,
+              "curve": [
+                {
+                  "costly_gather_share": 0.4513,
+                  "gather_rate": 0.6736,
+                  "m": 0.0,
+                  "regret": 1.7023
+                },
+                {
+                  "costly_gather_share": 0.4308,
+                  "gather_rate": 0.6104,
+                  "m": 0.1,
+                  "regret": 1.7099
+                },
+                {
+                  "costly_gather_share": 0.4051,
+                  "gather_rate": 0.4623,
+                  "m": 0.25,
+                  "regret": 1.7075
+                },
+                {
+                  "costly_gather_share": 0.3538,
+                  "gather_rate": 0.2971,
+                  "m": 0.5,
+                  "regret": 1.6893
+                },
+                {
+                  "costly_gather_share": 0.3282,
+                  "gather_rate": 0.2527,
+                  "m": 0.75,
+                  "regret": 1.7182
+                },
+                {
+                  "costly_gather_share": 0.2872,
+                  "gather_rate": 0.2144,
+                  "m": 1.0,
+                  "regret": 1.7077
+                },
+                {
+                  "costly_gather_share": 0.2359,
+                  "gather_rate": 0.1643,
+                  "m": 1.5,
+                  "regret": 1.7307
+                },
+                {
+                  "costly_gather_share": 0.2,
+                  "gather_rate": 0.1381,
+                  "m": 2.0,
+                  "regret": 1.7403
+                },
+                {
+                  "costly_gather_share": 0.1282,
+                  "gather_rate": 0.0805,
+                  "m": 5.0,
+                  "regret": 1.9056
+                }
+              ],
+              "plain_argmin_regret": 1.7023
+            }
+          }
+        },
+        "val": {
+          "belief/all": {
+            "costly_n": 73,
+            "decisions": 1206,
+            "episodes": 201,
+            "methods": {
+              "margin_0": {
+                "costly_gather_share": 0.3699,
+                "gather_rate": 0.6723,
+                "regret": {
+                  "hi": 2.3922,
+                  "lo": 1.212,
+                  "point": 1.7506
+                }
+              },
+              "margin_0.25": {
+                "costly_gather_share": 0.3562,
+                "gather_rate": 0.5356,
+                "minus_margin_0": {
+                  "hi": -0.006,
+                  "lo": -0.0337,
+                  "p_two_sided": 0.002,
+                  "point": -0.0187
+                },
+                "regret": {
+                  "hi": 2.3759,
+                  "lo": 1.1929,
+                  "point": 1.7319
+                }
+              },
+              "margin_0.5": {
+                "costly_gather_share": 0.2877,
+                "gather_rate": 0.285,
+                "minus_margin_0": {
+                  "hi": 0.0864,
+                  "lo": -0.0355,
+                  "p_two_sided": 0.655,
+                  "point": 0.0179
+                },
+                "regret": {
+                  "hi": 2.4212,
+                  "lo": 1.2182,
+                  "point": 1.7684
+                }
+              },
+              "margin_1": {
+                "costly_gather_share": 0.2466,
+                "gather_rate": 0.2188,
+                "minus_margin_0": {
+                  "hi": 0.103,
+                  "lo": -0.0577,
+                  "p_two_sided": 0.733,
+                  "point": 0.0182
+                },
+                "regret": {
+                  "hi": 2.4201,
+                  "lo": 1.2143,
+                  "point": 1.7687
+                }
+              }
+            },
+            "with_both": 1193
+          },
+          "belief/backup_unavailable": {
+            "costly_n": 48,
+            "decisions": 618,
+            "episodes": 103,
+            "methods": {
+              "margin_0": {
+                "costly_gather_share": 0.3542,
+                "gather_rate": 0.6748,
+                "regret": {
+                  "hi": 3.376,
+                  "lo": 1.2723,
+                  "point": 2.2078
+                }
+              },
+              "margin_0.25": {
+                "costly_gather_share": 0.3333,
+                "gather_rate": 0.5805,
+                "minus_margin_0": {
+                  "hi": 0.01,
+                  "lo": -0.0138,
+                  "p_two_sided": 0.686,
+                  "point": -0.0023
+                },
+                "regret": {
+                  "hi": 3.3836,
+                  "lo": 1.2728,
+                  "point": 2.2055
+                }
+              },
+              "margin_0.5": {
+                "costly_gather_share": 0.2292,
+                "gather_rate": 0.2959,
+                "minus_margin_0": {
+                  "hi": 0.1995,
+                  "lo": -0.0243,
+                  "p_two_sided": 0.198,
+                  "point": 0.0724
+                },
+                "regret": {
+                  "hi": 3.4919,
+                  "lo": 1.3045,
+                  "point": 2.2802
+                }
+              },
+              "margin_1": {
+                "costly_gather_share": 0.1667,
+                "gather_rate": 0.2602,
+                "minus_margin_0": {
+                  "hi": 0.1769,
+                  "lo": -0.0908,
+                  "p_two_sided": 0.668,
+                  "point": 0.0339
+                },
+                "regret": {
+                  "hi": 3.4499,
+                  "lo": 1.2788,
+                  "point": 2.2416
+                }
+              }
+            },
+            "with_both": 615
+          },
+          "belief/family": {
+            "costly_n": 64,
+            "decisions": 678,
+            "episodes": 113,
+            "methods": {
+              "margin_0": {
+                "costly_gather_share": 0.3438,
+                "gather_rate": 0.548,
+                "regret": {
+                  "hi": 3.6888,
+                  "lo": 1.7627,
+                  "point": 2.643
+                }
+              },
+              "margin_0.25": {
+                "costly_gather_share": 0.3281,
+                "gather_rate": 0.483,
+                "minus_margin_0": {
+                  "hi": 0.0147,
+                  "lo": -0.033,
+                  "p_two_sided": 0.655,
+                  "point": -0.0063
+                },
+                "regret": {
+                  "hi": 3.6761,
+                  "lo": 1.7575,
+                  "point": 2.6366
+                }
+              },
+              "margin_0.5": {
+                "costly_gather_share": 0.3281,
+                "gather_rate": 0.4328,
+                "minus_margin_0": {
+                  "hi": 0.0452,
+                  "lo": -0.0232,
+                  "p_two_sided": 0.549,
+                  "point": 0.0096
+                },
+                "regret": {
+                  "hi": 3.701,
+                  "lo": 1.7719,
+                  "point": 2.6526
+                }
+              },
+              "margin_1": {
+                "costly_gather_share": 0.2812,
+                "gather_rate": 0.3516,
+                "minus_margin_0": {
+                  "hi": 0.1202,
+                  "lo": -0.0873,
+                  "p_two_sided": 0.819,
+                  "point": 0.0128
+                },
+                "regret": {
+                  "hi": 3.6906,
+                  "lo": 1.7728,
+                  "point": 2.6558
+                }
+              }
+            },
+            "with_both": 677
+          },
+          "belief/family_backup_unavailable": {
+            "costly_n": 41,
+            "decisions": 342,
+            "episodes": 57,
+            "methods": {
+              "margin_0": {
+                "costly_gather_share": 0.2927,
+                "gather_rate": 0.5322,
+                "regret": {
+                  "hi": 5.1178,
+                  "lo": 1.658,
+                  "point": 3.2138
+                }
+              },
+              "margin_0.25": {
+                "costly_gather_share": 0.2683,
+                "gather_rate": 0.5029,
+                "minus_margin_0": {
+                  "hi": 0.034,
+                  "lo": 0.0024,
+                  "p_two_sided": 0.011,
+                  "point": 0.0159
+                },
+                "regret": {
+                  "hi": 5.1369,
+                  "lo": 1.6843,
+                  "point": 3.2297
+                }
+              },
+              "margin_0.5": {
+                "costly_gather_share": 0.2683,
+                "gather_rate": 0.462,
+                "minus_margin_0": {
+                  "hi": 0.0972,
+                  "lo": 0.0073,
+                  "p_two_sided": 0.003,
+                  "point": 0.0415
+                },
+                "regret": {
+                  "hi": 5.164,
+                  "lo": 1.7272,
+                  "point": 3.2553
+                }
+              },
+              "margin_1": {
+                "costly_gather_share": 0.1951,
+                "gather_rate": 0.4298,
+                "minus_margin_0": {
+                  "hi": 0.0781,
+                  "lo": -0.1765,
+                  "p_two_sided": 0.796,
+                  "point": -0.0279
+                },
+                "regret": {
+                  "hi": 5.1116,
+                  "lo": 1.6432,
+                  "point": 3.1859
+                }
+              }
+            },
+            "with_both": 342
+          },
+          "hindsight/all": {
+            "costly_n": 74,
+            "decisions": 1206,
+            "episodes": 201,
+            "methods": {
+              "margin_0": {
+                "costly_gather_share": 0.4189,
+                "gather_rate": 0.6723,
+                "regret": {
+                  "hi": 2.8427,
+                  "lo": 1.4679,
+                  "point": 2.0914
+                }
+              },
+              "margin_0.25": {
+                "costly_gather_share": 0.4054,
+                "gather_rate": 0.5356,
+                "minus_margin_0": {
+                  "hi": -0.012,
+                  "lo": -0.0393,
+                  "p_two_sided": 0.0,
+                  "point": -0.0241
+                },
+                "regret": {
+                  "hi": 2.822,
+                  "lo": 1.4446,
+                  "point": 2.0673
+                }
+              },
+              "margin_0.5": {
+                "costly_gather_share": 0.3378,
+                "gather_rate": 0.285,
+                "minus_margin_0": {
+                  "hi": 0.1114,
+                  "lo": -0.0374,
+                  "p_two_sided": 0.523,
+                  "point": 0.0267
+                },
+                "regret": {
+                  "hi": 2.8657,
+                  "lo": 1.4746,
+                  "point": 2.1181
+                }
+              },
+              "margin_1": {
+                "costly_gather_share": 0.3108,
+                "gather_rate": 0.2188,
+                "minus_margin_0": {
+                  "hi": 0.1233,
+                  "lo": -0.0683,
+                  "p_two_sided": 0.709,
+                  "point": 0.0224
+                },
+                "regret": {
+                  "hi": 2.8421,
+                  "lo": 1.4606,
+                  "point": 2.1138
+                }
+              }
+            },
+            "with_both": 1193
+          },
+          "hindsight/backup_unavailable": {
+            "costly_n": 51,
+            "decisions": 618,
+            "episodes": 103,
+            "methods": {
+              "margin_0": {
+                "costly_gather_share": 0.4314,
+                "gather_rate": 0.6748,
+                "regret": {
+                  "hi": 3.5956,
+                  "lo": 1.5312,
+                  "point": 2.4733
+                }
+              },
+              "margin_0.25": {
+                "costly_gather_share": 0.4118,
+                "gather_rate": 0.5805,
+                "minus_margin_0": {
+                  "hi": -0.0035,
+                  "lo": -0.0189,
+                  "p_two_sided": 0.002,
+                  "point": -0.0109
+                },
+                "regret": {
+                  "hi": 3.5813,
+                  "lo": 1.5189,
+                  "point": 2.4624
+                }
+              },
+              "margin_0.5": {
+                "costly_gather_share": 0.3137,
+                "gather_rate": 0.2959,
+                "minus_margin_0": {
+                  "hi": 0.2548,
+                  "lo": -0.0325,
+                  "p_two_sided": 0.132,
+                  "point": 0.0935
+                },
+                "regret": {
+                  "hi": 3.7222,
+                  "lo": 1.6027,
+                  "point": 2.5668
+                }
+              },
+              "margin_1": {
+                "costly_gather_share": 0.2745,
+                "gather_rate": 0.2602,
+                "minus_margin_0": {
+                  "hi": 0.2208,
+                  "lo": -0.1207,
+                  "p_two_sided": 0.561,
+                  "point": 0.0469
+                },
+                "regret": {
+                  "hi": 3.676,
+                  "lo": 1.577,
+                  "point": 2.5202
+                }
+              }
+            },
+            "with_both": 615
+          },
+          "hindsight/family": {
+            "costly_n": 65,
+            "decisions": 678,
+            "episodes": 113,
+            "methods": {
+              "margin_0": {
+                "costly_gather_share": 0.4,
+                "gather_rate": 0.548,
+                "regret": {
+                  "hi": 4.4826,
+                  "lo": 2.1777,
+                  "point": 3.2493
+                }
+              },
+              "margin_0.25": {
+                "costly_gather_share": 0.3846,
+                "gather_rate": 0.483,
+                "minus_margin_0": {
+                  "hi": 0.0037,
+                  "lo": -0.0431,
+                  "p_two_sided": 0.127,
+                  "point": -0.016
+                },
+                "regret": {
+                  "hi": 4.4695,
+                  "lo": 2.1651,
+                  "point": 3.2334
+                }
+              },
+              "margin_0.5": {
+                "costly_gather_share": 0.3846,
+                "gather_rate": 0.4328,
+                "minus_margin_0": {
+                  "hi": 0.1197,
+                  "lo": -0.034,
+                  "p_two_sided": 0.648,
+                  "point": 0.0252
+                },
+                "regret": {
+                  "hi": 4.5253,
+                  "lo": 2.2226,
+                  "point": 3.2745
+                }
+              },
+              "margin_1": {
+                "costly_gather_share": 0.3538,
+                "gather_rate": 0.3516,
+                "minus_margin_0": {
+                  "hi": 0.1568,
+                  "lo": -0.1088,
+                  "p_two_sided": 0.797,
+                  "point": 0.0203
+                },
+                "regret": {
+                  "hi": 4.495,
+                  "lo": 2.2117,
+                  "point": 3.2696
+                }
+              }
+            },
+            "with_both": 677
+          },
+          "hindsight/family_backup_unavailable": {
+            "costly_n": 44,
+            "decisions": 342,
+            "episodes": 57,
+            "methods": {
+              "margin_0": {
+                "costly_gather_share": 0.3864,
+                "gather_rate": 0.5322,
+                "regret": {
+                  "hi": 5.4439,
+                  "lo": 2.2405,
+                  "point": 3.6936
+                }
+              },
+              "margin_0.25": {
+                "costly_gather_share": 0.3636,
+                "gather_rate": 0.5029,
+                "minus_margin_0": {
+                  "hi": 0.0055,
+                  "lo": -0.0038,
+                  "p_two_sided": 0.974,
+                  "point": 0.0003
+                },
+                "regret": {
+                  "hi": 5.4433,
+                  "lo": 2.2377,
+                  "point": 3.6939
+                }
+              },
+              "margin_0.5": {
+                "costly_gather_share": 0.3636,
+                "gather_rate": 0.462,
+                "minus_margin_0": {
+                  "hi": 0.2412,
+                  "lo": -0.0054,
+                  "p_two_sided": 0.347,
+                  "point": 0.0797
+                },
+                "regret": {
+                  "hi": 5.5055,
+                  "lo": 2.2994,
+                  "point": 3.7733
+                }
+              },
+              "margin_1": {
+                "costly_gather_share": 0.3182,
+                "gather_rate": 0.4298,
+                "minus_margin_0": {
+                  "hi": 0.2309,
+                  "lo": -0.2381,
+                  "p_two_sided": 0.856,
+                  "point": -0.0044
+                },
+                "regret": {
+                  "hi": 5.4868,
+                  "lo": 2.2077,
+                  "point": 3.6892
+                }
+              }
+            },
+            "with_both": 342
+          }
+        }
+      },
+      "posterior_lr": {
+        "features": 94,
+        "fit_rows_train": 1952,
+        "train": {
+          "brier_exact_vs_cause": 0.0926,
+          "brier_vs_cause": 0.1193,
+          "mae_vs_exact": 0.0694,
+          "map_agreement_with_exact": 0.9559,
+          "n": 1952
+        },
+        "val": {
+          "brier_exact_vs_cause": 0.0895,
+          "brier_vs_cause": 0.1104,
+          "mae_vs_exact": 0.0568,
+          "map_agreement_with_exact": 0.9637,
+          "n": 633
+        }
+      },
+      "theta_selection": {
+        "exact": {
+          "chosen_theta": 0.75,
+          "curve": [
+            {
+              "gather_rate_held": 0.0,
+              "regret_belief": 3.4674,
+              "regret_hindsight": 4.2791,
+              "theta": 0.5
+            },
+            {
+              "gather_rate_held": 0.0005,
+              "regret_belief": 3.4665,
+              "regret_hindsight": 4.2792,
+              "theta": 0.55
+            },
+            {
+              "gather_rate_held": 0.0005,
+              "regret_belief": 3.4665,
+              "regret_hindsight": 4.2792,
+              "theta": 0.6
+            },
+            {
+              "gather_rate_held": 0.0005,
+              "regret_belief": 3.4665,
+              "regret_hindsight": 4.2792,
+              "theta": 0.65
+            },
+            {
+              "gather_rate_held": 0.2223,
+              "regret_belief": 2.7223,
+              "regret_hindsight": 3.4738,
+              "theta": 0.7
+            },
+            {
+              "gather_rate_held": 0.27,
+              "regret_belief": 2.6752,
+              "regret_hindsight": 3.3971,
+              "theta": 0.75
+            },
+            {
+              "gather_rate_held": 0.3438,
+              "regret_belief": 2.6856,
+              "regret_hindsight": 3.3992,
+              "theta": 0.8
+            },
+            {
+              "gather_rate_held": 0.3883,
+              "regret_belief": 2.7194,
+              "regret_hindsight": 3.3849,
+              "theta": 0.85
+            },
+            {
+              "gather_rate_held": 0.4042,
+              "regret_belief": 2.7015,
+              "regret_hindsight": 3.3722,
+              "theta": 0.9
+            },
+            {
+              "gather_rate_held": 0.4657,
+              "regret_belief": 2.6769,
+              "regret_hindsight": 3.3799,
+              "theta": 0.95
+            },
+            {
+              "gather_rate_held": 0.605,
+              "regret_belief": 2.7165,
+              "regret_hindsight": 3.4396,
+              "theta": 0.99
+            },
+            {
+              "gather_rate_held": 0.9462,
+              "regret_belief": 2.7631,
+              "regret_hindsight": 3.4963,
+              "theta": 1.01
+            }
+          ]
+        },
+        "lr": {
+          "chosen_theta": 0.95,
+          "curve": [
+            {
+              "gather_rate_held": 0.0,
+              "regret_belief": 3.5366,
+              "regret_hindsight": 4.3303,
+              "theta": 0.5
+            },
+            {
+              "gather_rate_held": 0.0046,
+              "regret_belief": 3.5261,
+              "regret_hindsight": 4.3125,
+              "theta": 0.55
+            },
+            {
+              "gather_rate_held": 0.022,
+              "regret_belief": 3.4994,
+              "regret_hindsight": 4.2892,
+              "theta": 0.6
+            },
+            {
+              "gather_rate_held": 0.0891,
+              "regret_belief": 3.5026,
+              "regret_hindsight": 4.268,
+              "theta": 0.65
+            },
+            {
+              "gather_rate_held": 0.3443,
+              "regret_belief": 2.8191,
+              "regret_hindsight": 3.4905,
+              "theta": 0.7
+            },
+            {
+              "gather_rate_held": 0.437,
+              "regret_belief": 2.7359,
+              "regret_hindsight": 3.4039,
+              "theta": 0.75
+            },
+            {
+              "gather_rate_held": 0.4472,
+              "regret_belief": 2.7346,
+              "regret_hindsight": 3.3831,
+              "theta": 0.8
+            },
+            {
+              "gather_rate_held": 0.4524,
+              "regret_belief": 2.7347,
+              "regret_hindsight": 3.3824,
+              "theta": 0.85
+            },
+            {
+              "gather_rate_held": 0.4595,
+              "regret_belief": 2.7296,
+              "regret_hindsight": 3.3826,
+              "theta": 0.9
+            },
+            {
+              "gather_rate_held": 0.5338,
+              "regret_belief": 2.6951,
+              "regret_hindsight": 3.392,
+              "theta": 0.95
+            },
+            {
+              "gather_rate_held": 0.8689,
+              "regret_belief": 2.7415,
+              "regret_hindsight": 3.4744,
+              "theta": 0.99
+            },
+            {
+              "gather_rate_held": 0.9462,
+              "regret_belief": 2.7631,
+              "regret_hindsight": 3.4963,
+              "theta": 1.01
+            }
+          ]
+        }
+      },
+      "train_references": {
+        "gbm_belief_crossfit_group_kfold": 1.643,
+        "playbook_act_first": 5.4844,
+        "playbook_investigate_first": 2.8327
+      },
+      "val": {
+        "belief/all": {
+          "costly_n": 73,
+          "decisions": 1206,
+          "episodes": 201,
+          "methods": {
+            "bt_exact": {
+              "costly_gather_share": 0.2329,
+              "gather_rate": 0.1526,
+              "minus_gbm_belief": {
+                "hi": 2.1795,
+                "lo": 0.4628,
+                "p_two_sided": 0.0,
+                "point": 1.2337
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0232,
+                "lo": -0.2696,
+                "p_two_sided": 0.014,
+                "point": -0.1408
+              },
+              "regret": {
+                "hi": 4.3042,
+                "lo": 1.9147,
+                "point": 2.9843
+              }
+            },
+            "bt_exact_gbm_fallback": {
+              "costly_gather_share": 0.3151,
+              "gather_rate": 0.544,
+              "minus_gbm_belief": {
+                "hi": 1.9098,
+                "lo": 0.184,
+                "p_two_sided": 0.012,
+                "point": 0.9578
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.2392,
+                "lo": -0.5951,
+                "p_two_sided": 0.0,
+                "point": -0.4167
+              },
+              "regret": {
+                "hi": 4.0155,
+                "lo": 1.6461,
+                "point": 2.7084
+              }
+            },
+            "bt_lr": {
+              "costly_gather_share": 0.3973,
+              "gather_rate": 0.2699,
+              "minus_gbm_belief": {
+                "hi": 2.2482,
+                "lo": 0.5432,
+                "p_two_sided": 0.0,
+                "point": 1.3021
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0126,
+                "lo": -0.1746,
+                "p_two_sided": 0.111,
+                "point": -0.0724
+              },
+              "regret": {
+                "hi": 4.3699,
+                "lo": 1.9984,
+                "point": 3.0527
+              }
+            },
+            "bt_lr_gbm_fallback": {
+              "costly_gather_share": 0.4795,
+              "gather_rate": 0.6614,
+              "minus_gbm_belief": {
+                "hi": 1.9708,
+                "lo": 0.2629,
+                "p_two_sided": 0.009,
+                "point": 1.0262
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.1872,
+                "lo": -0.5234,
+                "p_two_sided": 0.0,
+                "point": -0.3483
+              },
+              "regret": {
+                "hi": 4.0968,
+                "lo": 1.7113,
+                "point": 2.7768
+              }
+            },
+            "gate_exact": {
+              "costly_gather_share": 0.3425,
+              "gather_rate": 0.5574,
+              "minus_gbm_belief": {
+                "hi": 0.3724,
+                "lo": -0.0391,
+                "p_two_sided": 0.17,
+                "point": 0.1302
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.3763,
+                "lo": -2.2259,
+                "p_two_sided": 0.003,
+                "point": -1.2443
+              },
+              "regret": {
+                "hi": 2.6286,
+                "lo": 1.2755,
+                "point": 1.8807
+              }
+            },
+            "gate_lr": {
+              "costly_gather_share": 0.5068,
+              "gather_rate": 0.679,
+              "minus_gbm_belief": {
+                "hi": 0.1146,
+                "lo": -0.2516,
+                "p_two_sided": 0.75,
+                "point": -0.0357
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.6619,
+                "lo": -2.3712,
+                "p_two_sided": 0.0,
+                "point": -1.4102
+              },
+              "regret": {
+                "hi": 2.3317,
+                "lo": 1.1798,
+                "point": 1.7148
+              }
+            },
+            "gbm_belief": {
+              "costly_gather_share": 0.3699,
+              "gather_rate": 0.6723,
+              "minus_playbook_investigate_first": {
+                "hi": -0.6117,
+                "lo": -2.3168,
+                "p_two_sided": 0.0,
+                "point": -1.3745
+              },
+              "regret": {
+                "hi": 2.3922,
+                "lo": 1.212,
+                "point": 1.7506
+              }
+            },
+            "gbm_hindsight": {
+              "costly_gather_share": 0.4247,
+              "gather_rate": 0.5968,
+              "minus_gbm_belief": {
+                "hi": 0.596,
+                "lo": 0.1482,
+                "p_two_sided": 0.0,
+                "point": 0.3484
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.2793,
+                "lo": -1.8893,
+                "p_two_sided": 0.007,
+                "point": -1.0261
+              },
+              "regret": {
+                "hi": 2.8847,
+                "lo": 1.4585,
+                "point": 2.099
+              }
+            },
+            "playbook_act_first": {
+              "costly_gather_share": 0.0,
+              "gather_rate": 0.0,
+              "minus_gbm_belief": {
+                "hi": 5.6099,
+                "lo": 2.6785,
+                "p_two_sided": 0.0,
+                "point": 4.0698
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 3.9458,
+                "lo": 1.6188,
+                "p_two_sided": 0.0,
+                "point": 2.6953
+              },
+              "regret": {
+                "hi": 7.7377,
+                "lo": 4.1196,
+                "point": 5.8204
+              }
+            },
+            "playbook_investigate_first": {
+              "costly_gather_share": 0.3425,
+              "gather_rate": 0.285,
+              "minus_gbm_belief": {
+                "hi": 2.3168,
+                "lo": 0.6117,
+                "p_two_sided": 0.0,
+                "point": 1.3745
+              },
+              "regret": {
+                "hi": 4.4387,
+                "lo": 2.0506,
+                "point": 3.125
+              }
+            }
+          },
+          "with_both": 1193
+        },
+        "belief/backup_unavailable": {
+          "costly_n": 48,
+          "decisions": 618,
+          "episodes": 103,
+          "methods": {
+            "bt_exact": {
+              "costly_gather_share": 0.125,
+              "gather_rate": 0.148,
+              "minus_gbm_belief": {
+                "hi": 2.6876,
+                "lo": 0.0964,
+                "p_two_sided": 0.029,
+                "point": 1.1975
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0122,
+                "lo": -0.3507,
+                "p_two_sided": 0.083,
+                "point": -0.1459
+              },
+              "regret": {
+                "hi": 5.5575,
+                "lo": 1.8139,
+                "point": 3.4052
+              }
+            },
+            "bt_exact_gbm_fallback": {
+              "costly_gather_share": 0.25,
+              "gather_rate": 0.548,
+              "minus_gbm_belief": {
+                "hi": 2.4993,
+                "lo": -0.0602,
+                "p_two_sided": 0.069,
+                "point": 1.008
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0667,
+                "lo": -0.605,
+                "p_two_sided": 0.014,
+                "point": -0.3353
+              },
+              "regret": {
+                "hi": 5.3175,
+                "lo": 1.608,
+                "point": 3.2158
+              }
+            },
+            "bt_lr": {
+              "costly_gather_share": 0.3542,
+              "gather_rate": 0.3154,
+              "minus_gbm_belief": {
+                "hi": 2.7937,
+                "lo": 0.2433,
+                "p_two_sided": 0.012,
+                "point": 1.3137
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0388,
+                "lo": -0.1182,
+                "p_two_sided": 0.466,
+                "point": -0.0297
+              },
+              "regret": {
+                "hi": 5.6178,
+                "lo": 1.923,
+                "point": 3.5214
+              }
+            },
+            "bt_lr_gbm_fallback": {
+              "costly_gather_share": 0.4792,
+              "gather_rate": 0.7154,
+              "minus_gbm_belief": {
+                "hi": 2.5964,
+                "lo": 0.0588,
+                "p_two_sided": 0.032,
+                "point": 1.1242
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0042,
+                "lo": -0.4131,
+                "p_two_sided": 0.054,
+                "point": -0.2191
+              },
+              "regret": {
+                "hi": 5.4064,
+                "lo": 1.7176,
+                "point": 3.332
+              }
+            },
+            "gate_exact": {
+              "costly_gather_share": 0.2917,
+              "gather_rate": 0.5593,
+              "minus_gbm_belief": {
+                "hi": 0.5039,
+                "lo": -0.1836,
+                "p_two_sided": 0.623,
+                "point": 0.1133
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0274,
+                "lo": -2.8384,
+                "p_two_sided": 0.059,
+                "point": -1.23
+              },
+              "regret": {
+                "hi": 3.638,
+                "lo": 1.2727,
+                "point": 2.3211
+              }
+            },
+            "gate_lr": {
+              "costly_gather_share": 0.5208,
+              "gather_rate": 0.7268,
+              "minus_gbm_belief": {
+                "hi": 0.1596,
+                "lo": -0.4797,
+                "p_two_sided": 0.712,
+                "point": -0.0969
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.422,
+                "lo": -2.8598,
+                "p_two_sided": 0.002,
+                "point": -1.4403
+              },
+              "regret": {
+                "hi": 3.2497,
+                "lo": 1.2126,
+                "point": 2.1108
+              }
+            },
+            "gbm_belief": {
+              "costly_gather_share": 0.3542,
+              "gather_rate": 0.6748,
+              "minus_playbook_investigate_first": {
+                "hi": -0.258,
+                "lo": -2.8113,
+                "p_two_sided": 0.011,
+                "point": -1.3433
+              },
+              "regret": {
+                "hi": 3.376,
+                "lo": 1.2723,
+                "point": 2.2078
+              }
+            },
+            "gbm_hindsight": {
+              "costly_gather_share": 0.4583,
+              "gather_rate": 0.639,
+              "minus_gbm_belief": {
+                "hi": 0.9738,
+                "lo": 0.2012,
+                "p_two_sided": 0.0,
+                "point": 0.5526
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.2388,
+                "lo": -2.0943,
+                "p_two_sided": 0.15,
+                "point": -0.7907
+              },
+              "regret": {
+                "hi": 4.1666,
+                "lo": 1.6071,
+                "point": 2.7604
+              }
+            },
+            "playbook_act_first": {
+              "costly_gather_share": 0.0,
+              "gather_rate": 0.0,
+              "minus_gbm_belief": {
+                "hi": 9.1548,
+                "lo": 4.0799,
+                "p_two_sided": 0.0,
+                "point": 6.4736
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 7.5347,
+                "lo": 3.059,
+                "p_two_sided": 0.0,
+                "point": 5.1303
+              },
+              "regret": {
+                "hi": 11.9167,
+                "lo": 5.7092,
+                "point": 8.6814
+              }
+            },
+            "playbook_investigate_first": {
+              "costly_gather_share": 0.3542,
+              "gather_rate": 0.3545,
+              "minus_gbm_belief": {
+                "hi": 2.8113,
+                "lo": 0.258,
+                "p_two_sided": 0.011,
+                "point": 1.3433
+              },
+              "regret": {
+                "hi": 5.6632,
+                "lo": 1.9649,
+                "point": 3.5511
+              }
+            }
+          },
+          "with_both": 615
+        },
+        "belief/family": {
+          "costly_n": 64,
+          "decisions": 678,
+          "episodes": 113,
+          "methods": {
+            "bt_exact": {
+              "costly_gather_share": 0.2656,
+              "gather_rate": 0.2688,
+              "minus_gbm_belief": {
+                "hi": 3.3885,
+                "lo": 0.4005,
+                "p_two_sided": 0.008,
+                "point": 1.7709
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0855,
+                "lo": -0.5182,
+                "p_two_sided": 0.002,
+                "point": -0.2821
+              },
+              "regret": {
+                "hi": 6.5334,
+                "lo": 2.5879,
+                "point": 4.4139
+              }
+            },
+            "bt_exact_gbm_fallback": {
+              "costly_gather_share": 0.2812,
+              "gather_rate": 0.322,
+              "minus_gbm_belief": {
+                "hi": 3.3233,
+                "lo": 0.3218,
+                "p_two_sided": 0.01,
+                "point": 1.7037
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.14,
+                "lo": -0.5981,
+                "p_two_sided": 0.0,
+                "point": -0.3493
+              },
+              "regret": {
+                "hi": 6.4831,
+                "lo": 2.5471,
+                "point": 4.3467
+              }
+            },
+            "bt_lr": {
+              "costly_gather_share": 0.4531,
+              "gather_rate": 0.4756,
+              "minus_gbm_belief": {
+                "hi": 3.542,
+                "lo": 0.5287,
+                "p_two_sided": 0.003,
+                "point": 1.8926
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0129,
+                "lo": -0.3455,
+                "p_two_sided": 0.031,
+                "point": -0.1604
+              },
+              "regret": {
+                "hi": 6.6497,
+                "lo": 2.7644,
+                "point": 4.5356
+              }
+            },
+            "bt_lr_gbm_fallback": {
+              "costly_gather_share": 0.4688,
+              "gather_rate": 0.5288,
+              "minus_gbm_belief": {
+                "hi": 3.4256,
+                "lo": 0.4641,
+                "p_two_sided": 0.006,
+                "point": 1.8254
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0493,
+                "lo": -0.4311,
+                "p_two_sided": 0.008,
+                "point": -0.2276
+              },
+              "regret": {
+                "hi": 6.601,
+                "lo": 2.6996,
+                "point": 4.4684
+              }
+            },
+            "gate_exact": {
+              "costly_gather_share": 0.3125,
+              "gather_rate": 0.3456,
+              "minus_gbm_belief": {
+                "hi": 0.6291,
+                "lo": -0.0787,
+                "p_two_sided": 0.172,
+                "point": 0.2315
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.2469,
+                "lo": -3.5184,
+                "p_two_sided": 0.021,
+                "point": -1.8215
+              },
+              "regret": {
+                "hi": 4.0566,
+                "lo": 1.8873,
+                "point": 2.8745
+              }
+            },
+            "gate_lr": {
+              "costly_gather_share": 0.5,
+              "gather_rate": 0.5598,
+              "minus_gbm_belief": {
+                "hi": 0.202,
+                "lo": -0.4323,
+                "p_two_sided": 0.743,
+                "point": -0.0635
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.8072,
+                "lo": -3.7359,
+                "p_two_sided": 0.0,
+                "point": -2.1165
+              },
+              "regret": {
+                "hi": 3.6296,
+                "lo": 1.742,
+                "point": 2.5794
+              }
+            },
+            "gbm_belief": {
+              "costly_gather_share": 0.3438,
+              "gather_rate": 0.548,
+              "minus_playbook_investigate_first": {
+                "hi": -0.6471,
+                "lo": -3.6824,
+                "p_two_sided": 0.001,
+                "point": -2.053
+              },
+              "regret": {
+                "hi": 3.6888,
+                "lo": 1.7627,
+                "point": 2.643
+              }
+            },
+            "gbm_hindsight": {
+              "costly_gather_share": 0.4219,
+              "gather_rate": 0.5391,
+              "minus_gbm_belief": {
+                "hi": 0.9165,
+                "lo": 0.2199,
+                "p_two_sided": 0.0,
+                "point": 0.5311
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.1734,
+                "lo": -3.0228,
+                "p_two_sided": 0.03,
+                "point": -1.5219
+              },
+              "regret": {
+                "hi": 4.3969,
+                "lo": 2.1481,
+                "point": 3.174
+              }
+            },
+            "playbook_act_first": {
+              "costly_gather_share": 0.0,
+              "gather_rate": 0.0,
+              "minus_gbm_belief": {
+                "hi": 9.2744,
+                "lo": 4.539,
+                "p_two_sided": 0.0,
+                "point": 6.8157
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 6.736,
+                "lo": 2.8823,
+                "p_two_sided": 0.0,
+                "point": 4.7627
+              },
+              "regret": {
+                "hi": 12.4004,
+                "lo": 6.711,
+                "point": 9.4587
+              }
+            },
+            "playbook_investigate_first": {
+              "costly_gather_share": 0.3906,
+              "gather_rate": 0.421,
+              "minus_gbm_belief": {
+                "hi": 3.6824,
+                "lo": 0.6471,
+                "p_two_sided": 0.001,
+                "point": 2.053
+              },
+              "regret": {
+                "hi": 6.8657,
+                "lo": 2.8773,
+                "point": 4.696
+              }
+            }
+          },
+          "with_both": 677
+        },
+        "belief/family_backup_unavailable": {
+          "costly_n": 41,
+          "decisions": 342,
+          "episodes": 57,
+          "methods": {
+            "bt_exact": {
+              "costly_gather_share": 0.1463,
+              "gather_rate": 0.2661,
+              "minus_gbm_belief": {
+                "hi": 4.2388,
+                "lo": -0.1468,
+                "p_two_sided": 0.073,
+                "point": 1.8549
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0237,
+                "lo": -0.6573,
+                "p_two_sided": 0.032,
+                "point": -0.31
+              },
+              "regret": {
+                "hi": 8.783,
+                "lo": 2.2726,
+                "point": 5.0687
+              }
+            },
+            "bt_exact_gbm_fallback": {
+              "costly_gather_share": 0.1707,
+              "gather_rate": 0.3041,
+              "minus_gbm_belief": {
+                "hi": 4.2117,
+                "lo": -0.1798,
+                "p_two_sided": 0.083,
+                "point": 1.8215
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0549,
+                "lo": -0.6898,
+                "p_two_sided": 0.018,
+                "point": -0.3433
+              },
+              "regret": {
+                "hi": 8.6826,
+                "lo": 2.2399,
+                "point": 5.0354
+              }
+            },
+            "bt_lr": {
+              "costly_gather_share": 0.4146,
+              "gather_rate": 0.5673,
+              "minus_gbm_belief": {
+                "hi": 4.4477,
+                "lo": 0.0635,
+                "p_two_sided": 0.037,
+                "point": 2.0648
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.001,
+                "lo": -0.2477,
+                "p_two_sided": 0.058,
+                "point": -0.1
+              },
+              "regret": {
+                "hi": 8.9387,
+                "lo": 2.4682,
+                "point": 5.2786
+              }
+            },
+            "bt_lr_gbm_fallback": {
+              "costly_gather_share": 0.439,
+              "gather_rate": 0.6053,
+              "minus_gbm_belief": {
+                "hi": 4.3877,
+                "lo": 0.0493,
+                "p_two_sided": 0.042,
+                "point": 2.0315
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0052,
+                "lo": -0.2913,
+                "p_two_sided": 0.027,
+                "point": -0.1334
+              },
+              "regret": {
+                "hi": 8.9376,
+                "lo": 2.4254,
+                "point": 5.2453
+              }
+            },
+            "gate_exact": {
+              "costly_gather_share": 0.2195,
+              "gather_rate": 0.3246,
+              "minus_gbm_belief": {
+                "hi": 0.9586,
+                "lo": -0.3262,
+                "p_two_sided": 0.554,
+                "point": 0.2048
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.3718,
+                "lo": -4.478,
+                "p_two_sided": 0.101,
+                "point": -1.96
+              },
+              "regret": {
+                "hi": 5.6622,
+                "lo": 1.6701,
+                "point": 3.4186
+              }
+            },
+            "gate_lr": {
+              "costly_gather_share": 0.4878,
+              "gather_rate": 0.6257,
+              "minus_gbm_belief": {
+                "hi": 0.3115,
+                "lo": -0.9171,
+                "p_two_sided": 0.664,
+                "point": -0.1752
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.4626,
+                "lo": -4.702,
+                "p_two_sided": 0.002,
+                "point": -2.34
+              },
+              "regret": {
+                "hi": 4.8898,
+                "lo": 1.5773,
+                "point": 3.0387
+              }
+            },
+            "gbm_belief": {
+              "costly_gather_share": 0.2927,
+              "gather_rate": 0.5322,
+              "minus_playbook_investigate_first": {
+                "hi": -0.1601,
+                "lo": -4.5491,
+                "p_two_sided": 0.024,
+                "point": -2.1648
+              },
+              "regret": {
+                "hi": 5.1178,
+                "lo": 1.658,
+                "point": 3.2138
+              }
+            },
+            "gbm_hindsight": {
+              "costly_gather_share": 0.439,
+              "gather_rate": 0.5673,
+              "minus_gbm_belief": {
+                "hi": 1.5308,
+                "lo": 0.2773,
+                "p_two_sided": 0.0,
+                "point": 0.8374
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.6016,
+                "lo": -3.4529,
+                "p_two_sided": 0.181,
+                "point": -1.3274
+              },
+              "regret": {
+                "hi": 6.3324,
+                "lo": 2.2198,
+                "point": 4.0513
+              }
+            },
+            "playbook_act_first": {
+              "costly_gather_share": 0.0,
+              "gather_rate": 0.0,
+              "minus_gbm_belief": {
+                "hi": 15.4858,
+                "lo": 7.4578,
+                "p_two_sided": 0.0,
+                "point": 11.3889
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 12.9023,
+                "lo": 5.9944,
+                "p_two_sided": 0.0,
+                "point": 9.2241
+              },
+              "regret": {
+                "hi": 19.9274,
+                "lo": 9.909,
+                "point": 14.6028
+              }
+            },
+            "playbook_investigate_first": {
+              "costly_gather_share": 0.4146,
+              "gather_rate": 0.5702,
+              "minus_gbm_belief": {
+                "hi": 4.5491,
+                "lo": 0.1601,
+                "p_two_sided": 0.024,
+                "point": 2.1648
+              },
+              "regret": {
+                "hi": 9.0862,
+                "lo": 2.5681,
+                "point": 5.3787
+              }
+            }
+          },
+          "with_both": 342
+        },
+        "hindsight/all": {
+          "costly_n": 74,
+          "decisions": 1206,
+          "episodes": 201,
+          "methods": {
+            "bt_exact": {
+              "costly_gather_share": 0.2838,
+              "gather_rate": 0.1526,
+              "minus_gbm_belief": {
+                "hi": 2.0582,
+                "lo": 0.3204,
+                "p_two_sided": 0.002,
+                "point": 1.1134
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0395,
+                "lo": -0.3038,
+                "p_two_sided": 0.145,
+                "point": -0.1325
+              },
+              "regret": {
+                "hi": 4.5334,
+                "lo": 2.125,
+                "point": 3.2048
+              }
+            },
+            "bt_exact_gbm_fallback": {
+              "costly_gather_share": 0.3649,
+              "gather_rate": 0.544,
+              "minus_gbm_belief": {
+                "hi": 1.8296,
+                "lo": 0.0945,
+                "p_two_sided": 0.032,
+                "point": 0.8652
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.1639,
+                "lo": -0.5887,
+                "p_two_sided": 0.0,
+                "point": -0.3806
+              },
+              "regret": {
+                "hi": 4.2839,
+                "lo": 1.8597,
+                "point": 2.9566
+              }
+            },
+            "bt_lr": {
+              "costly_gather_share": 0.4189,
+              "gather_rate": 0.2699,
+              "minus_gbm_belief": {
+                "hi": 2.1539,
+                "lo": 0.4003,
+                "p_two_sided": 0.001,
+                "point": 1.197
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0221,
+                "lo": -0.1488,
+                "p_two_sided": 0.299,
+                "point": -0.0488
+              },
+              "regret": {
+                "hi": 4.6113,
+                "lo": 2.2003,
+                "point": 3.2884
+              }
+            },
+            "bt_lr_gbm_fallback": {
+              "costly_gather_share": 0.5,
+              "gather_rate": 0.6614,
+              "minus_gbm_belief": {
+                "hi": 1.9085,
+                "lo": 0.1522,
+                "p_two_sided": 0.016,
+                "point": 0.9488
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.148,
+                "lo": -0.4576,
+                "p_two_sided": 0.001,
+                "point": -0.297
+              },
+              "regret": {
+                "hi": 4.3977,
+                "lo": 1.937,
+                "point": 3.0403
+              }
+            },
+            "gate_exact": {
+              "costly_gather_share": 0.3784,
+              "gather_rate": 0.5574,
+              "minus_gbm_belief": {
+                "hi": 0.3433,
+                "lo": -0.0828,
+                "p_two_sided": 0.359,
+                "point": 0.0959
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.2452,
+                "lo": -2.1359,
+                "p_two_sided": 0.01,
+                "point": -1.1499
+              },
+              "regret": {
+                "hi": 3.0196,
+                "lo": 1.4898,
+                "point": 2.1874
+              }
+            },
+            "gate_lr": {
+              "costly_gather_share": 0.5135,
+              "gather_rate": 0.679,
+              "minus_gbm_belief": {
+                "hi": 0.0763,
+                "lo": -0.3507,
+                "p_two_sided": 0.319,
+                "point": -0.0993
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.5649,
+                "lo": -2.2954,
+                "p_two_sided": 0.0,
+                "point": -1.3451
+              },
+              "regret": {
+                "hi": 2.7129,
+                "lo": 1.3835,
+                "point": 1.9922
+              }
+            },
+            "gbm_belief": {
+              "costly_gather_share": 0.4189,
+              "gather_rate": 0.6723,
+              "minus_playbook_investigate_first": {
+                "hi": -0.442,
+                "lo": -2.1807,
+                "p_two_sided": 0.0,
+                "point": -1.2458
+              },
+              "regret": {
+                "hi": 2.8427,
+                "lo": 1.4679,
+                "point": 2.0914
+              }
+            },
+            "gbm_hindsight": {
+              "costly_gather_share": 0.4324,
+              "gather_rate": 0.5968,
+              "minus_gbm_belief": {
+                "hi": 0.5806,
+                "lo": 0.0679,
+                "p_two_sided": 0.004,
+                "point": 0.308
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.1912,
+                "lo": -1.8178,
+                "p_two_sided": 0.014,
+                "point": -0.9378
+              },
+              "regret": {
+                "hi": 3.2341,
+                "lo": 1.6744,
+                "point": 2.3995
+              }
+            },
+            "playbook_act_first": {
+              "costly_gather_share": 0.0,
+              "gather_rate": 0.0,
+              "minus_gbm_belief": {
+                "hi": 6.012,
+                "lo": 2.5709,
+                "p_two_sided": 0.0,
+                "point": 4.1965
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 4.4813,
+                "lo": 1.6247,
+                "p_two_sided": 0.0,
+                "point": 2.9507
+              },
+              "regret": {
+                "hi": 8.4417,
+                "lo": 4.3705,
+                "point": 6.288
+              }
+            },
+            "playbook_investigate_first": {
+              "costly_gather_share": 0.3784,
+              "gather_rate": 0.285,
+              "minus_gbm_belief": {
+                "hi": 2.1807,
+                "lo": 0.442,
+                "p_two_sided": 0.0,
+                "point": 1.2458
+              },
+              "regret": {
+                "hi": 4.7002,
+                "lo": 2.2463,
+                "point": 3.3373
+              }
+            }
+          },
+          "with_both": 1193
+        },
+        "hindsight/backup_unavailable": {
+          "costly_n": 51,
+          "decisions": 618,
+          "episodes": 103,
+          "methods": {
+            "bt_exact": {
+              "costly_gather_share": 0.2353,
+              "gather_rate": 0.148,
+              "minus_gbm_belief": {
+                "hi": 2.6064,
+                "lo": -0.0081,
+                "p_two_sided": 0.056,
+                "point": 1.0973
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.1932,
+                "lo": -0.3978,
+                "p_two_sided": 0.503,
+                "point": -0.0926
+              },
+              "regret": {
+                "hi": 5.7961,
+                "lo": 1.9721,
+                "point": 3.5706
+              }
+            },
+            "bt_exact_gbm_fallback": {
+              "costly_gather_share": 0.3529,
+              "gather_rate": 0.548,
+              "minus_gbm_belief": {
+                "hi": 2.4155,
+                "lo": -0.1725,
+                "p_two_sided": 0.126,
+                "point": 0.9084
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0714,
+                "lo": -0.6337,
+                "p_two_sided": 0.112,
+                "point": -0.2815
+              },
+              "regret": {
+                "hi": 5.5523,
+                "lo": 1.7886,
+                "point": 3.3817
+              }
+            },
+            "bt_lr": {
+              "costly_gather_share": 0.4118,
+              "gather_rate": 0.3154,
+              "minus_gbm_belief": {
+                "hi": 2.6931,
+                "lo": 0.0872,
+                "p_two_sided": 0.031,
+                "point": 1.2126
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0579,
+                "lo": -0.006,
+                "p_two_sided": 0.139,
+                "point": 0.0227
+              },
+              "regret": {
+                "hi": 5.8323,
+                "lo": 2.0986,
+                "point": 3.6859
+              }
+            },
+            "bt_lr_gbm_fallback": {
+              "costly_gather_share": 0.5294,
+              "gather_rate": 0.7154,
+              "minus_gbm_belief": {
+                "hi": 2.5026,
+                "lo": -0.0584,
+                "p_two_sided": 0.077,
+                "point": 1.0237
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0443,
+                "lo": -0.3509,
+                "p_two_sided": 0.119,
+                "point": -0.1662
+              },
+              "regret": {
+                "hi": 5.6439,
+                "lo": 1.9131,
+                "point": 3.497
+              }
+            },
+            "gate_exact": {
+              "costly_gather_share": 0.3725,
+              "gather_rate": 0.5593,
+              "minus_gbm_belief": {
+                "hi": 0.5028,
+                "lo": -0.2442,
+                "p_two_sided": 0.71,
+                "point": 0.0916
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.2055,
+                "lo": -2.7011,
+                "p_two_sided": 0.107,
+                "point": -1.0983
+              },
+              "regret": {
+                "hi": 3.8971,
+                "lo": 1.52,
+                "point": 2.5649
+              }
+            },
+            "gate_lr": {
+              "costly_gather_share": 0.549,
+              "gather_rate": 0.7268,
+              "minus_gbm_belief": {
+                "hi": 0.1251,
+                "lo": -0.6369,
+                "p_two_sided": 0.333,
+                "point": -0.1976
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.3638,
+                "lo": -2.8037,
+                "p_two_sided": 0.002,
+                "point": -1.3875
+              },
+              "regret": {
+                "hi": 3.2583,
+                "lo": 1.4151,
+                "point": 2.2757
+              }
+            },
+            "gbm_belief": {
+              "costly_gather_share": 0.4314,
+              "gather_rate": 0.6748,
+              "minus_playbook_investigate_first": {
+                "hi": -0.0571,
+                "lo": -2.6659,
+                "p_two_sided": 0.037,
+                "point": -1.1899
+              },
+              "regret": {
+                "hi": 3.5956,
+                "lo": 1.5312,
+                "point": 2.4733
+              }
+            },
+            "gbm_hindsight": {
+              "costly_gather_share": 0.4902,
+              "gather_rate": 0.639,
+              "minus_gbm_belief": {
+                "hi": 0.9752,
+                "lo": 0.0307,
+                "p_two_sided": 0.033,
+                "point": 0.4821
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.3879,
+                "lo": -2.0613,
+                "p_two_sided": 0.209,
+                "point": -0.7078
+              },
+              "regret": {
+                "hi": 4.2866,
+                "lo": 1.8415,
+                "point": 2.9554
+              }
+            },
+            "playbook_act_first": {
+              "costly_gather_share": 0.0,
+              "gather_rate": 0.0,
+              "minus_gbm_belief": {
+                "hi": 10.2203,
+                "lo": 4.0043,
+                "p_two_sided": 0.0,
+                "point": 6.8172
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 8.6668,
+                "lo": 3.0946,
+                "p_two_sided": 0.0,
+                "point": 5.6274
+              },
+              "regret": {
+                "hi": 13.0893,
+                "lo": 5.9393,
+                "point": 9.2905
+              }
+            },
+            "playbook_investigate_first": {
+              "costly_gather_share": 0.4118,
+              "gather_rate": 0.3545,
+              "minus_gbm_belief": {
+                "hi": 2.6659,
+                "lo": 0.0571,
+                "p_two_sided": 0.037,
+                "point": 1.1899
+              },
+              "regret": {
+                "hi": 5.7961,
+                "lo": 2.074,
+                "point": 3.6632
+              }
+            }
+          },
+          "with_both": 615
+        },
+        "hindsight/family": {
+          "costly_n": 65,
+          "decisions": 678,
+          "episodes": 113,
+          "methods": {
+            "bt_exact": {
+              "costly_gather_share": 0.3231,
+              "gather_rate": 0.2688,
+              "minus_gbm_belief": {
+                "hi": 3.2302,
+                "lo": 0.1392,
+                "p_two_sided": 0.026,
+                "point": 1.5568
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0424,
+                "lo": -0.5979,
+                "p_two_sided": 0.091,
+                "point": -0.2673
+              },
+              "regret": {
+                "hi": 7.0091,
+                "lo": 2.9301,
+                "point": 4.8062
+              }
+            },
+            "bt_exact_gbm_fallback": {
+              "costly_gather_share": 0.3385,
+              "gather_rate": 0.322,
+              "minus_gbm_belief": {
+                "hi": 3.2008,
+                "lo": 0.12,
+                "p_two_sided": 0.029,
+                "point": 1.539
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0267,
+                "lo": -0.6156,
+                "p_two_sided": 0.069,
+                "point": -0.2852
+              },
+              "regret": {
+                "hi": 6.9946,
+                "lo": 2.9317,
+                "point": 4.7883
+              }
+            },
+            "bt_lr": {
+              "costly_gather_share": 0.4769,
+              "gather_rate": 0.4756,
+              "minus_gbm_belief": {
+                "hi": 3.3501,
+                "lo": 0.311,
+                "p_two_sided": 0.014,
+                "point": 1.7056
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0,
+                "lo": -0.3021,
+                "p_two_sided": 0.05,
+                "point": -0.1185
+              },
+              "regret": {
+                "hi": 7.1842,
+                "lo": 3.076,
+                "point": 4.955
+              }
+            },
+            "bt_lr_gbm_fallback": {
+              "costly_gather_share": 0.4923,
+              "gather_rate": 0.5288,
+              "minus_gbm_belief": {
+                "hi": 3.3378,
+                "lo": 0.2928,
+                "p_two_sided": 0.015,
+                "point": 1.6878
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0117,
+                "lo": -0.3182,
+                "p_two_sided": 0.023,
+                "point": -0.1364
+              },
+              "regret": {
+                "hi": 7.1701,
+                "lo": 3.0568,
+                "point": 4.9371
+              }
+            },
+            "gate_exact": {
+              "costly_gather_share": 0.3538,
+              "gather_rate": 0.3456,
+              "minus_gbm_belief": {
+                "hi": 0.5833,
+                "lo": -0.1592,
+                "p_two_sided": 0.359,
+                "point": 0.1707
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0493,
+                "lo": -3.3783,
+                "p_two_sided": 0.041,
+                "point": -1.6535
+              },
+              "regret": {
+                "hi": 4.7555,
+                "lo": 2.3125,
+                "point": 3.42
+              }
+            },
+            "gate_lr": {
+              "costly_gather_share": 0.5077,
+              "gather_rate": 0.5598,
+              "minus_gbm_belief": {
+                "hi": 0.1386,
+                "lo": -0.587,
+                "p_two_sided": 0.35,
+                "point": -0.1766
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.6626,
+                "lo": -3.6262,
+                "p_two_sided": 0.002,
+                "point": -2.0007
+              },
+              "regret": {
+                "hi": 4.2417,
+                "lo": 2.0608,
+                "point": 3.0728
+              }
+            },
+            "gbm_belief": {
+              "costly_gather_share": 0.4,
+              "gather_rate": 0.548,
+              "minus_playbook_investigate_first": {
+                "hi": -0.4162,
+                "lo": -3.4914,
+                "p_two_sided": 0.008,
+                "point": -1.8242
+              },
+              "regret": {
+                "hi": 4.4826,
+                "lo": 2.1777,
+                "point": 3.2493
+              }
+            },
+            "gbm_hindsight": {
+              "costly_gather_share": 0.4308,
+              "gather_rate": 0.5391,
+              "minus_gbm_belief": {
+                "hi": 0.9127,
+                "lo": 0.0624,
+                "p_two_sided": 0.018,
+                "point": 0.4593
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.0224,
+                "lo": -2.9058,
+                "p_two_sided": 0.046,
+                "point": -1.3649
+              },
+              "regret": {
+                "hi": 5.0589,
+                "lo": 2.563,
+                "point": 3.7086
+              }
+            },
+            "playbook_act_first": {
+              "costly_gather_share": 0.0,
+              "gather_rate": 0.0,
+              "minus_gbm_belief": {
+                "hi": 10.1235,
+                "lo": 4.2849,
+                "p_two_sided": 0.0,
+                "point": 7.0411
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 7.9273,
+                "lo": 2.8542,
+                "p_two_sided": 0.0,
+                "point": 5.2169
+              },
+              "regret": {
+                "hi": 13.7286,
+                "lo": 7.0293,
+                "point": 10.2904
+              }
+            },
+            "playbook_investigate_first": {
+              "costly_gather_share": 0.4308,
+              "gather_rate": 0.421,
+              "minus_gbm_belief": {
+                "hi": 3.4914,
+                "lo": 0.4162,
+                "p_two_sided": 0.008,
+                "point": 1.8242
+              },
+              "regret": {
+                "hi": 7.3064,
+                "lo": 3.1503,
+                "point": 5.0735
+              }
+            }
+          },
+          "with_both": 677
+        },
+        "hindsight/family_backup_unavailable": {
+          "costly_n": 44,
+          "decisions": 342,
+          "episodes": 57,
+          "methods": {
+            "bt_exact": {
+              "costly_gather_share": 0.2727,
+              "gather_rate": 0.2661,
+              "minus_gbm_belief": {
+                "hi": 4.157,
+                "lo": -0.3645,
+                "p_two_sided": 0.12,
+                "point": 1.6738
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.3024,
+                "lo": -0.7306,
+                "p_two_sided": 0.399,
+                "point": -0.2137
+              },
+              "regret": {
+                "hi": 8.8396,
+                "lo": 2.5767,
+                "point": 5.3675
+              }
+            },
+            "bt_exact_gbm_fallback": {
+              "costly_gather_share": 0.2955,
+              "gather_rate": 0.3041,
+              "minus_gbm_belief": {
+                "hi": 4.0991,
+                "lo": -0.3973,
+                "p_two_sided": 0.128,
+                "point": 1.6415
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.2687,
+                "lo": -0.7672,
+                "p_two_sided": 0.33,
+                "point": -0.2461
+              },
+              "regret": {
+                "hi": 8.8077,
+                "lo": 2.5612,
+                "point": 5.3351
+              }
+            },
+            "bt_lr": {
+              "costly_gather_share": 0.4773,
+              "gather_rate": 0.5673,
+              "minus_gbm_belief": {
+                "hi": 4.3189,
+                "lo": -0.1885,
+                "p_two_sided": 0.08,
+                "point": 1.8822
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.0151,
+                "lo": -0.0256,
+                "p_two_sided": 0.646,
+                "point": -0.0054
+              },
+              "regret": {
+                "hi": 9.0657,
+                "lo": 2.7948,
+                "point": 5.5758
+              }
+            },
+            "bt_lr_gbm_fallback": {
+              "costly_gather_share": 0.5,
+              "gather_rate": 0.6053,
+              "minus_gbm_belief": {
+                "hi": 4.2685,
+                "lo": -0.2066,
+                "p_two_sided": 0.088,
+                "point": 1.8498
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.014,
+                "lo": -0.121,
+                "p_two_sided": 0.325,
+                "point": -0.0377
+              },
+              "regret": {
+                "hi": 9.0079,
+                "lo": 2.7775,
+                "point": 5.5435
+              }
+            },
+            "gate_exact": {
+              "costly_gather_share": 0.3182,
+              "gather_rate": 0.3246,
+              "minus_gbm_belief": {
+                "hi": 0.957,
+                "lo": -0.4441,
+                "p_two_sided": 0.629,
+                "point": 0.1654
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.7235,
+                "lo": -4.2896,
+                "p_two_sided": 0.169,
+                "point": -1.7221
+              },
+              "regret": {
+                "hi": 5.9366,
+                "lo": 2.1167,
+                "point": 3.8591
+              }
+            },
+            "gate_lr": {
+              "costly_gather_share": 0.5227,
+              "gather_rate": 0.6257,
+              "minus_gbm_belief": {
+                "hi": 0.2374,
+                "lo": -1.2288,
+                "p_two_sided": 0.325,
+                "point": -0.357
+              },
+              "minus_playbook_investigate_first": {
+                "hi": -0.3654,
+                "lo": -4.6269,
+                "p_two_sided": 0.007,
+                "point": -2.2446
+              },
+              "regret": {
+                "hi": 4.8976,
+                "lo": 2.0629,
+                "point": 3.3366
+              }
+            },
+            "gbm_belief": {
+              "costly_gather_share": 0.3864,
+              "gather_rate": 0.5322,
+              "minus_playbook_investigate_first": {
+                "hi": 0.1782,
+                "lo": -4.3168,
+                "p_two_sided": 0.08,
+                "point": -1.8876
+              },
+              "regret": {
+                "hi": 5.4439,
+                "lo": 2.2405,
+                "point": 3.6936
+              }
+            },
+            "gbm_hindsight": {
+              "costly_gather_share": 0.4773,
+              "gather_rate": 0.5673,
+              "minus_gbm_belief": {
+                "hi": 1.529,
+                "lo": -0.0356,
+                "p_two_sided": 0.067,
+                "point": 0.71
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 0.7964,
+                "lo": -3.3028,
+                "p_two_sided": 0.242,
+                "point": -1.1776
+              },
+              "regret": {
+                "hi": 6.5264,
+                "lo": 2.6478,
+                "point": 4.4036
+              }
+            },
+            "playbook_act_first": {
+              "costly_gather_share": 0.0,
+              "gather_rate": 0.0,
+              "minus_gbm_belief": {
+                "hi": 17.517,
+                "lo": 7.2012,
+                "p_two_sided": 0.0,
+                "point": 12.0099
+              },
+              "minus_playbook_investigate_first": {
+                "hi": 15.0506,
+                "lo": 5.7796,
+                "p_two_sided": 0.0,
+                "point": 10.1223
+              },
+              "regret": {
+                "hi": 21.8278,
+                "lo": 10.379,
+                "point": 15.7035
+              }
+            },
+            "playbook_investigate_first": {
+              "costly_gather_share": 0.4773,
+              "gather_rate": 0.5702,
+              "minus_gbm_belief": {
+                "hi": 4.3168,
+                "lo": -0.1782,
+                "p_two_sided": 0.08,
+                "point": 1.8876
+              },
+              "regret": {
+                "hi": 9.0679,
+                "lo": 2.8229,
+                "point": 5.5812
+              }
+            }
+          },
+          "with_both": 342
+        }
+      },
+      "wall_s": 320.2419
+    }
+  },
+  "wall_s": 890.1083
+}

@@ -1,0 +1,5 @@
+base: model/direct_v2_summary.yaml
+train:
+  stop_on: regret
+  stop_smooth: 5
+  min_epochs: 10

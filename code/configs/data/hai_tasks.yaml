@@ -1,0 +1,76 @@
+splits: [train, val, dev_test]
+seed: 0
+
+sources:
+  P1: [P1_, x1001_, x1002_, x1003_]
+  P2: [P2_]
+  P3: [P3_]
+  P4: [P4_]
+
+windows:
+  window_s: 10
+  sample_period_s: 1
+  stats: [last, mean, std, slope]
+
+decisions:
+  stride_s: 10
+  recent_windows: 6
+  stale_lags: [15, 30, 60]
+
+scaling:
+  floor_frac: 0.01
+  clip: 20
+
+timing:
+  default:
+    delay_median_s: 4
+    delay_sigma: 0.6
+    lifetime_s: 60
+    lifetime_jitter: 0.2
+    outage_p_start: 0.002
+    outage_mean_windows: 12
+  sources:
+    P1: {delay_median_s: 3, lifetime_s: 60}
+    P2: {delay_median_s: 6, lifetime_s: 90}
+    P3: {delay_median_s: 12, lifetime_s: 120}
+    P4: {delay_median_s: 2, lifetime_s: 30}
+  retraction:
+    rate: 0.01
+    delay_median_s: 30
+    delay_sigma: 0.5
+    replay_payload: true
+    replay_lag_windows: [30, 180]
+
+derived:
+  enabled: true
+  name: plant
+  stats: [mean, slope]
+  delay_median_s: 1
+  delay_sigma: 0.3
+
+targets:
+  horizon_s: 600
+  questions:
+    p1_pump:
+      source: P1
+      "23.05": {type: discrete_change, columns: [P1_PP04D]}
+      "22.04": {type: hysteresis, column: P1_PP04, lo: 0.5, hi: 0.5}
+    p3_level:
+      source: P3
+      all: {type: hysteresis, column: P3_LIT01, half_width_iqr: 0.25}
+    p4_pressure:
+      source: P4
+      all: {type: hysteresis, column: P4_ST_PT01, half_width_iqr: 0.25}
+  score:
+    name: p3_level_bin
+    column: P3_LIT01
+    lead_s: 60
+    n_bins: 5
+
+discovery:
+  max_levels: 20
+
+min_events: {train: 200, val: 50}
+
+save:
+  compress: true

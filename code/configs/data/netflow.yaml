@@ -1,0 +1,14 @@
+datasets: [NF-UNSW-NB15-v3, NF-ToN-IoT-v3]
+raw_dir: data/raw/netflow
+out_dir: data/processed/netflow
+
+seed: 0
+split:
+  fractions: [0.6, 0.2, 0.2]
+  purge_gap_s: 60
+
+io:
+  block_size_mb: 32
+  rows_per_part: 2000000
+  row_group_rows: 250000
+  compression: zstd

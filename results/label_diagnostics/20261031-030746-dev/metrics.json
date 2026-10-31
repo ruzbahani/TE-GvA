@@ -1,0 +1,20 @@
+{
+  "natural": {
+    "brier": 0.1247,
+    "ece": 0.0152,
+    "ece_not_settled": 0.0179,
+    "gather_strictly_best_belief": 0.1552,
+    "gather_strictly_best_hindsight": 0.0159,
+    "onset_shift_+1_mean_abs_dpi": 0.0177,
+    "signal_share": 0.864
+  },
+  "stress": {
+    "brier": 0.0925,
+    "ece": 0.014,
+    "ece_not_settled": 0.0162,
+    "gather_strictly_best_belief": 0.2296,
+    "gather_strictly_best_hindsight": 0.0172,
+    "onset_shift_+1_mean_abs_dpi": 0.0124,
+    "signal_share": 0.9265
+  }
+}

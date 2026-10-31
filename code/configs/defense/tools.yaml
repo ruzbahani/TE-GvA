@@ -1,0 +1,134 @@
+candidate_expiry_s: 300
+
+tools:
+  trace_link:
+    version: "1"
+    family: observe
+    target_kinds: [link]
+    duration: {median: 120, sigma: 0.4}
+    side_effect_class: observational
+    resource_cost: 1
+    required_authority: observe
+    preconditions: [link_exists]
+    description: Trace a link end to end (heartbeats, switch counters); tells a failed link from a quiet sensor.
+
+  query_historian:
+    version: "1"
+    family: observe
+    target_kinds: [source]
+    duration: {median: 10, sigma: 0.3}
+    side_effect_class: observational
+    resource_cost: 0.2
+    required_authority: observe
+    preconditions: [source_exists]
+    description: Read the historian's recent window for a source (what SCADA received, held values included).
+
+  verify_sensor:
+    version: "1"
+    family: observe
+    target_kinds: [source]
+    duration: {median: 1200, sigma: 0.5}
+    side_effect_class: observational
+    resource_cost: 5
+    required_authority: observe
+    preconditions: [source_exists]
+    description: Field check of a source's instruments against an independent reading (slow).
+
+  switch_to_backup:
+    version: "1"
+    family: respond
+    target_kinds: [link]
+    duration: {median: 60, sigma: 0.3}
+    side_effect_class: reversible
+    resource_cost: 1
+    required_authority: contain
+    preconditions: [link_exists, sensor_link, link_not_in_backup, backup_available]
+    postconditions: [link_in_backup]
+    compensation: restore_primary
+    default_ttl: 3600
+    description: Route a sensor link over its delayed backup channel; repairs a failed link, not a faulty sensor.
+
+  restore_primary:
+    version: "1"
+    family: respond
+    target_kinds: [link]
+    duration: {median: 60, sigma: 0.3}
+    side_effect_class: reversible
+    resource_cost: 1
+    required_authority: contain
+    preconditions: [link_exists, sensor_link, link_in_backup]
+    postconditions: [link_not_in_backup]
+    description: Return a sensor link from its backup channel to the primary path (its receipt does not say whether the primary path delivers).
+
+  repair_link:
+    version: "1"
+    family: respond
+    target_kinds: [link]
+    duration: {median: 2400, sigma: 0.5}
+    side_effect_class: irreversible
+    resource_cost: 10
+    required_authority: contain
+    preconditions: [link_exists]
+    postconditions: [link_healthy]
+    description: Field repair of a link's primary path (device replacement; no undo).
+
+  recalibrate_sensor:
+    version: "1"
+    family: respond
+    target_kinds: [sensor]
+    duration: {median: 3600, sigma: 0.5}
+    side_effect_class: irreversible
+    resource_cost: 10
+    required_authority: contain
+    preconditions: [sensor_exists]
+    postconditions: [sensor_calibrated]
+    description: Recalibrate or replace one instrument; fixes a frozen, drifting or biased instrument, after which the instrument itself is calibrated (a frozen I/O module may still hold its published reading).
+
+  replace_io_module:
+    version: "1"
+    family: respond
+    target_kinds: [source]
+    duration: {median: 3600, sigma: 0.5}
+    side_effect_class: irreversible
+    resource_cost: 10
+    required_authority: contain
+    preconditions: [source_exists]
+    description: Replace the remote I/O module of a sensor group; fixes a group whose channels all froze (the backup network path does not).
+
+  set_production:
+    version: "1"
+    family: respond
+    target_kinds: [plant]
+    args:
+      - {name: fraction, kind: enum, choices: [0.8, 0.9, 1.0]}
+    duration: {median: 30, sigma: 0.3}
+    side_effect_class: partially_reversible
+    resource_cost: 1
+    required_authority: contain
+    preconditions: [production_differs]
+    postconditions: [production_at_target]
+    default_ttl: 3600
+    description: Change the production target (buys time before a trip; lost production is not recovered).
+
+  monitor:
+    version: "1"
+    family: monitor
+    target_kinds: [plant]
+    args:
+      - {name: review_after_s, kind: enum, choices: [300, 900]}
+    duration: {median: 1, sigma: 0.3}
+    side_effect_class: none
+    resource_cost: 0
+    required_authority: observe
+    description: Keep the current state and schedule a review.
+
+  escalate:
+    version: "1"
+    family: escalate
+    target_kinds: [incident]
+    duration: {median: 900, sigma: 0.5}
+    side_effect_class: observational
+    resource_cost: 20
+    required_authority: escalate
+    preconditions: [incident_exists]
+    description: Hand the incident to the operator (delayed, imperfect).

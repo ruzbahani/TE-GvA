@@ -1,0 +1,28 @@
+window_steps: 20
+sources:
+  feeds:     {delay_s: 20, sigma: 0.4, lifetime_s: 300}
+  reactor:   {delay_s: 10, sigma: 0.4, lifetime_s: 240}
+  separator: {delay_s: 15, sigma: 0.4, lifetime_s: 300}
+  stripper:  {delay_s: 15, sigma: 0.4, lifetime_s: 300}
+  recycle:   {delay_s: 20, sigma: 0.4, lifetime_s: 300}
+  analyzers: {delay_s: 60, sigma: 0.4, lifetime_s: 900}
+outage:
+  start_prob: 0.003
+  mean_windows: 4
+link_health:
+  delay_s: 15
+  sigma: 0.3
+  lifetime_s: 240
+  p_detect_down: 0.05
+  p_false: 0.0003
+  report_backup: true
+detectors:
+  baseline_from_s: 600
+  stale_min_windows: 2
+  stale_factor: 5.0
+  deviation_z: 8.0
+  deviation_rel_floor: 0.05
+  deviation_persist_windows: 3
+  realert_windows: 10
+  delay_s: 5
+  lifetime_s: 600

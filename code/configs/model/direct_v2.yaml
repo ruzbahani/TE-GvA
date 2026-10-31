@@ -1,0 +1,5 @@
+base: model/direct.yaml
+data: data/processed/tep_decisions/v2-natural
+labels: belief
+train:
+  max_minutes: 10

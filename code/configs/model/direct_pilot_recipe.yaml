@@ -1,0 +1,7 @@
+base: model/direct.yaml
+model:
+  weights: {J_centered: 0.0, rank: 1.0}
+train:
+  stop_on: total
+  ema: 0.0
+  patience: 30

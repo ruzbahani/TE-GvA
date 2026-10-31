@@ -1,0 +1,12 @@
+incidents: sim/incidents.yaml
+seeds: [0, 64]
+workers: 15
+epsilon: 0.3
+max_labels_per_episode: 4
+max_labels_pre_onset: 1
+label_ticks_after_onset: true
+horizon_s: 10800
+replicates: 4
+follow_mode: act_first
+evidence_window_s: [1800, 300]
+twins: true

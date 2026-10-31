@@ -1,0 +1,43 @@
+warmup_s: 3600
+onset_s: [600, 3600]
+horizon_s: 21600
+background:
+  choices: [[], [8], [1]]
+  weights: [0.4, 0.3, 0.3]
+types:
+  link_fault: 0.35
+  io_module_fault: 0.20
+  sensor_fault: 0.25
+  disturbance: 0.20
+io_module_fault:
+  groups:
+    reactor: 2
+    stripper: 2
+    feeds: 1
+    separator: 1
+    recycle: 1
+    analyzers: 1
+link_fault:
+  links:
+    sensor:reactor: 2
+    sensor:stripper: 2
+    sensor:feeds: 1
+    sensor:separator: 1
+    sensor:recycle: 1
+    sensor:analyzers: 1
+    actuator:reactor: 1
+    actuator:separator: 1
+    actuator:stripper: 1
+    actuator:feeds: 1
+    actuator:recycle: 1
+sensor_fault:
+  sensors: [reactor_pressure, reactor_level, reactor_temperature, separator_level, stripper_level,
+            feed_A_flow, feed_D_flow, feed_E_flow]
+  kinds:
+    frozen: {weight: 0.5}
+    drift: {weight: 0.3, magnitude_rel_per_h: [0.02, 0.08]}
+    bias: {weight: 0.2, magnitude_rel: [0.02, 0.06]}
+disturbance:
+  idv: [1, 2, 4, 5, 6, 7, 12, 13, 14]
+redraw_active_disturbance: true
+backup_unavailable_prob: 0.0

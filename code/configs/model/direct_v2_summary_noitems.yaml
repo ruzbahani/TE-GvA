@@ -1,0 +1,3 @@
+base: model/direct_v2_summary.yaml
+model:
+  item_path: false

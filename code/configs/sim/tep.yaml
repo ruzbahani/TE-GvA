@@ -1,0 +1,31 @@
+kernel:
+  commit: 852f0c69ab974540750d61bd1dbfafd56bfd80bb
+  temexd_mod_c_sha256: eff57b75700e7472005785150c21f82b0c3d178ebceebe37e532794f23785aba
+mode: mode1
+control_interval_s: 1.8
+
+sensor_links:
+  feeds: [feed_A_flow, feed_D_flow, feed_E_flow, feed_AC_flow]
+  reactor: [reactor_feed_flow, reactor_pressure, reactor_level, reactor_temperature,
+            reactor_cooling_water_outlet_temperature_meas]
+  separator: [separator_temperature, separator_level, separator_pressure, separator_underflow,
+              condenser_cooling_water_outlet_temperature]
+  stripper: [stripper_level, stripper_pressure, stripper_underflow, stripper_temperature, stripper_steam_flow]
+  recycle: [recycle_flow, purge_flow, compressor_work]
+  analyzers: [reactor_feed_A_concentration, reactor_feed_B_concentration, reactor_feed_C_concentration,
+              reactor_feed_D_concentration, reactor_feed_E_concentration, reactor_feed_F_concentration,
+              purge_A_concentration, purge_B_concentration, purge_C_concentration, purge_D_concentration,
+              purge_E_concentration, purge_F_concentration, purge_G_concentration, purge_H_concentration,
+              stripper_underflow_D_concentration, stripper_underflow_E_concentration,
+              stripper_underflow_F_concentration, stripper_underflow_G_concentration,
+              stripper_underflow_H_concentration]
+
+backup_channel:
+  delay_s: 36.0
+
+actuator_links:
+  feeds: [d_feed_valve, e_feed_valve, a_feed_valve, ac_feed_valve]
+  reactor: [reactor_cooling_water_valve, reactor_agitator_speed]
+  separator: [separator_underflow_valve, separator_cooling_water_valve]
+  stripper: [stripper_underflow_valve, stripper_steam_valve]
+  recycle: [compressor_recycle_valve, purge_valve]

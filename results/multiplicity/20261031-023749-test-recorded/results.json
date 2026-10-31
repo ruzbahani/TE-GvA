@@ -1,0 +1,753 @@
+{
+  "e1_views": {
+    "m": 16,
+    "rejected": [
+      "E1 stress belief/backup_unavailable",
+      "E1 stress belief/family_backup_unavailable",
+      "E1 stress hindsight/family_backup_unavailable",
+      "E1 stress hindsight/backup_unavailable"
+    ],
+    "resolvable": true,
+    "rows": [
+      {
+        "p": 0.0,
+        "rejected": true,
+        "test": "E1 stress belief/backup_unavailable",
+        "threshold": 0.003125
+      },
+      {
+        "p": 0.0,
+        "rejected": true,
+        "test": "E1 stress belief/family_backup_unavailable",
+        "threshold": 0.003333
+      },
+      {
+        "p": 0.002,
+        "rejected": true,
+        "test": "E1 stress hindsight/family_backup_unavailable",
+        "threshold": 0.003571
+      },
+      {
+        "p": 0.003,
+        "rejected": true,
+        "test": "E1 stress hindsight/backup_unavailable",
+        "threshold": 0.003846
+      },
+      {
+        "p": 0.016,
+        "rejected": false,
+        "test": "E1 stress belief/all",
+        "threshold": 0.004167
+      },
+      {
+        "p": 0.016,
+        "rejected": false,
+        "test": "E1 stress belief/family",
+        "threshold": 0.004545
+      },
+      {
+        "p": 0.058,
+        "rejected": false,
+        "test": "E1 stress hindsight/family",
+        "threshold": 0.005
+      },
+      {
+        "p": 0.066,
+        "rejected": false,
+        "test": "E1 stress hindsight/all",
+        "threshold": 0.005556
+      },
+      {
+        "p": 0.118,
+        "rejected": false,
+        "test": "E1 natural hindsight/all",
+        "threshold": 0.00625
+      },
+      {
+        "p": 0.123,
+        "rejected": false,
+        "test": "E1 natural hindsight/family",
+        "threshold": 0.007143
+      },
+      {
+        "p": 0.408,
+        "rejected": false,
+        "test": "E1 stress belief/backup_available",
+        "threshold": 0.008333
+      },
+      {
+        "p": 0.423,
+        "rejected": false,
+        "test": "E1 stress hindsight/backup_available",
+        "threshold": 0.01
+      },
+      {
+        "p": 0.493,
+        "rejected": false,
+        "test": "E1 stress belief/family_backup_available",
+        "threshold": 0.0125
+      },
+      {
+        "p": 0.523,
+        "rejected": false,
+        "test": "E1 stress hindsight/family_backup_available",
+        "threshold": 0.016667
+      },
+      {
+        "p": 0.627,
+        "rejected": false,
+        "test": "E1 natural belief/all",
+        "threshold": 0.025
+      },
+      {
+        "p": 0.646,
+        "rejected": false,
+        "test": "E1 natural belief/family",
+        "threshold": 0.05
+      }
+    ],
+    "smallest_threshold": 0.003125
+  },
+  "prespecified": {
+    "m": 20,
+    "rejected": [
+      "E1 stress belief/family_backup_unavailable",
+      "E2 stress summary_ensemble - flat_gbm_belief",
+      "E1 stress hindsight/family_backup_unavailable"
+    ],
+    "resolvable": true,
+    "rows": [
+      {
+        "p": 0.0,
+        "rejected": true,
+        "test": "E1 stress belief/family_backup_unavailable",
+        "threshold": 0.0025
+      },
+      {
+        "p": 0.0,
+        "rejected": true,
+        "test": "E2 stress summary_ensemble - flat_gbm_belief",
+        "threshold": 0.002632
+      },
+      {
+        "p": 0.002,
+        "rejected": true,
+        "test": "E1 stress hindsight/family_backup_unavailable",
+        "threshold": 0.002778
+      },
+      {
+        "p": 0.016,
+        "rejected": false,
+        "test": "E1 stress belief/all",
+        "threshold": 0.002941
+      },
+      {
+        "p": 0.016,
+        "rejected": false,
+        "test": "E1 stress belief/family",
+        "threshold": 0.003125
+      },
+      {
+        "p": 0.044,
+        "rejected": false,
+        "test": "E2 stress summary - base",
+        "threshold": 0.003333
+      },
+      {
+        "p": 0.045,
+        "rejected": false,
+        "test": "E2 stress summary_ensemble - base",
+        "threshold": 0.003571
+      },
+      {
+        "p": 0.058,
+        "rejected": false,
+        "test": "E1 stress hindsight/family",
+        "threshold": 0.003846
+      },
+      {
+        "p": 0.066,
+        "rejected": false,
+        "test": "E1 stress hindsight/all",
+        "threshold": 0.004167
+      },
+      {
+        "p": 0.087,
+        "rejected": false,
+        "test": "E3 natural direct_belief - direct_hindsight",
+        "threshold": 0.004545
+      },
+      {
+        "p": 0.118,
+        "rejected": false,
+        "test": "E1 natural hindsight/all",
+        "threshold": 0.005
+      },
+      {
+        "p": 0.123,
+        "rejected": false,
+        "test": "E1 natural hindsight/family",
+        "threshold": 0.005556
+      },
+      {
+        "p": 0.168,
+        "rejected": false,
+        "test": "E2 natural summary_items - summary",
+        "threshold": 0.00625
+      },
+      {
+        "p": 0.177,
+        "rejected": false,
+        "test": "E2 stress summary_items - summary",
+        "threshold": 0.007143
+      },
+      {
+        "p": 0.208,
+        "rejected": false,
+        "test": "E3 stress direct_belief - direct_hindsight",
+        "threshold": 0.008333
+      },
+      {
+        "p": 0.372,
+        "rejected": false,
+        "test": "E2 natural summary - base",
+        "threshold": 0.01
+      },
+      {
+        "p": 0.627,
+        "rejected": false,
+        "test": "E1 natural belief/all",
+        "threshold": 0.0125
+      },
+      {
+        "p": 0.646,
+        "rejected": false,
+        "test": "E1 natural belief/family",
+        "threshold": 0.016667
+      },
+      {
+        "p": 0.647,
+        "rejected": false,
+        "test": "E2 natural summary_ensemble - base",
+        "threshold": 0.025
+      },
+      {
+        "p": 0.858,
+        "rejected": false,
+        "test": "E2 natural summary_ensemble - flat_gbm_belief",
+        "threshold": 0.05
+      }
+    ],
+    "smallest_threshold": 0.0025
+  },
+  "primary": {
+    "m": 2,
+    "rejected": [
+      "E1 stress belief/all"
+    ],
+    "resolvable": true,
+    "rows": [
+      {
+        "p": 0.016,
+        "rejected": true,
+        "test": "E1 stress belief/all",
+        "threshold": 0.025
+      },
+      {
+        "p": 0.627,
+        "rejected": false,
+        "test": "E1 natural belief/all",
+        "threshold": 0.05
+      }
+    ],
+    "smallest_threshold": 0.025
+  },
+  "with_grid": {
+    "m": 80,
+    "rejected": [],
+    "resolvable": false,
+    "rows": [
+      {
+        "p": 0.0,
+        "rejected": false,
+        "test": "E1 stress belief/family_backup_unavailable",
+        "threshold": 0.000625
+      },
+      {
+        "p": 0.0,
+        "rejected": false,
+        "test": "E2 stress summary_ensemble - flat_gbm_belief",
+        "threshold": 0.000633
+      },
+      {
+        "p": 0.0,
+        "rejected": false,
+        "test": "S natural T=inf delta=0.0 belief/all",
+        "threshold": 0.000641
+      },
+      {
+        "p": 0.0,
+        "rejected": false,
+        "test": "S natural T=inf delta=1.0 belief/all",
+        "threshold": 0.000649
+      },
+      {
+        "p": 0.0,
+        "rejected": false,
+        "test": "S stress T=2.0 delta=1.0 belief/all",
+        "threshold": 0.000658
+      },
+      {
+        "p": 0.002,
+        "rejected": false,
+        "test": "E1 stress hindsight/family_backup_unavailable",
+        "threshold": 0.000667
+      },
+      {
+        "p": 0.007,
+        "rejected": false,
+        "test": "S natural T=inf delta=-1.0 belief/all",
+        "threshold": 0.000676
+      },
+      {
+        "p": 0.009,
+        "rejected": false,
+        "test": "S stress T=2.0 delta=1.0 hindsight/all",
+        "threshold": 0.000685
+      },
+      {
+        "p": 0.011,
+        "rejected": false,
+        "test": "S stress T=inf delta=-1.0 belief/all",
+        "threshold": 0.000694
+      },
+      {
+        "p": 0.011,
+        "rejected": false,
+        "test": "S stress T=inf delta=0.0 belief/all",
+        "threshold": 0.000704
+      },
+      {
+        "p": 0.013,
+        "rejected": false,
+        "test": "S stress T=inf delta=1.0 belief/all",
+        "threshold": 0.000714
+      },
+      {
+        "p": 0.016,
+        "rejected": false,
+        "test": "E1 stress belief/all",
+        "threshold": 0.000725
+      },
+      {
+        "p": 0.016,
+        "rejected": false,
+        "test": "E1 stress belief/family",
+        "threshold": 0.000735
+      },
+      {
+        "p": 0.016,
+        "rejected": false,
+        "test": "S stress T=1.0 delta=0.0 belief/all",
+        "threshold": 0.000746
+      },
+      {
+        "p": 0.02,
+        "rejected": false,
+        "test": "S stress T=0.0 delta=1.0 hindsight/all",
+        "threshold": 0.000758
+      },
+      {
+        "p": 0.023,
+        "rejected": false,
+        "test": "S stress T=2.0 delta=0.0 belief/all",
+        "threshold": 0.000769
+      },
+      {
+        "p": 0.028,
+        "rejected": false,
+        "test": "S stress T=2.0 delta=0.0 hindsight/all",
+        "threshold": 0.000781
+      },
+      {
+        "p": 0.04,
+        "rejected": false,
+        "test": "S stress T=0.0 delta=1.0 belief/all",
+        "threshold": 0.000794
+      },
+      {
+        "p": 0.042,
+        "rejected": false,
+        "test": "S stress T=1.0 delta=1.0 belief/all",
+        "threshold": 0.000806
+      },
+      {
+        "p": 0.044,
+        "rejected": false,
+        "test": "E2 stress summary - base",
+        "threshold": 0.00082
+      },
+      {
+        "p": 0.045,
+        "rejected": false,
+        "test": "E2 stress summary_ensemble - base",
+        "threshold": 0.000833
+      },
+      {
+        "p": 0.058,
+        "rejected": false,
+        "test": "E1 stress hindsight/family",
+        "threshold": 0.000847
+      },
+      {
+        "p": 0.058,
+        "rejected": false,
+        "test": "S stress T=0.5 delta=-1.0 belief/all",
+        "threshold": 0.000862
+      },
+      {
+        "p": 0.066,
+        "rejected": false,
+        "test": "E1 stress hindsight/all",
+        "threshold": 0.000877
+      },
+      {
+        "p": 0.066,
+        "rejected": false,
+        "test": "S stress T=1.0 delta=0.0 hindsight/all",
+        "threshold": 0.000893
+      },
+      {
+        "p": 0.087,
+        "rejected": false,
+        "test": "E3 natural direct_belief - direct_hindsight",
+        "threshold": 0.000909
+      },
+      {
+        "p": 0.095,
+        "rejected": false,
+        "test": "S natural T=inf delta=0.0 hindsight/all",
+        "threshold": 0.000926
+      },
+      {
+        "p": 0.095,
+        "rejected": false,
+        "test": "S natural T=inf delta=1.0 hindsight/all",
+        "threshold": 0.000943
+      },
+      {
+        "p": 0.099,
+        "rejected": false,
+        "test": "S stress T=1.0 delta=1.0 hindsight/all",
+        "threshold": 0.000962
+      },
+      {
+        "p": 0.118,
+        "rejected": false,
+        "test": "E1 natural hindsight/all",
+        "threshold": 0.00098
+      },
+      {
+        "p": 0.118,
+        "rejected": false,
+        "test": "S natural T=1.0 delta=0.0 hindsight/all",
+        "threshold": 0.001
+      },
+      {
+        "p": 0.118,
+        "rejected": false,
+        "test": "S stress T=0.5 delta=-1.0 hindsight/all",
+        "threshold": 0.00102
+      },
+      {
+        "p": 0.123,
+        "rejected": false,
+        "test": "E1 natural hindsight/family",
+        "threshold": 0.001042
+      },
+      {
+        "p": 0.156,
+        "rejected": false,
+        "test": "S stress T=inf delta=-1.0 hindsight/all",
+        "threshold": 0.001064
+      },
+      {
+        "p": 0.156,
+        "rejected": false,
+        "test": "S stress T=inf delta=0.0 hindsight/all",
+        "threshold": 0.001087
+      },
+      {
+        "p": 0.157,
+        "rejected": false,
+        "test": "S natural T=inf delta=-1.0 hindsight/all",
+        "threshold": 0.001111
+      },
+      {
+        "p": 0.168,
+        "rejected": false,
+        "test": "E2 natural summary_items - summary",
+        "threshold": 0.001136
+      },
+      {
+        "p": 0.177,
+        "rejected": false,
+        "test": "E2 stress summary_items - summary",
+        "threshold": 0.001163
+      },
+      {
+        "p": 0.184,
+        "rejected": false,
+        "test": "S stress T=0.0 delta=0.0 hindsight/all",
+        "threshold": 0.00119
+      },
+      {
+        "p": 0.184,
+        "rejected": false,
+        "test": "S stress T=inf delta=1.0 hindsight/all",
+        "threshold": 0.00122
+      },
+      {
+        "p": 0.208,
+        "rejected": false,
+        "test": "E3 stress direct_belief - direct_hindsight",
+        "threshold": 0.00125
+      },
+      {
+        "p": 0.235,
+        "rejected": false,
+        "test": "S stress T=0.5 delta=0.0 belief/all",
+        "threshold": 0.001282
+      },
+      {
+        "p": 0.24,
+        "rejected": false,
+        "test": "S stress T=0.0 delta=0.0 belief/all",
+        "threshold": 0.001316
+      },
+      {
+        "p": 0.244,
+        "rejected": false,
+        "test": "S natural T=0.5 delta=1.0 belief/all",
+        "threshold": 0.001351
+      },
+      {
+        "p": 0.268,
+        "rejected": false,
+        "test": "S natural T=1.0 delta=-1.0 hindsight/all",
+        "threshold": 0.001389
+      },
+      {
+        "p": 0.293,
+        "rejected": false,
+        "test": "S stress T=0.5 delta=0.0 hindsight/all",
+        "threshold": 0.001429
+      },
+      {
+        "p": 0.334,
+        "rejected": false,
+        "test": "S stress T=1.0 delta=-1.0 belief/all",
+        "threshold": 0.001471
+      },
+      {
+        "p": 0.364,
+        "rejected": false,
+        "test": "S natural T=1.0 delta=-1.0 belief/all",
+        "threshold": 0.001515
+      },
+      {
+        "p": 0.372,
+        "rejected": false,
+        "test": "E2 natural summary - base",
+        "threshold": 0.001563
+      },
+      {
+        "p": 0.393,
+        "rejected": false,
+        "test": "S natural T=0.5 delta=0.0 belief/all",
+        "threshold": 0.001613
+      },
+      {
+        "p": 0.403,
+        "rejected": false,
+        "test": "S natural T=2.0 delta=0.0 hindsight/all",
+        "threshold": 0.001667
+      },
+      {
+        "p": 0.413,
+        "rejected": false,
+        "test": "S stress T=0.0 delta=-1.0 hindsight/all",
+        "threshold": 0.001724
+      },
+      {
+        "p": 0.415,
+        "rejected": false,
+        "test": "S natural T=0.0 delta=1.0 belief/all",
+        "threshold": 0.001786
+      },
+      {
+        "p": 0.453,
+        "rejected": false,
+        "test": "S natural T=0.5 delta=-1.0 hindsight/all",
+        "threshold": 0.001852
+      },
+      {
+        "p": 0.472,
+        "rejected": false,
+        "test": "S natural T=1.0 delta=1.0 belief/all",
+        "threshold": 0.001923
+      },
+      {
+        "p": 0.482,
+        "rejected": false,
+        "test": "S stress T=1.0 delta=-1.0 hindsight/all",
+        "threshold": 0.002
+      },
+      {
+        "p": 0.487,
+        "rejected": false,
+        "test": "S stress T=0.0 delta=-1.0 belief/all",
+        "threshold": 0.002083
+      },
+      {
+        "p": 0.488,
+        "rejected": false,
+        "test": "S natural T=2.0 delta=0.0 belief/all",
+        "threshold": 0.002174
+      },
+      {
+        "p": 0.521,
+        "rejected": false,
+        "test": "S natural T=0.5 delta=0.0 hindsight/all",
+        "threshold": 0.002273
+      },
+      {
+        "p": 0.528,
+        "rejected": false,
+        "test": "S natural T=0.0 delta=0.0 belief/all",
+        "threshold": 0.002381
+      },
+      {
+        "p": 0.555,
+        "rejected": false,
+        "test": "S natural T=2.0 delta=1.0 hindsight/all",
+        "threshold": 0.0025
+      },
+      {
+        "p": 0.585,
+        "rejected": false,
+        "test": "S natural T=2.0 delta=-1.0 hindsight/all",
+        "threshold": 0.002632
+      },
+      {
+        "p": 0.601,
+        "rejected": false,
+        "test": "S natural T=0.5 delta=1.0 hindsight/all",
+        "threshold": 0.002778
+      },
+      {
+        "p": 0.617,
+        "rejected": false,
+        "test": "S stress T=0.5 delta=1.0 belief/all",
+        "threshold": 0.002941
+      },
+      {
+        "p": 0.627,
+        "rejected": false,
+        "test": "E1 natural belief/all",
+        "threshold": 0.003125
+      },
+      {
+        "p": 0.627,
+        "rejected": false,
+        "test": "S natural T=1.0 delta=0.0 belief/all",
+        "threshold": 0.003333
+      },
+      {
+        "p": 0.646,
+        "rejected": false,
+        "test": "E1 natural belief/family",
+        "threshold": 0.003571
+      },
+      {
+        "p": 0.647,
+        "rejected": false,
+        "test": "E2 natural summary_ensemble - base",
+        "threshold": 0.003846
+      },
+      {
+        "p": 0.667,
+        "rejected": false,
+        "test": "S natural T=0.0 delta=1.0 hindsight/all",
+        "threshold": 0.004167
+      },
+      {
+        "p": 0.692,
+        "rejected": false,
+        "test": "S natural T=0.0 delta=0.0 hindsight/all",
+        "threshold": 0.004545
+      },
+      {
+        "p": 0.706,
+        "rejected": false,
+        "test": "S natural T=2.0 delta=1.0 belief/all",
+        "threshold": 0.005
+      },
+      {
+        "p": 0.711,
+        "rejected": false,
+        "test": "S natural T=1.0 delta=1.0 hindsight/all",
+        "threshold": 0.005556
+      },
+      {
+        "p": 0.731,
+        "rejected": false,
+        "test": "S natural T=2.0 delta=-1.0 belief/all",
+        "threshold": 0.00625
+      },
+      {
+        "p": 0.731,
+        "rejected": false,
+        "test": "S stress T=2.0 delta=-1.0 belief/all",
+        "threshold": 0.007143
+      },
+      {
+        "p": 0.768,
+        "rejected": false,
+        "test": "S natural T=0.0 delta=-1.0 belief/all",
+        "threshold": 0.008333
+      },
+      {
+        "p": 0.794,
+        "rejected": false,
+        "test": "S stress T=0.5 delta=1.0 hindsight/all",
+        "threshold": 0.01
+      },
+      {
+        "p": 0.858,
+        "rejected": false,
+        "test": "E2 natural summary_ensemble - flat_gbm_belief",
+        "threshold": 0.0125
+      },
+      {
+        "p": 0.893,
+        "rejected": false,
+        "test": "S natural T=0.5 delta=-1.0 belief/all",
+        "threshold": 0.016667
+      },
+      {
+        "p": 0.944,
+        "rejected": false,
+        "test": "S natural T=0.0 delta=-1.0 hindsight/all",
+        "threshold": 0.025
+      },
+      {
+        "p": 0.968,
+        "rejected": false,
+        "test": "S stress T=2.0 delta=-1.0 hindsight/all",
+        "threshold": 0.05
+      }
+    ],
+    "smallest_threshold": 0.000625
+  }
+}

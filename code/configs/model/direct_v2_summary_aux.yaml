@@ -1,0 +1,4 @@
+base: model/direct_v2.yaml
+model:
+  summary_aux: true
+  weights: {summary_aux: 0.3}

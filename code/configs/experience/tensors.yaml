@@ -1,0 +1,14 @@
+selection:
+  lookahead_s: 120
+  context_s: 1800
+  max_items: 256
+  fixed_slots: true
+vocab:
+  alert_measurement: true
+  field_check_difference: true
+scaling:
+  clip: 10.0
+  floor_frac: 0.1
+  min_scale: 1.0e-12
+  min_count: 20
+  max_rows: 200000

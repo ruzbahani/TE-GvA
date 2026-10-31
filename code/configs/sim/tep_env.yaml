@@ -1,0 +1,11 @@
+decision_tick_s: 300
+queue_latency_s: 5.0
+signing_key: "tep-env-receipts"
+tools:
+  trace_accuracy: 0.97
+  trace_lifetime_s: 900
+  historian_lifetime_s: 120
+  verify_lifetime_s: 1800
+  operator_accuracy: 0.85
+  operator_lifetime_s: 3600
+causes: [none, link_fault, io_module_fault, sensor_fault, disturbance]

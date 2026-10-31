@@ -1,0 +1,1745 @@
+{
+  "caveats": [
+    "Validation only and exploratory: not pre-specified, and the GBM grid points were chosen on val.",
+    "v-bins select on label realizations (v is computed from the stored label estimates J and J_belief), so the argument that hindsight-scored differences are unbiased does not carry over to them; it does carry over to the a-bins, which use the posterior only.",
+    "v uses the label estimates in place of the expected costs, so it overstates the between-cause term by pi (1 - pi) Var(J - J_twin) on average.",
+    "In the zero bin of v the two label sets are (up to decisions with 1 - pi < 1e-12) identical, so E1 there comes from training only (spillover).",
+    "first_actions describes the first action only; what the follow-up policy does with the backup channel afterwards is not measured here."
+  ],
+  "definitions": {
+    "E1": "per decision, regret of the flat GBM trained on the train split's belief labels (J_belief) minus regret of the flat GBM trained on its hindsight labels (J); each GBM's FLAT_GRID point is chosen on val regret under its own label set (train_direct.flat_predictions); negative favours belief labels",
+    "E1 intervals": "point, 95% percentile interval and two-sided bootstrap p (cpsdefense.eval.metrics.paired_cluster_bootstrap_diff): per subset, a paired bootstrap over the subset's episodes, seed 0",
+    "E1_given_differ": "mean E1 over the decisions where the two GBMs choose different candidates (E1 is 0 where they choose the same one)",
+    "TOL": "1e-09: values closer than this count as equal (scripts/dataset_stats.py TOL)",
+    "a": "pi (1 - pi) per decision (0 where pi is not finite)",
+    "ambiguous family": "dec_family: the episode's incident is a link or remote I/O module fault of one sensor group (the paper's ambiguous family); view 'family'",
+    "backup": "dec_backup_available (views backup_available / backup_unavailable)",
+    "bins": "zero: score <= TOL; T1-T3: terciles of the score over the decisions with score > TOL (np.quantile at 1/3 and 2/3; a value equal to a cut point goes to the upper bin). v_bins: the set's own cut points; v_bins_reference_cuts: the cut points of the reference set (--cuts-from)",
+    "contrasts": "E1 on one subset minus E1 on another (no_backup_minus_backup, top_minus_zero), paired_cluster_bootstrap_diff of the subset means on joint resamples of all val episodes, seed 1",
+    "differ_share": "share of decisions where the two GBMs choose different candidates",
+    "gather_optimal_belief_share": "share of decisions with both observe and non-observe candidates in which the best observe candidate's J_belief is below the best non-observe candidate's by more than TOL (scripts/dataset_stats.py, gather_belief)",
+    "gbm_belief / gbm_hindsight": "the flat GBM trained on belief / hindsight labels",
+    "gbm_switch_share": "share of decisions where the GBM chooses a switch_to_backup action",
+    "high_stakes_share": "share of decisions whose candidates' hindsight trip probabilities differ by more than TOL (scripts/dataset_stats.py, the paper's high-stakes decisions); high_stakes_belief_share: the same on p_trip_belief",
+    "n / episodes": "decisions / distinct episodes among them",
+    "pi": "dec_posterior, the posterior of the true cause given the defender's evidence (1 outside the family and where the twin was excluded)",
+    "regret": "J of the chosen candidate minus the lowest J among the decision's candidates, with J from the scoring label set (belief_scoring: J_belief; hindsight_scoring: J)",
+    "switch_belief_optimal_share": "the candidate with the lowest J_belief (the first on exact ties) is a switch_to_backup action; switch_belief_co_optimal_share: some switch_to_backup candidate is within TOL of the lowest J_belief",
+    "v": "between-cause term per decision: mean over the decision's candidates of pi (1 - pi) (J - J_twin)^2, J_twin = (J_belief - pi J) / (1 - pi) (belief_sensitivity.twin_labels); 0 where 1 - pi < 1e-12; uses the stored label estimates",
+    "v_above_median": "v above the median of v over the reference set's val decisions with v > TOL"
+  },
+  "log": [
+    "v2-natural: fitting the flat GBM on train belief and hindsight labels (grid chosen on val)",
+    "flat baseline: 241 features, chosen {'center': True, 'learning_rate': 0.05, 'max_leaf_nodes': 63} (val regret 1.128); action prior on 90 action features; 155s",
+    "flat baseline: 241 features, chosen {'center': True, 'learning_rate': 0.1, 'max_leaf_nodes': 63} (val regret 1.408); action prior on 90 action features; 183s",
+    "v2-stress: fitting the flat GBM on train belief and hindsight labels (grid chosen on val)",
+    "flat baseline: 241 features, chosen {'center': True, 'learning_rate': 0.05, 'max_leaf_nodes': 15} (val regret 1.751); action prior on 90 action features; 150s",
+    "flat baseline: 241 features, chosen {'center': True, 'learning_rate': 0.05, 'max_leaf_nodes': 15} (val regret 2.399); action prior on 90 action features; 106s",
+    "v2-natural: recorded val views reproduced: {'run': 'runs\\\\model_direct\\\\20260927-224653-v2n-compare-flatref', 'chosen_equal': True, 'max_abs_diff': 0.0}",
+    "v2-natural: val regret (belief scoring) GBM belief 1.1283, GBM hindsight 1.2191; E1 -0.091 [-0.298, +0.133], p=0.397; v > 0 in 296 of 783 decisions",
+    "v2-stress: recorded val views reproduced: {'run': 'runs\\\\model_direct\\\\20260927-224653-v2s-compare-flatref', 'chosen_equal': True, 'max_abs_diff': 0.0}",
+    "v2-stress: val regret (belief scoring) GBM belief 1.7506, GBM hindsight 2.0990; E1 -0.348 [-0.596, -0.148], p=0.000; v > 0 in 589 of 1206 decisions",
+    "v2-stress: no backup minus backup -0.419 [-0.840, -0.018], p=0.040 (belief), -0.357 [-0.871, +0.149], p=0.169 (hindsight)"
+  ],
+  "reference_set": "v2-stress",
+  "sets": {
+    "v2-natural": {
+      "a_bins": {
+        "bins": {
+          "T1": {
+            "E1": {
+              "belief_scoring": {
+                "hi": 0.0579,
+                "lo": -0.2687,
+                "n_boot": 2000,
+                "n_clusters": 38,
+                "n_valid": 2000,
+                "p_two_sided": 0.264,
+                "point": -0.0943
+              },
+              "hindsight_scoring": {
+                "hi": 0.0948,
+                "lo": -0.2488,
+                "n_boot": 2000,
+                "n_clusters": 38,
+                "n_valid": 2000,
+                "p_two_sided": 0.465,
+                "point": -0.0676
+              }
+            },
+            "episodes": 38,
+            "family_share": 1.0,
+            "gather_optimal_belief_share": 0.0505,
+            "high_stakes_belief_share": 0.3737,
+            "high_stakes_share": 0.1919,
+            "mean_score": 0.0127,
+            "mean_v": 10.7326,
+            "n": 99,
+            "range": [
+              0.0,
+              0.0455
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 2.0953,
+                "gbm_hindsight": 2.1896
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 2.3972,
+                "gbm_hindsight": 2.4648
+              }
+            }
+          },
+          "T2": {
+            "E1": {
+              "belief_scoring": {
+                "hi": -0.032,
+                "lo": -0.7722,
+                "n_boot": 2000,
+                "n_clusters": 61,
+                "n_valid": 2000,
+                "p_two_sided": 0.025,
+                "point": -0.3371
+              },
+              "hindsight_scoring": {
+                "hi": 1.5037,
+                "lo": -0.7037,
+                "n_boot": 2000,
+                "n_clusters": 61,
+                "n_valid": 2000,
+                "p_two_sided": 0.757,
+                "point": 0.2127
+              }
+            },
+            "episodes": 61,
+            "family_share": 1.0,
+            "gather_optimal_belief_share": 0.2604,
+            "high_stakes_belief_share": 0.375,
+            "high_stakes_share": 0.2604,
+            "mean_score": 0.2135,
+            "mean_v": 147.6117,
+            "n": 96,
+            "range": [
+              0.0456,
+              0.2478
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 1.3022,
+                "gbm_hindsight": 1.6393
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 2.2877,
+                "gbm_hindsight": 2.0751
+              }
+            }
+          },
+          "T3": {
+            "E1": {
+              "belief_scoring": {
+                "hi": 0.8983,
+                "lo": -0.8046,
+                "n_boot": 2000,
+                "n_clusters": 74,
+                "n_valid": 2000,
+                "p_two_sided": 0.904,
+                "point": 0.0526
+              },
+              "hindsight_scoring": {
+                "hi": 1.4666,
+                "lo": -1.5737,
+                "n_boot": 2000,
+                "n_clusters": 74,
+                "n_valid": 2000,
+                "p_two_sided": 0.914,
+                "point": -0.05
+              }
+            },
+            "episodes": 74,
+            "family_share": 1.0,
+            "gather_optimal_belief_share": 0.3663,
+            "high_stakes_belief_share": 0.4554,
+            "high_stakes_share": 0.3465,
+            "mean_score": 0.2486,
+            "mean_v": 157.6618,
+            "n": 101,
+            "range": [
+              0.248,
+              0.25
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 1.9707,
+                "gbm_hindsight": 1.9181
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 2.6509,
+                "gbm_hindsight": 2.7009
+              }
+            }
+          },
+          "zero": {
+            "E1": {
+              "belief_scoring": {
+                "hi": 0.2083,
+                "lo": -0.3594,
+                "n_boot": 2000,
+                "n_clusters": 145,
+                "n_valid": 2000,
+                "p_two_sided": 0.604,
+                "point": -0.0712
+              },
+              "hindsight_scoring": {
+                "hi": 0.2083,
+                "lo": -0.3594,
+                "n_boot": 2000,
+                "n_clusters": 145,
+                "n_valid": 2000,
+                "p_two_sided": 0.604,
+                "point": -0.0712
+              }
+            },
+            "episodes": 145,
+            "family_share": 0.1068,
+            "gather_optimal_belief_share": 0.0042,
+            "high_stakes_belief_share": 0.0431,
+            "high_stakes_share": 0.0431,
+            "mean_score": 0.0,
+            "mean_v": 0.0,
+            "n": 487,
+            "range": [
+              0.0,
+              0.0
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 0.7227,
+                "gbm_hindsight": 0.7939
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 0.7227,
+                "gbm_hindsight": 0.7939
+              }
+            }
+          }
+        },
+        "cuts": [
+          0.0456,
+          0.248
+        ],
+        "top_minus_zero": {
+          "belief_scoring": {
+            "hi": 1.0544,
+            "lo": -0.7975,
+            "n_boot": 2000,
+            "n_clusters": 199,
+            "n_valid": 2000,
+            "p_two_sided": 0.772,
+            "point": 0.1238
+          },
+          "hindsight_scoring": {
+            "hi": 1.5833,
+            "lo": -1.5419,
+            "n_boot": 2000,
+            "n_clusters": 199,
+            "n_valid": 2000,
+            "p_two_sided": 0.957,
+            "point": 0.0212
+          }
+        }
+      },
+      "decisions": 783,
+      "episodes": 199,
+      "flat": {
+        "belief": {
+          "chosen": {
+            "center": true,
+            "learning_rate": 0.05,
+            "max_leaf_nodes": 63
+          },
+          "grid": [
+            {
+              "center": false,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.3722
+            },
+            {
+              "center": false,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.1624
+            },
+            {
+              "center": false,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.3265
+            },
+            {
+              "center": false,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.2851
+            },
+            {
+              "center": true,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.1588
+            },
+            {
+              "center": true,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.1283
+            },
+            {
+              "center": true,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.1497
+            },
+            {
+              "center": true,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.1487
+            }
+          ]
+        },
+        "hindsight": {
+          "chosen": {
+            "center": true,
+            "learning_rate": 0.1,
+            "max_leaf_nodes": 63
+          },
+          "grid": [
+            {
+              "center": false,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.7597
+            },
+            {
+              "center": false,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.635
+            },
+            {
+              "center": false,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.6372
+            },
+            {
+              "center": false,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.5873
+            },
+            {
+              "center": true,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.4538
+            },
+            {
+              "center": true,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.4642
+            },
+            {
+              "center": true,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.4601
+            },
+            {
+              "center": true,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.4082
+            }
+          ]
+        }
+      },
+      "reproduction": {
+        "chosen_equal": true,
+        "max_abs_diff": 0.0,
+        "run": "runs\\model_direct\\20260927-224653-v2n-compare-flatref"
+      },
+      "v_bins": {
+        "bins": {
+          "T1": {
+            "E1": {
+              "belief_scoring": {
+                "hi": 0.0378,
+                "lo": -0.2586,
+                "n_boot": 2000,
+                "n_clusters": 41,
+                "n_valid": 2000,
+                "p_two_sided": 0.198,
+                "point": -0.0915
+              },
+              "hindsight_scoring": {
+                "hi": 0.0151,
+                "lo": -0.3118,
+                "n_boot": 2000,
+                "n_clusters": 41,
+                "n_valid": 2000,
+                "p_two_sided": 0.096,
+                "point": -0.1257
+              }
+            },
+            "episodes": 41,
+            "family_share": 1.0,
+            "gather_optimal_belief_share": 0.0404,
+            "high_stakes_belief_share": 0.0909,
+            "high_stakes_share": 0.0404,
+            "mean_score": 0.1993,
+            "mean_v": 0.1993,
+            "n": 99,
+            "range": [
+              0.0,
+              0.8846
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 0.6004,
+                "gbm_hindsight": 0.6919
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 0.6014,
+                "gbm_hindsight": 0.7271
+              }
+            }
+          },
+          "T2": {
+            "E1": {
+              "belief_scoring": {
+                "hi": 0.0734,
+                "lo": -0.2583,
+                "n_boot": 2000,
+                "n_clusters": 50,
+                "n_valid": 2000,
+                "p_two_sided": 0.245,
+                "point": -0.0913
+              },
+              "hindsight_scoring": {
+                "hi": 0.2227,
+                "lo": -0.1888,
+                "n_boot": 2000,
+                "n_clusters": 50,
+                "n_valid": 2000,
+                "p_two_sided": 0.857,
+                "point": 0.0221
+              }
+            },
+            "episodes": 50,
+            "family_share": 1.0,
+            "gather_optimal_belief_share": 0.2755,
+            "high_stakes_belief_share": 0.2041,
+            "high_stakes_share": 0.0918,
+            "mean_score": 3.6767,
+            "mean_v": 3.6767,
+            "n": 98,
+            "range": [
+              0.8847,
+              13.0422
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 0.73,
+                "gbm_hindsight": 0.8213
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 0.9382,
+                "gbm_hindsight": 0.9161
+              }
+            }
+          },
+          "T3": {
+            "E1": {
+              "belief_scoring": {
+                "hi": 0.7634,
+                "lo": -1.1062,
+                "n_boot": 2000,
+                "n_clusters": 44,
+                "n_valid": 2000,
+                "p_two_sided": 0.671,
+                "point": -0.1856
+              },
+              "hindsight_scoring": {
+                "hi": 2.0302,
+                "lo": -1.5854,
+                "n_boot": 2000,
+                "n_clusters": 44,
+                "n_valid": 2000,
+                "p_two_sided": 0.889,
+                "point": 0.1914
+              }
+            },
+            "episodes": 44,
+            "family_share": 1.0,
+            "gather_optimal_belief_share": 0.3636,
+            "high_stakes_belief_share": 0.9091,
+            "high_stakes_share": 0.6667,
+            "mean_score": 310.8792,
+            "mean_v": 310.8792,
+            "n": 99,
+            "range": [
+              13.2952,
+              2048.7059
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 4.0456,
+                "gbm_hindsight": 4.2311
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 5.7899,
+                "gbm_hindsight": 5.5985
+              }
+            }
+          },
+          "zero": {
+            "E1": {
+              "belief_scoring": {
+                "hi": 0.2083,
+                "lo": -0.3594,
+                "n_boot": 2000,
+                "n_clusters": 145,
+                "n_valid": 2000,
+                "p_two_sided": 0.604,
+                "point": -0.0712
+              },
+              "hindsight_scoring": {
+                "hi": 0.2083,
+                "lo": -0.3594,
+                "n_boot": 2000,
+                "n_clusters": 145,
+                "n_valid": 2000,
+                "p_two_sided": 0.604,
+                "point": -0.0712
+              }
+            },
+            "episodes": 145,
+            "family_share": 0.1068,
+            "gather_optimal_belief_share": 0.0042,
+            "high_stakes_belief_share": 0.0431,
+            "high_stakes_share": 0.0431,
+            "mean_score": 0.0,
+            "mean_v": 0.0,
+            "n": 487,
+            "range": [
+              0.0,
+              0.0
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 0.7227,
+                "gbm_hindsight": 0.7939
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 0.7227,
+                "gbm_hindsight": 0.7939
+              }
+            }
+          }
+        },
+        "cuts": [
+          0.8846,
+          13.2109
+        ],
+        "top_minus_zero": {
+          "belief_scoring": {
+            "hi": 0.912,
+            "lo": -1.1762,
+            "n_boot": 2000,
+            "n_clusters": 199,
+            "n_valid": 2000,
+            "p_two_sided": 0.854,
+            "point": -0.1143
+          },
+          "hindsight_scoring": {
+            "hi": 2.214,
+            "lo": -1.6576,
+            "n_boot": 2000,
+            "n_clusters": 199,
+            "n_valid": 2000,
+            "p_two_sided": 0.793,
+            "point": 0.2627
+          }
+        }
+      },
+      "v_bins_reference_cuts": {
+        "bins": {
+          "T1": {
+            "E1": {
+              "belief_scoring": {
+                "hi": 0.012,
+                "lo": -0.2151,
+                "n_boot": 2000,
+                "n_clusters": 49,
+                "n_valid": 2000,
+                "p_two_sided": 0.09,
+                "point": -0.0913
+              },
+              "hindsight_scoring": {
+                "hi": -0.0098,
+                "lo": -0.2629,
+                "n_boot": 2000,
+                "n_clusters": 49,
+                "n_valid": 2000,
+                "p_two_sided": 0.032,
+                "point": -0.1265
+              }
+            },
+            "episodes": 49,
+            "family_share": 1.0,
+            "gather_optimal_belief_share": 0.0859,
+            "high_stakes_belief_share": 0.0703,
+            "high_stakes_share": 0.0312,
+            "mean_score": 0.3706,
+            "mean_v": 0.3706,
+            "n": 128,
+            "range": [
+              0.0,
+              1.018
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 0.5169,
+                "gbm_hindsight": 0.6082
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 0.5255,
+                "gbm_hindsight": 0.6519
+              }
+            }
+          },
+          "T2": {
+            "E1": {
+              "belief_scoring": {
+                "hi": 0.465,
+                "lo": -0.4606,
+                "n_boot": 2000,
+                "n_clusters": 47,
+                "n_valid": 2000,
+                "p_two_sided": 0.982,
+                "point": -0.0065
+              },
+              "hindsight_scoring": {
+                "hi": 0.2042,
+                "lo": -0.7972,
+                "n_boot": 2000,
+                "n_clusters": 47,
+                "n_valid": 2000,
+                "p_two_sided": 0.557,
+                "point": -0.1831
+              }
+            },
+            "episodes": 47,
+            "family_share": 1.0,
+            "gather_optimal_belief_share": 0.2871,
+            "high_stakes_belief_share": 0.505,
+            "high_stakes_share": 0.2574,
+            "mean_score": 11.9106,
+            "mean_v": 11.9106,
+            "n": 101,
+            "range": [
+              1.0198,
+              49.7585
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 2.2283,
+                "gbm_hindsight": 2.2348
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 2.3092,
+                "gbm_hindsight": 2.4924
+              }
+            }
+          },
+          "T3": {
+            "E1": {
+              "belief_scoring": {
+                "hi": 0.9138,
+                "lo": -1.584,
+                "n_boot": 2000,
+                "n_clusters": 34,
+                "n_valid": 2000,
+                "p_two_sided": 0.589,
+                "point": -0.3587
+              },
+              "hindsight_scoring": {
+                "hi": 3.4128,
+                "lo": -2.0217,
+                "n_boot": 2000,
+                "n_clusters": 34,
+                "n_valid": 2000,
+                "p_two_sided": 0.625,
+                "point": 0.6472
+              }
+            },
+            "episodes": 34,
+            "family_share": 1.0,
+            "gather_optimal_belief_share": 0.403,
+            "high_stakes_belief_share": 0.8806,
+            "high_stakes_share": 0.7313,
+            "mean_score": 446.3685,
+            "mean_v": 446.3685,
+            "n": 67,
+            "range": [
+              64.004,
+              2048.7059
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 3.5863,
+                "gbm_hindsight": 3.945
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 6.3312,
+                "gbm_hindsight": 5.684
+              }
+            }
+          },
+          "zero": {
+            "E1": {
+              "belief_scoring": {
+                "hi": 0.2083,
+                "lo": -0.3594,
+                "n_boot": 2000,
+                "n_clusters": 145,
+                "n_valid": 2000,
+                "p_two_sided": 0.604,
+                "point": -0.0712
+              },
+              "hindsight_scoring": {
+                "hi": 0.2083,
+                "lo": -0.3594,
+                "n_boot": 2000,
+                "n_clusters": 145,
+                "n_valid": 2000,
+                "p_two_sided": 0.604,
+                "point": -0.0712
+              }
+            },
+            "episodes": 145,
+            "family_share": 0.1068,
+            "gather_optimal_belief_share": 0.0042,
+            "high_stakes_belief_share": 0.0431,
+            "high_stakes_share": 0.0431,
+            "mean_score": 0.0,
+            "mean_v": 0.0,
+            "n": 487,
+            "range": [
+              0.0,
+              0.0
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 0.7227,
+                "gbm_hindsight": 0.7939
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 0.7227,
+                "gbm_hindsight": 0.7939
+              }
+            }
+          }
+        },
+        "cuts": [
+          1.0188,
+          60.7041
+        ],
+        "top_minus_zero": {
+          "belief_scoring": {
+            "hi": 1.0422,
+            "lo": -1.646,
+            "n_boot": 2000,
+            "n_clusters": 199,
+            "n_valid": 2000,
+            "p_two_sided": 0.67,
+            "point": -0.2875
+          },
+          "hindsight_scoring": {
+            "hi": 3.4857,
+            "lo": -1.9558,
+            "n_boot": 2000,
+            "n_clusters": 199,
+            "n_valid": 2000,
+            "p_two_sided": 0.612,
+            "point": 0.7184
+          }
+        }
+      },
+      "views": {
+        "all": {
+          "E1": {
+            "belief_scoring": {
+              "hi": 0.1328,
+              "lo": -0.2976,
+              "n_boot": 2000,
+              "n_clusters": 199,
+              "n_valid": 2000,
+              "p_two_sided": 0.397,
+              "point": -0.0908
+            },
+            "hindsight_scoring": {
+              "hi": 0.26,
+              "lo": -0.3126,
+              "n_boot": 2000,
+              "n_clusters": 199,
+              "n_valid": 2000,
+              "p_two_sided": 0.823,
+              "point": -0.0332
+            }
+          },
+          "episodes": 199,
+          "family_share": 0.4444,
+          "gather_optimal_belief_share": 0.0889,
+          "high_stakes_belief_share": 0.1788,
+          "high_stakes_share": 0.1277,
+          "mean_v": 39.7919,
+          "n": 783,
+          "regret": {
+            "belief_scoring": {
+              "gbm_belief": 1.1283,
+              "gbm_hindsight": 1.2191
+            },
+            "hindsight_scoring": {
+              "gbm_belief": 1.375,
+              "gbm_hindsight": 1.4082
+            }
+          }
+        },
+        "family": {
+          "E1": {
+            "belief_scoring": {
+              "hi": 0.0455,
+              "lo": -0.7459,
+              "n_boot": 2000,
+              "n_clusters": 87,
+              "n_valid": 2000,
+              "p_two_sided": 0.095,
+              "point": -0.3213
+            },
+            "hindsight_scoring": {
+              "hi": 0.4082,
+              "lo": -0.8012,
+              "n_boot": 2000,
+              "n_clusters": 87,
+              "n_valid": 2000,
+              "p_two_sided": 0.576,
+              "point": -0.1919
+            }
+          },
+          "episodes": 87,
+          "family_share": 1.0,
+          "gather_optimal_belief_share": 0.1925,
+          "high_stakes_belief_share": 0.3793,
+          "high_stakes_share": 0.2644,
+          "mean_v": 89.5319,
+          "n": 348,
+          "regret": {
+            "belief_scoring": {
+              "gbm_belief": 1.6003,
+              "gbm_hindsight": 1.9216
+            },
+            "hindsight_scoring": {
+              "gbm_belief": 2.1554,
+              "gbm_hindsight": 2.3473
+            }
+          }
+        }
+      }
+    },
+    "v2-stress": {
+      "a_bins": {
+        "bins": {
+          "T1": {
+            "E1": {
+              "belief_scoring": {
+                "hi": -0.0905,
+                "lo": -1.7656,
+                "n_boot": 2000,
+                "n_clusters": 57,
+                "n_valid": 2000,
+                "p_two_sided": 0.023,
+                "point": -0.8255
+              },
+              "hindsight_scoring": {
+                "hi": -0.0955,
+                "lo": -1.8045,
+                "n_boot": 2000,
+                "n_clusters": 57,
+                "n_valid": 2000,
+                "p_two_sided": 0.022,
+                "point": -0.8421
+              }
+            },
+            "episodes": 57,
+            "family_share": 1.0,
+            "gather_optimal_belief_share": 0.0513,
+            "high_stakes_belief_share": 0.6821,
+            "high_stakes_share": 0.2667,
+            "mean_score": 0.007,
+            "mean_v": 8.5113,
+            "n": 195,
+            "range": [
+              0.0,
+              0.0121
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 2.3357,
+                "gbm_hindsight": 3.1612
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 2.7672,
+                "gbm_hindsight": 3.6093
+              }
+            }
+          },
+          "T2": {
+            "E1": {
+              "belief_scoring": {
+                "hi": 0.1659,
+                "lo": -1.3154,
+                "n_boot": 2000,
+                "n_clusters": 75,
+                "n_valid": 2000,
+                "p_two_sided": 0.16,
+                "point": -0.5192
+              },
+              "hindsight_scoring": {
+                "hi": 0.6887,
+                "lo": -1.2737,
+                "n_boot": 2000,
+                "n_clusters": 75,
+                "n_valid": 2000,
+                "p_two_sided": 0.586,
+                "point": -0.269
+              }
+            },
+            "episodes": 75,
+            "family_share": 1.0,
+            "gather_optimal_belief_share": 0.2792,
+            "high_stakes_belief_share": 0.5584,
+            "high_stakes_share": 0.3706,
+            "mean_score": 0.1109,
+            "mean_v": 306.1279,
+            "n": 197,
+            "range": [
+              0.0121,
+              0.1998
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 3.0484,
+                "gbm_hindsight": 3.5676
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 3.5712,
+                "gbm_hindsight": 3.8401
+              }
+            }
+          },
+          "T3": {
+            "E1": {
+              "belief_scoring": {
+                "hi": -0.1466,
+                "lo": -1.0279,
+                "n_boot": 2000,
+                "n_clusters": 100,
+                "n_valid": 2000,
+                "p_two_sided": 0.0,
+                "point": -0.5205
+              },
+              "hindsight_scoring": {
+                "hi": 0.0244,
+                "lo": -1.2066,
+                "n_boot": 2000,
+                "n_clusters": 100,
+                "n_valid": 2000,
+                "p_two_sided": 0.088,
+                "point": -0.5072
+              }
+            },
+            "episodes": 100,
+            "family_share": 1.0,
+            "gather_optimal_belief_share": 0.4745,
+            "high_stakes_belief_share": 0.6497,
+            "high_stakes_share": 0.533,
+            "mean_score": 0.2188,
+            "mean_v": 457.8745,
+            "n": 197,
+            "range": [
+              0.2001,
+              0.2417
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 2.9569,
+                "gbm_hindsight": 3.4774
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 4.0938,
+                "gbm_hindsight": 4.6011
+              }
+            }
+          },
+          "zero": {
+            "E1": {
+              "belief_scoring": {
+                "hi": 0.0352,
+                "lo": -0.2727,
+                "n_boot": 2000,
+                "n_clusters": 119,
+                "n_valid": 2000,
+                "p_two_sided": 0.306,
+                "point": -0.0881
+              },
+              "hindsight_scoring": {
+                "hi": 0.0352,
+                "lo": -0.2727,
+                "n_boot": 2000,
+                "n_clusters": 119,
+                "n_valid": 2000,
+                "p_two_sided": 0.306,
+                "point": -0.0881
+              }
+            },
+            "episodes": 119,
+            "family_share": 0.1442,
+            "gather_optimal_belief_share": 0.0099,
+            "high_stakes_belief_share": 0.0794,
+            "high_stakes_share": 0.0794,
+            "mean_score": 0.0,
+            "mean_v": 0.0,
+            "n": 617,
+            "range": [
+              0.0,
+              0.0
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 0.7661,
+                "gbm_hindsight": 0.8542
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 0.7661,
+                "gbm_hindsight": 0.8542
+              }
+            }
+          }
+        },
+        "cuts": [
+          0.0121,
+          0.2001
+        ],
+        "top_minus_zero": {
+          "belief_scoring": {
+            "hi": -0.0086,
+            "lo": -0.9448,
+            "n_boot": 2000,
+            "n_clusters": 201,
+            "n_valid": 2000,
+            "p_two_sided": 0.046,
+            "point": -0.4324
+          },
+          "hindsight_scoring": {
+            "hi": 0.1385,
+            "lo": -1.1932,
+            "n_boot": 2000,
+            "n_clusters": 201,
+            "n_valid": 2000,
+            "p_two_sided": 0.188,
+            "point": -0.4191
+          }
+        }
+      },
+      "decisions": 1206,
+      "episodes": 201,
+      "first_actions": {
+        "all/backup_available": {
+          "E1_given_differ": {
+            "belief_scoring": -0.4443,
+            "hindsight_scoring": -0.4154
+          },
+          "E1_mean": {
+            "belief_scoring": -0.1337,
+            "hindsight_scoring": -0.1251
+          },
+          "E1_zero_where_same": true,
+          "differ_share": 0.301,
+          "episodes": 98,
+          "gbm_switch_share": {
+            "gbm_belief": 0.0,
+            "gbm_hindsight": 0.0017
+          },
+          "n": 588,
+          "switch_belief_co_optimal_share": 0.0884,
+          "switch_belief_optimal_n": 52,
+          "switch_belief_optimal_share": 0.0884,
+          "switch_candidate_share": 0.7262
+        },
+        "all/backup_unavailable": {
+          "E1_given_differ": {
+            "belief_scoring": -2.8461,
+            "hindsight_scoring": -2.4829
+          },
+          "E1_mean": {
+            "belief_scoring": -0.5526,
+            "hindsight_scoring": -0.4821
+          },
+          "E1_zero_where_same": true,
+          "differ_share": 0.1942,
+          "episodes": 103,
+          "gbm_switch_share": {
+            "gbm_belief": 0.0,
+            "gbm_hindsight": 0.0
+          },
+          "n": 618,
+          "switch_belief_co_optimal_share": 0.0,
+          "switch_belief_optimal_n": 0,
+          "switch_belief_optimal_share": 0.0,
+          "switch_candidate_share": 0.0
+        },
+        "v_above_median/backup_available": {
+          "E1_given_differ": {
+            "belief_scoring": -0.9078,
+            "hindsight_scoring": -0.5983
+          },
+          "E1_mean": {
+            "belief_scoring": -0.2354,
+            "hindsight_scoring": -0.1551
+          },
+          "E1_zero_where_same": true,
+          "differ_share": 0.2593,
+          "episodes": 38,
+          "gbm_switch_share": {
+            "gbm_belief": 0.0,
+            "gbm_hindsight": 0.0
+          },
+          "n": 81,
+          "switch_belief_co_optimal_share": 0.0494,
+          "switch_belief_optimal_n": 4,
+          "switch_belief_optimal_share": 0.0494,
+          "switch_candidate_share": 0.8272
+        },
+        "v_above_median/backup_unavailable": {
+          "E1_given_differ": {
+            "belief_scoring": -4.3681,
+            "hindsight_scoring": -3.4344
+          },
+          "E1_mean": {
+            "belief_scoring": -1.0049,
+            "hindsight_scoring": -0.7901
+          },
+          "E1_zero_where_same": true,
+          "differ_share": 0.23,
+          "episodes": 48,
+          "gbm_switch_share": {
+            "gbm_belief": 0.0,
+            "gbm_hindsight": 0.0
+          },
+          "n": 213,
+          "switch_belief_co_optimal_share": 0.0,
+          "switch_belief_optimal_n": 0,
+          "switch_belief_optimal_share": 0.0,
+          "switch_candidate_share": 0.0
+        }
+      },
+      "flat": {
+        "belief": {
+          "chosen": {
+            "center": true,
+            "learning_rate": 0.05,
+            "max_leaf_nodes": 15
+          },
+          "grid": [
+            {
+              "center": false,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 15,
+              "val_regret": 2.2821
+            },
+            {
+              "center": false,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 63,
+              "val_regret": 2.2224
+            },
+            {
+              "center": false,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 15,
+              "val_regret": 2.3584
+            },
+            {
+              "center": false,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.9965
+            },
+            {
+              "center": true,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.7506
+            },
+            {
+              "center": true,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 63,
+              "val_regret": 1.831
+            },
+            {
+              "center": true,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 15,
+              "val_regret": 1.802
+            },
+            {
+              "center": true,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 63,
+              "val_regret": 2.0048
+            }
+          ]
+        },
+        "hindsight": {
+          "chosen": {
+            "center": true,
+            "learning_rate": 0.05,
+            "max_leaf_nodes": 15
+          },
+          "grid": [
+            {
+              "center": false,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 15,
+              "val_regret": 2.8048
+            },
+            {
+              "center": false,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 63,
+              "val_regret": 2.6899
+            },
+            {
+              "center": false,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 15,
+              "val_regret": 2.757
+            },
+            {
+              "center": false,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 63,
+              "val_regret": 2.7198
+            },
+            {
+              "center": true,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 15,
+              "val_regret": 2.3995
+            },
+            {
+              "center": true,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 63,
+              "val_regret": 2.4248
+            },
+            {
+              "center": true,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 15,
+              "val_regret": 2.6028
+            },
+            {
+              "center": true,
+              "learning_rate": 0.1,
+              "max_leaf_nodes": 63,
+              "val_regret": 2.8016
+            }
+          ]
+        }
+      },
+      "no_backup_minus_backup": {
+        "belief_scoring": {
+          "hi": -0.0176,
+          "lo": -0.84,
+          "n_boot": 2000,
+          "n_clusters": 201,
+          "n_valid": 2000,
+          "p_two_sided": 0.04,
+          "point": -0.4189
+        },
+        "hindsight_scoring": {
+          "hi": 0.1488,
+          "lo": -0.871,
+          "n_boot": 2000,
+          "n_clusters": 201,
+          "n_valid": 2000,
+          "p_two_sided": 0.169,
+          "point": -0.3571
+        }
+      },
+      "reproduction": {
+        "chosen_equal": true,
+        "max_abs_diff": 0.0,
+        "run": "runs\\model_direct\\20260927-224653-v2s-compare-flatref"
+      },
+      "v_bins": {
+        "bins": {
+          "T1": {
+            "E1": {
+              "belief_scoring": {
+                "hi": 0.1046,
+                "lo": -0.7147,
+                "n_boot": 2000,
+                "n_clusters": 55,
+                "n_valid": 2000,
+                "p_two_sided": 0.718,
+                "point": -0.1841
+              },
+              "hindsight_scoring": {
+                "hi": 0.0987,
+                "lo": -0.7243,
+                "n_boot": 2000,
+                "n_clusters": 55,
+                "n_valid": 2000,
+                "p_two_sided": 0.705,
+                "point": -0.1884
+              }
+            },
+            "episodes": 55,
+            "family_share": 1.0,
+            "gather_optimal_belief_share": 0.0459,
+            "high_stakes_belief_share": 0.2245,
+            "high_stakes_share": 0.051,
+            "mean_score": 0.2875,
+            "mean_v": 0.2875,
+            "n": 196,
+            "range": [
+              0.0,
+              0.9668
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 1.1124,
+                "gbm_hindsight": 1.2965
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 1.2775,
+                "gbm_hindsight": 1.4659
+              }
+            }
+          },
+          "T2": {
+            "E1": {
+              "belief_scoring": {
+                "hi": -0.1312,
+                "lo": -1.9169,
+                "n_boot": 2000,
+                "n_clusters": 74,
+                "n_valid": 2000,
+                "p_two_sided": 0.004,
+                "point": -0.9112
+              },
+              "hindsight_scoring": {
+                "hi": -0.1955,
+                "lo": -2.0318,
+                "n_boot": 2000,
+                "n_clusters": 74,
+                "n_valid": 2000,
+                "p_two_sided": 0.007,
+                "point": -0.9903
+              }
+            },
+            "episodes": 74,
+            "family_share": 1.0,
+            "gather_optimal_belief_share": 0.2143,
+            "high_stakes_belief_share": 0.7704,
+            "high_stakes_share": 0.449,
+            "mean_score": 12.8028,
+            "mean_v": 12.8028,
+            "n": 196,
+            "range": [
+              1.0188,
+              60.0508
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 3.0997,
+                "gbm_hindsight": 4.0109
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 3.7872,
+                "gbm_hindsight": 4.7775
+              }
+            }
+          },
+          "T3": {
+            "E1": {
+              "belief_scoring": {
+                "hi": -0.2011,
+                "lo": -1.4696,
+                "n_boot": 2000,
+                "n_clusters": 71,
+                "n_valid": 2000,
+                "p_two_sided": 0.007,
+                "point": -0.7672
+              },
+              "hindsight_scoring": {
+                "hi": 0.5473,
+                "lo": -1.4902,
+                "n_boot": 2000,
+                "n_clusters": 71,
+                "n_valid": 2000,
+                "p_two_sided": 0.382,
+                "point": -0.4371
+              }
+            },
+            "episodes": 71,
+            "family_share": 1.0,
+            "gather_optimal_belief_share": 0.5459,
+            "high_stakes_belief_share": 0.8934,
+            "high_stakes_share": 0.6701,
+            "mean_score": 759.4035,
+            "mean_v": 759.4035,
+            "n": 197,
+            "range": [
+              60.7041,
+              2070.3554
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 4.1265,
+                "gbm_hindsight": 4.8937
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 5.365,
+                "gbm_hindsight": 5.8022
+              }
+            }
+          },
+          "zero": {
+            "E1": {
+              "belief_scoring": {
+                "hi": 0.0352,
+                "lo": -0.2727,
+                "n_boot": 2000,
+                "n_clusters": 119,
+                "n_valid": 2000,
+                "p_two_sided": 0.306,
+                "point": -0.0881
+              },
+              "hindsight_scoring": {
+                "hi": 0.0352,
+                "lo": -0.2727,
+                "n_boot": 2000,
+                "n_clusters": 119,
+                "n_valid": 2000,
+                "p_two_sided": 0.306,
+                "point": -0.0881
+              }
+            },
+            "episodes": 119,
+            "family_share": 0.1442,
+            "gather_optimal_belief_share": 0.0099,
+            "high_stakes_belief_share": 0.0794,
+            "high_stakes_share": 0.0794,
+            "mean_score": 0.0,
+            "mean_v": 0.0,
+            "n": 617,
+            "range": [
+              0.0,
+              0.0
+            ],
+            "regret": {
+              "belief_scoring": {
+                "gbm_belief": 0.7661,
+                "gbm_hindsight": 0.8542
+              },
+              "hindsight_scoring": {
+                "gbm_belief": 0.7661,
+                "gbm_hindsight": 0.8542
+              }
+            }
+          }
+        },
+        "cuts": [
+          1.0188,
+          60.7041
+        ],
+        "top_minus_zero": {
+          "belief_scoring": {
+            "hi": -0.0641,
+            "lo": -1.3486,
+            "n_boot": 2000,
+            "n_clusters": 201,
+            "n_valid": 2000,
+            "p_two_sided": 0.034,
+            "point": -0.6791
+          },
+          "hindsight_scoring": {
+            "hi": 0.6659,
+            "lo": -1.3586,
+            "n_boot": 2000,
+            "n_clusters": 201,
+            "n_valid": 2000,
+            "p_two_sided": 0.5,
+            "point": -0.349
+          }
+        }
+      },
+      "views": {
+        "all": {
+          "E1": {
+            "belief_scoring": {
+              "hi": -0.1482,
+              "lo": -0.596,
+              "n_boot": 2000,
+              "n_clusters": 201,
+              "n_valid": 2000,
+              "p_two_sided": 0.0,
+              "point": -0.3484
+            },
+            "hindsight_scoring": {
+              "hi": -0.0679,
+              "lo": -0.5806,
+              "n_boot": 2000,
+              "n_clusters": 201,
+              "n_valid": 2000,
+              "p_two_sided": 0.004,
+              "point": -0.308
+            }
+          },
+          "episodes": 201,
+          "family_share": 0.5622,
+          "gather_optimal_belief_share": 0.1375,
+          "high_stakes_belief_share": 0.3483,
+          "high_stakes_share": 0.2313,
+          "mean_v": 126.1759,
+          "n": 1206,
+          "regret": {
+            "belief_scoring": {
+              "gbm_belief": 1.7506,
+              "gbm_hindsight": 2.099
+            },
+            "hindsight_scoring": {
+              "gbm_belief": 2.0914,
+              "gbm_hindsight": 2.3995
+            }
+          }
+        },
+        "backup_available": {
+          "E1": {
+            "belief_scoring": {
+              "hi": 0.0166,
+              "lo": -0.3403,
+              "n_boot": 2000,
+              "n_clusters": 98,
+              "n_valid": 2000,
+              "p_two_sided": 0.101,
+              "point": -0.1337
+            },
+            "hindsight_scoring": {
+              "hi": 0.0379,
+              "lo": -0.3367,
+              "n_boot": 2000,
+              "n_clusters": 98,
+              "n_valid": 2000,
+              "p_two_sided": 0.195,
+              "point": -0.1251
+            }
+          },
+          "episodes": 98,
+          "family_share": 0.5714,
+          "gather_optimal_belief_share": 0.083,
+          "high_stakes_belief_share": 0.2619,
+          "high_stakes_share": 0.1701,
+          "mean_v": 55.2465,
+          "n": 588,
+          "regret": {
+            "belief_scoring": {
+              "gbm_belief": 1.27,
+              "gbm_hindsight": 1.4037
+            },
+            "hindsight_scoring": {
+              "gbm_belief": 1.6901,
+              "gbm_hindsight": 1.8152
+            }
+          }
+        },
+        "backup_unavailable": {
+          "E1": {
+            "belief_scoring": {
+              "hi": -0.2012,
+              "lo": -0.9738,
+              "n_boot": 2000,
+              "n_clusters": 103,
+              "n_valid": 2000,
+              "p_two_sided": 0.0,
+              "point": -0.5526
+            },
+            "hindsight_scoring": {
+              "hi": -0.0307,
+              "lo": -0.9752,
+              "n_boot": 2000,
+              "n_clusters": 103,
+              "n_valid": 2000,
+              "p_two_sided": 0.033,
+              "point": -0.4821
+            }
+          },
+          "episodes": 103,
+          "family_share": 0.5534,
+          "gather_optimal_belief_share": 0.1886,
+          "high_stakes_belief_share": 0.4304,
+          "high_stakes_share": 0.2896,
+          "mean_v": 193.6622,
+          "n": 618,
+          "regret": {
+            "belief_scoring": {
+              "gbm_belief": 2.2078,
+              "gbm_hindsight": 2.7604
+            },
+            "hindsight_scoring": {
+              "gbm_belief": 2.4733,
+              "gbm_hindsight": 2.9554
+            }
+          }
+        },
+        "family": {
+          "E1": {
+            "belief_scoring": {
+              "hi": -0.2199,
+              "lo": -0.9165,
+              "n_boot": 2000,
+              "n_clusters": 113,
+              "n_valid": 2000,
+              "p_two_sided": 0.0,
+              "point": -0.5311
+            },
+            "hindsight_scoring": {
+              "hi": -0.0624,
+              "lo": -0.9127,
+              "n_boot": 2000,
+              "n_clusters": 113,
+              "n_valid": 2000,
+              "p_two_sided": 0.018,
+              "point": -0.4593
+            }
+          },
+          "episodes": 113,
+          "family_share": 1.0,
+          "gather_optimal_belief_share": 0.2349,
+          "high_stakes_belief_share": 0.5885,
+          "high_stakes_share": 0.3805,
+          "mean_v": 224.4368,
+          "n": 678,
+          "regret": {
+            "belief_scoring": {
+              "gbm_belief": 2.643,
+              "gbm_hindsight": 3.174
+            },
+            "hindsight_scoring": {
+              "gbm_belief": 3.2493,
+              "gbm_hindsight": 3.7086
+            }
+          }
+        },
+        "family_backup_available": {
+          "E1": {
+            "belief_scoring": {
+              "hi": 0.0386,
+              "lo": -0.5791,
+              "n_boot": 2000,
+              "n_clusters": 56,
+              "n_valid": 2000,
+              "p_two_sided": 0.137,
+              "point": -0.2192
+            },
+            "hindsight_scoring": {
+              "hi": 0.0732,
+              "lo": -0.5948,
+              "n_boot": 2000,
+              "n_clusters": 56,
+              "n_valid": 2000,
+              "p_two_sided": 0.212,
+              "point": -0.204
+            }
+          },
+          "episodes": 56,
+          "family_share": 1.0,
+          "gather_optimal_belief_share": 0.1403,
+          "high_stakes_belief_share": 0.4405,
+          "high_stakes_share": 0.2798,
+          "mean_v": 96.6814,
+          "n": 336,
+          "regret": {
+            "belief_scoring": {
+              "gbm_belief": 2.062,
+              "gbm_hindsight": 2.2812
+            },
+            "hindsight_scoring": {
+              "gbm_belief": 2.7971,
+              "gbm_hindsight": 3.0012
+            }
+          }
+        },
+        "family_backup_unavailable": {
+          "E1": {
+            "belief_scoring": {
+              "hi": -0.2773,
+              "lo": -1.5308,
+              "n_boot": 2000,
+              "n_clusters": 57,
+              "n_valid": 2000,
+              "p_two_sided": 0.0,
+              "point": -0.8374
+            },
+            "hindsight_scoring": {
+              "hi": 0.0356,
+              "lo": -1.529,
+              "n_boot": 2000,
+              "n_clusters": 57,
+              "n_valid": 2000,
+              "p_two_sided": 0.067,
+              "point": -0.71
+            }
+          },
+          "episodes": 57,
+          "family_share": 1.0,
+          "gather_optimal_belief_share": 0.3275,
+          "high_stakes_belief_share": 0.7339,
+          "high_stakes_share": 0.4795,
+          "mean_v": 349.951,
+          "n": 342,
+          "regret": {
+            "belief_scoring": {
+              "gbm_belief": 3.2138,
+              "gbm_hindsight": 4.0513
+            },
+            "hindsight_scoring": {
+              "gbm_belief": 3.6936,
+              "gbm_hindsight": 4.4036
+            }
+          }
+        }
+      }
+    }
+  },
+  "v_median_threshold": 8.037,
+  "wall_s": 599.4609
+}

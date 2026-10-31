@@ -1,0 +1,105 @@
+versions: ["23.05", "22.04"]
+variants: [unmasked, unmasked_novalidity, masked, block_local]
+seeds: [0, 1, 2]
+device: cuda
+
+questions:
+  hazard_edges: [0, 5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240, 300, 400, 500, 600]
+  noul_within_s: 60
+  score: true
+  censor_rule: start
+
+model:
+  d_model: 64
+  n_heads: 4
+  n_layers: 2
+  d_ff: 128
+  n_pool: 4
+  dropout: 0.1
+  branch_layers: 2
+  hazard_hidden: 64
+
+train:
+  batch_size: 512
+  lr: 0.001
+  weight_decay: 0.0001
+  grad_clip: 1.0
+  max_steps: 10000
+  max_minutes: 9.5
+  eval_every: 100
+  patience: 16
+  lr_patience: 8
+  lr_factor: 0.5
+  eval_chunk: 4096
+
+baselines:
+  min_events: 10
+  age_bins_s: [10, 30, 60, 120, 300, 600, 1800]
+  shrink_events: 10
+
+eval:
+  block_s: 3600
+  n_boot: 1000
+  alpha: 0.05
+  boot_seed: 0
+  min_ci_clusters: 10
+  rule: linear
+  tail: inf
+  ibs_grid_s: [5, 600, 5]
+  calib_horizons_s: [60, 300]
+  calib_bins: 10
+  dcal_bins: 10
+
+compare:
+  - [masked, km_state]
+  - [masked, km_state_age]
+  - [masked, km_marginal]
+  - [masked, unmasked]
+  - [block_local, masked]
+  - [unmasked_novalidity, unmasked]
+
+invariance:
+  fills: [random, huge, nan, inf, hour_earlier]
+  random_std: 3.0
+  huge: 1.0e+30
+  hour_s: 3600
+
+revalidation:
+  deltas_s: [1, 5, 15, 30]
+
+latency:
+  version: "23.05"
+  split: val
+  delta_s: 15
+  batch_sizes: [1, 256]
+  repeats: {"1": 200, "256": 30}
+  warmup: 10
+  cpu_threads: 8
+  devices: [cuda, cpu]
+  seed: 0
+
+deadline:
+  predictors: [km_marginal, km_state, unmasked, masked]
+  deadlines_s: [120, 300, 600]
+  deltas: [0.05, 0.1]
+  n_grid: 2048
+  rule: linear
+  tail: inf
+  seed: 0
+  grid_max_s: 240
+  grid_step_s: 0.25
+  pipeline:
+    - {name: export, type: lognormal, median: 4.0, sigma: 0.6}
+    - {name: inference_queue, type: gamma, shape: 2.0, scale: 1.5}
+    - name: actuation
+      type: mixture
+      weights: [0.96, 0.04]
+      parts:
+        - {type: lognormal, median: 5.0, sigma: 0.4}
+        - {type: uniform, low: 30.0, high: 90.0}
+    - name: confirmation
+      type: mixture
+      weights: [0.96, 0.04]
+      parts:
+        - {type: lognormal, median: 2.0, sigma: 0.5}
+        - {type: uniform, low: 20.0, high: 60.0}

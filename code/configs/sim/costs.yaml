@@ -1,0 +1,13 @@
+weights:
+  service: 1.0
+  physical: 1.0
+  compute: 1.0
+physical:
+  shutdown: 100.0
+  near_limit_per_h: 5.0
+  near_limit_fraction: 0.10
+service:
+  production_shortfall_per_h: 10.0
+  degraded_per_h: 0.5
+compute:
+  per_resource_unit: 0.2

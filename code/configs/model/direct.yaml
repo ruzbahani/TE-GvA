@@ -1,0 +1,31 @@
+data: data/processed/tep_decisions/v1
+seeds: [0, 1, 2]
+model:
+  backbone:
+    mode: masked
+    d_model: 128
+    n_heads: 4
+    n_layers: 2
+    d_ff: 256
+    n_pool: 4
+    dropout: 0.1
+    branch_layers: 2
+    n_query_ids: 0
+  head_hidden: 128
+  j_scale: 10.0
+  j_loss: huber
+  rank_temperature: 2.0
+  weights: {J: 1.0, J_centered: 1.0, rank: 0.0, trip: 1.0, hazard: 0.5, resolve: 0.5, duration: 0.2, gva: 0.0}
+train:
+  lr: 5.0e-4
+  weight_decay: 1.0e-2
+  batch_decisions: 32
+  max_epochs: 100
+  patience: 15
+  stop_on: J_centered
+  ema: 0.995
+  max_minutes: 5
+  grad_clip: 1.0
+eval:
+  n_boot: 2000
+  material_gap: 0.5

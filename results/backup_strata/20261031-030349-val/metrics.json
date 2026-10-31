@@ -1,0 +1,11 @@
+{
+  "v2-natural": {
+    "E1_all": -0.0908,
+    "v_top_minus_zero": -0.1143
+  },
+  "v2-stress": {
+    "E1_all": -0.3484,
+    "no_backup_minus_backup": -0.4189,
+    "v_top_minus_zero": -0.6791
+  }
+}

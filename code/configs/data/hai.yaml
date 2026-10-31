@@ -1,0 +1,24 @@
+val_fraction: 0.2
+purge_s: 300
+purge_adjacent_files: true
+max_gap_s: 1
+verify_checksums: true
+
+releases:
+  "22.04":
+    label_column: Attack
+    train: [train1, train2, train3, train4, train5, train6]
+    dev_test: [test1, test2]
+    test: [test3, test4]
+
+  "23.05":
+    label_column: null
+    train: [hai-train1, hai-train2, hai-train3, hai-train4]
+    dev_test: [hai-test1]
+    test: [hai-test2]
+    label_files:
+      hai-test1: {file: label-test1.csv, timestamp_resolution: s}
+      hai-test2: {file: label-test2.csv, timestamp_resolution: min, require_summary_match: true}
+    summaries:
+      hai-test1: summary_label1.txt
+      hai-test2: summary_label2.txt

@@ -1,0 +1,26 @@
+{
+  "v2-natural": {
+    "bt_exact": 1.4586,
+    "bt_exact_gbm_fallback": 1.4442,
+    "bt_lr": 1.4625,
+    "bt_lr_gbm_fallback": 1.4481,
+    "gate_exact": 1.1572,
+    "gate_lr": 1.1502,
+    "gbm_belief": 1.1283,
+    "gbm_hindsight": 1.2191,
+    "playbook_act_first": 1.6316,
+    "playbook_investigate_first": 1.5675
+  },
+  "v2-stress": {
+    "bt_exact": 2.9843,
+    "bt_exact_gbm_fallback": 2.7084,
+    "bt_lr": 3.0527,
+    "bt_lr_gbm_fallback": 2.7768,
+    "gate_exact": 1.8807,
+    "gate_lr": 1.7148,
+    "gbm_belief": 1.7506,
+    "gbm_hindsight": 2.099,
+    "playbook_act_first": 5.8204,
+    "playbook_investigate_first": 3.125
+  }
+}

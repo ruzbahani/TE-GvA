@@ -1,0 +1,27 @@
+authority: [observe, contain, escalate]
+
+scope_rules:
+  - id: deep_production_cut
+    tool: set_production
+    args: {fraction: {lt: 0.9}}
+    scope: process
+
+forbid:
+  - id: backup_only_for_sensor_links
+    tool: switch_to_backup
+    unless: [sensor_link]
+  - id: respond_needs_evidence
+    family: respond
+    min_evidence: 1
+
+rate_limits:
+  - id: respond_per_target
+    family: respond
+    per: target
+    max: 3
+    window_s: 1800
+
+ttl_caps:
+  switch_to_backup: 7200
+  set_production: 3600
+  respond: 14400
