@@ -288,7 +288,7 @@ def fig_sensitivity():
             ax.imshow(M, cmap=cmap, vmin=-vmax, vmax=vmax, aspect="auto")
             ax.set_xticks(range(3), [r"$-1$", r"$0$", r"$+1$"])
             ax.set_xlabel(r"prior shift $\delta$")
-            ax.set_yticks(range(len(Ts)), ["0 (prior)", "0.5", "1 (exact)", "2", r"$\infty$ (MAP)"] if k == 0 else [])
+            ax.set_yticks(range(len(Ts)), ["0 (prior)", "0.5", "1 (exact)", "2", r"$\infty$ (hard)"] if k == 0 else [])
             if k == 0:
                 ax.set_ylabel(r"evidence weight $T$")
             for s in ax.spines.values():
