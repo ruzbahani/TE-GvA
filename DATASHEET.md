@@ -5,7 +5,7 @@ process. Each record is a moment in a simulated incident at which a defender has
 more evidence and responding. For every candidate action at that moment, the dataset gives the cost that action
 would have caused, estimated by rolling the full simulator forward from the same state. It accompanies the paper
 "Gather or Act? Belief-Level Counterfactual Labels for Deadline-Aware Incident Response in Cyber-Physical Systems"
-by A. Mohammadi Ruzbahani. The structure of this datasheet follows Gebru et al., "Datasheets for Datasets".
+by A. Mohammadi Ruzbahani (arXiv:2611.03974, https://arxiv.org/abs/2611.03974). The structure of this datasheet follows Gebru et al., "Datasheets for Datasets".
 
 Counts of episodes, decisions, candidates and rollouts cover all three splits. Shares and other statistics cover
 the training and validation splits together (the development pool): 800 episodes and 3,129 decisions in the

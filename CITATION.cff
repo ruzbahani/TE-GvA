@@ -10,6 +10,18 @@ authors:
     orcid: "https://orcid.org/0009-0004-3287-552X"
     affiliation: "University of Calgary"
 repository-code: "https://github.com/ruzbahani/TE-GvA"
+preferred-citation:
+  type: article
+  title: "Gather or Act? Belief-Level Counterfactual Labels for Deadline-Aware Incident Response in Cyber-Physical Systems"
+  authors:
+    - family-names: "Mohammadi Ruzbahani"
+      given-names: "Ali"
+      orcid: "https://orcid.org/0009-0004-3287-552X"
+      affiliation: "University of Calgary"
+  journal: "arXiv preprint arXiv:2611.03974"
+  year: 2026
+  doi: "10.48550/arXiv.2611.03974"
+  url: "https://arxiv.org/abs/2611.03974"
 license:
   - CC-BY-4.0
   - MIT
